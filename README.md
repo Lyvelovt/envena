@@ -26,7 +26,7 @@ have internal built-in Wi-Fi network adapters by default).</b>
 • <b>Superuser rights (“root” or “administrator rights”), because
 the project uses a lower level of abstraction.</b>
 
-The possibilities expand significantly with an external Wi-Fi adapter that supports monitoring mode. Envena is a very powerful and flexible tool that allows you to create custom packets up to the Ethernet header. So far, the tool supports only 2 protocols, but the user can independently assemble packets of any protocol (so far, only stack Ethernet protocols. In the future, it is planned to create a graphical interface with a form for such collection of packages. The project supports a bunch of types of network testing, I can give you a couple of basic ones as an example.:
+The possibilities expand significantly with an external Wi-Fi adapter that supports monitoring mode. Envena is a very powerful and flexible tool that allows you to create custom packets up to the Ethernet header. So far, the tool supports only 2 protocols, but the user can independently assemble packets of any protocol (so far, only stack Ethernet protocols. In the future, it is planned to create a graphical interface with a form for such collection of packages. The project supports a bunch of types of network testing, I can give you a couple of basic ones as an example:
 
 • ARP-spoofing
 
