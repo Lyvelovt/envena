@@ -3,8 +3,8 @@ from scapy.all import ARP
 from scapy.all import PcapWriter, sniff
 from datetime import datetime
 
-import sys
-sys.path.append('..'*2)
+import sys, os
+sys.path.append(os.path.join('..','..'))
 from config import *
 
 
@@ -12,7 +12,7 @@ arp_table = {}
 arp_table[scapy.get_if_addr(scapy.conf.iface)] = scapy.get_if_hwaddr(scapy.conf.iface)
 
 
-def detect_arpspoof_in_package(packet, iface=scapy.conf.iface):
+def detect_arpspoof_in_package(packet, iface: str=scapy.conf.iface)->None:
     global arp_table
     global is_continue
     if packet.haslayer(ARP):
@@ -27,7 +27,7 @@ def detect_arpspoof_in_package(packet, iface=scapy.conf.iface):
         elif packet[ARP].op == 1:
             print(f"{Back}[{Purple}{iface}{Clear}{Back}] ARP request: {Orange}{packet[ARP].psrc}{Clear}{Back} -> {Blue}{packet[ARP].hwdst}{Clear}{Back}: {Dark_light_blue}who has {Blue}{packet[ARP].pdst}{Dark_light_blue}? Tell {Orange}{packet[ARP].psrc}{Clear}")
 
-def detect_arpspoof(args):
+def detect_arpspoof(args: Dict)->None:
     print('ARP-spoof detecter, version: 1.0')
     print('*Sniffing started. Ctrl+C to stop')
     now = datetime.now()

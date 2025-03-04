@@ -1,14 +1,15 @@
 import scapy.all as scapy
 from scapy.all import Ether, IP, UDP, BOOTP, DHCP
 
-import sys
-sys.path.append('..'*2)
+import sys, os
+sys.path.append(os.path.join('..','..'))
 from config import *
 
 import random
 
-def send_dhcp_offer(ip_dst, ip_src, mac_dst, xid, lease_time=3600, sub_mask="255.255.255.0",
-                    ip_router=None, dns_server="8.8.8.8", iface=None, mac_src=None, port_src=67, printed=True):
+def send_dhcp_offer(ip_dst: str, ip_src: str, mac_dst: str, xid: int, lease_time: int=3600, sub_mask: str="255.255.255.0",
+                    ip_router: str=None, dns_server: str="8.8.8.8", iface: str=None,
+                    mac_src: str=None, port_src: int=67, printed: bool=True)->bool:
 
     if ip_router is None:
         ip_router = ip_src

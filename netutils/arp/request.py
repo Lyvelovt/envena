@@ -1,33 +1,23 @@
 import scapy.all as scapy
 
-import sys
-sys.path.append('..'*2)
+import sys, os
+sys.path.append(os.path.join('..','..'))
 from config import *
 
 
-def send_arp_request(ip_dst, mac_dst, ip_src, mac_src, iface, printed=True):
-    """Sends an ARP request with the specified parameters."""
+def send_arp_request(ip_dst: str, mac_dst:str, ip_src: str, mac_src: str, iface: str, printed=True)->bool:
     
-    if mac_dst == 'broadcast':
-        mac_dst = 'ff:ff:ff:ff:ff:ff'
-    if mac_src == 'broadcast':
-        mac_src = 'ff:ff:ff:ff:ff:ff'
-    # Creates an ARP request
     arp_request = scapy.ARP(
-        pdst=ip_dst,  # Destination IP address (who are we asking)
-        psrc=ip_src, # Sender IP address (who is asking)
-        hwsrc=mac_src, # Sender MAC address (who is asking)
-        hwdst=mac_dst,  # Broadcast MAC for the request
-        op="who-has" # Set that is ARP request
+        pdst=ip_dst, 
+        psrc=ip_src, 
+        hwsrc=mac_src,
+        hwdst=mac_dst,
+        op="who-has"
     )
 
-    # Creates an Ethernet packet for the data link layer
+    
     ether = scapy.Ether(src=mac_src, dst=mac_dst)  # Broadcast MAC
-
-    # Combines the two packets into one
     packet = ether/arp_request
-
-
     # Sends the packet
     try:
         scapy.sendp(packet, iface=iface, verbose=False)

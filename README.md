@@ -1,5 +1,5 @@
 # envena
-![envena_main](https://github.com/user-attachments/assets/4660b8d4-0a42-4af4-a226-a2f41db53946)
+![envena_main](https://github.com/user-attachments/assets/7fe1499c-3825-4746-838b-dffeff6a4562)
 ### DESCRIPTION ###
 <b>Envena</b> - is a powerful tool for generating custom network packets and manipulating them. The user has full control over the protocol headers. This opens up a lot of possibilities. The program is designed as an interactive shell (which makes management user-friendly) and uses a simple syntax. Users can create their own modules, functions, and so on, because the program is designed in a modular way.
 
@@ -26,7 +26,7 @@ have internal built-in Wi-Fi network adapters by default).</b>
 • <b>Superuser rights (“root” or “administrator rights”), because
 the project uses a lower level of abstraction.</b>
 
-The possibilities expand significantly with an external Wi-Fi adapter that supports monitoring mode. Envena is a very powerful and flexible tool that allows you to create custom packets up to the Ethernet header. So far, the tool supports only 2 protocols, but the user can independently assemble packets of any protocol (so far, only stack Ethernet protocols. In the future, it is planned to create a graphical interface with a form for such collection of packages. The project supports a bunch of types of network testing, I can give you a couple of basic ones as an example:
+The possibilities expand significantly with an external Wi-Fi adapter that supports monitoring mode. Envena is a very powerful and flexible tool that allows you to create custom packets up to the Ethernet header. So far, the tool supports only 2 protocols, but the user can independently assemble packets of any protocol (so far, only stack Ethernet protocols. In the future, it is planned to create a graphical interface with a form for such collection of packages. The project supports a bunch of types of network testing, I can give you a couple of basic ones as an example.:
 
 • ARP-spoofing
 

@@ -1,17 +1,16 @@
 import socket
 
-import sys
-sys.path.append('..'*2)
+import sys, os
+sys.path.append(os.path.join('..','..'))
 from config import *
 
 def get_hostname(ip):
-    """Получает имя хоста (DNS) по его IP-адресу."""
     try:
         return socket.gethostbyaddr(ip)[0]
     except socket.herror:
         return None
 
-def dns_getHostname(args):
+def dns_getHostname(args: Dict)->None:
     print("*DNS get-hostname, version: 1.0")
     print(
         f'{Back}DNS response: {Orange}{args['payload']}{Clear}{Back} {Purple}is at{Clear}{Back} {Light_blue}{get_hostname(ip=args['payload'])}{Clear}{Clear}')

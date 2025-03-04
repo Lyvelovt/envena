@@ -1,14 +1,15 @@
 import scapy.all as scapy
 from scapy.all import Ether, IP, UDP, BOOTP, DHCP
 
-import sys
-sys.path.append('..'*2)
+import sys, os
+sys.path.append(os.path.join('..','..'))
 from config import *
 
 
 import random
 
-def send_dhcp_request(ip_src, ip_dst, xid, hostname='', iface=None, mac_src=None, port_src=68, printed=True):
+def send_dhcp_request(ip_src: str, ip_dst: str, xid: int, hostname: str=None, iface: str=None,
+                      mac_src: str=None, port_src: int=68, printed: bool=True)->bool:
 
     if xid is None:
         xid = random.randint(1000000, 9999999)

@@ -1,11 +1,11 @@
 import scapy.all as scapy
 
-import sys
-sys.path.append('..'*2)
+import sys, os
+sys.path.append(os.path.join('..','..'))
 from config import *
 
 
-def send_arp_response(ip_dst, mac_dst, ip_src, mac_src, iface, printed=True):
+def send_arp_response(ip_dst: str, mac_dst: str, ip_src: str, mac_src: str, iface: str, printed=True)->bool:
     """Sends an ARP reply with the specified parameters."""
 
     if mac_dst == 'broadcast':

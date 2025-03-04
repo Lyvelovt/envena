@@ -1,14 +1,15 @@
 import scapy.all as scapy
 from scapy.all import Ether, IP, UDP, BOOTP, DHCP
 
-import sys
-sys.path.append('..'*2)
+import sys, os
+sys.path.append(os.path.join('..','..'))
 from config import *
 
 import random
 
-def send_dhcp_nak(ip_src, ip_dst, xid, mac_src, iface=None, mac_dst=None, port_src=67,
-                printed=True, lease_time=3600, sub_mask='255.255.255.0', ip_router=None, dns_server='8.8.8.8'):
+def send_dhcp_nak(ip_src: str, ip_dst: str, xid: int, mac_src: str, iface: str=None, mac_dst: str=None, port_src: int=67,
+                printed: bool=True, lease_time: int=3600, sub_mask: str='255.255.255.0',
+                ip_router: str=None, dns_server: str='8.8.8.8')->bool:
     
     if ip_router is None:
         ip_router = ip_src
@@ -28,7 +29,7 @@ def send_dhcp_nak(ip_src, ip_dst, xid, mac_src, iface=None, mac_dst=None, port_s
             xid.append(_)
         random.shuffle(xid)
 
-    ether = Ether(dst="ff:ff:ff:ff:ff:ff", src=mac_src) # Server's MAC address. Best to fill this in if known
+    ether = Ether(dst="ff:ff:ff:ff:ff:ff", src=mac_src)
     ip = IP(src=ip_src, dst="255.255.255.255")
     udp = UDP(sport=port_src, dport=68)
     bootp = BOOTP(chaddr=mac_dst.encode(), xid=xid)

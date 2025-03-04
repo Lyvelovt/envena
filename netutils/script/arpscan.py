@@ -4,11 +4,12 @@ import scapy.all as scapy
 
 from .dns_getHostname import get_hostname
 
-import sys
-sys.path.append('..'*2)
+from typing import Dict
+import sys, os
+sys.path.append(os.path.join('..','..'))
 from config import *
 
-def print_aligned_table(table):
+def print_aligned_table(table: Dict)->None:
     headers = list(table[0].keys())
 
     max_lengths = {}
@@ -29,20 +30,15 @@ def print_aligned_table(table):
         print(" | ".join(row_values))
 
 def get_mac(ip_dst, ip_src, mac_src):
-    """Получает MAC-адрес устройства по его IP-адресу."""
     arp_request = scapy.ARP(pdst=ip_dst, psrc=ip_src, hwsrc=mac_src)
     broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
     arp_request_broadcast = broadcast/arp_request
     answered_list = scapy.srp(arp_request_broadcast, timeout=1, verbose=False)[0]
-    if answered_list:
-        return answered_list[0][1].hwsrc
-    else:
-        return None
+    return answered_list[0][1].hwsrc if answered_list else None    
 
 def scan_network(ip_range, ip_src=None, mac_src=None):
     anim_num = 0
     anim = '/|\\-'
-    # Сканирует сеть для обнаружения устройств и их IP, MAC и DNS.
     devices = []
     num = 0
     random.shuffle(ip_range)
@@ -57,9 +53,7 @@ def scan_network(ip_range, ip_src=None, mac_src=None):
             })
         num += 1
         anim_num += 1
-        if(anim_num > 3):
-            anim_num = 0
-        print(f'Scanning({num}/{len(ip_range)})... {anim[anim_num]}\r', end='')
+        print(f'Scanning({num}/{len(ip_range)})... {anim[anim_num%len(anim)]}\r', end='')
 
     print(' '*22 + '\r', end='')
 
@@ -105,11 +99,10 @@ if __name__ == "__main__":
 
         parser = argparse.ArgumentParser(description=desc, formatter_class=argparse.RawDescriptionHelpFormatter)
         parser.add_argument("ip", help="target IP or range.")  # , required=True)
-        # parser.add_argument( "-i", "--interface", help="Network interface.")
 
         args = parser.parse_args()
         print("ARP-Scanner, version: 1.0.")
-        print('Scanning started.')
+        print('*Scanning started.')
         if '-' in args.ip:
             args.ip = args.ip.split('-')
             args.ip[0] = args.ip[0].split('.')

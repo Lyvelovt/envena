@@ -16,6 +16,7 @@ if os.name == "posix":
     Info = "\033[43m"
     Back = "\033[48;5;236m"
     Muted = "\033[37m"
+    Back_red = "\033[101m"
 
     Blink = "\033[5m"
     Blue = "\033[38;5;117m"
@@ -39,6 +40,8 @@ else:
     Error_text = ""
     Info = ""
     Back = ""
+    Back_red = ""
+    Muted = ""
 
     Blink = ""
     Blue = ""
@@ -82,6 +85,8 @@ from netutils.script.dns_getHostname import *
 from netutils.script.detect_arpspoof import *
 #RAW PACKET SENDER #=========================#
 from netutils.raw_packet import *
+#IP FORWARDING #=============================#
+from netutils.ip_forward import *
 # DHCP #=====================================#
 from netutils.dhcp.discover import *
 from netutils.dhcp.ack import *
@@ -265,6 +270,7 @@ commands = {
     "script.arpscan": lambda: arpscan(args=args),
     "script.dns_getHostname": lambda: dns_getHostname(args=args),
     "script.detect_arpspoof": lambda: detect_arpspoof(args=args),
+    "ip_forward": lambda: ip_forward(args=args),
     "raw_packet": lambda: send_packet(type='raw_packet', args=args)
     # ...
 }
@@ -309,18 +315,18 @@ args = {
 
 # FUNTIONS SECTION #============================================#
 
-def main_exit():
+def main_exit()->None:
     print(bye_word)
     exit()
 
 # [Base] Animated-print art
-def print_art():
+def print_art()->None:
     for line in envenena_art:
         print(line)
         time.sleep(0.02)
 
 # [Tech-word] Returned random MAC-address by mask or not
-def rand_mac():
+def rand_mac()->str:
     global args
     mask=args['payload']
     if not mask or (mask.count(':') != 5 and len(mask) != 17):
@@ -337,7 +343,7 @@ def rand_mac():
     return f"{mask[0]}:{mask[1]}:{mask[2]}:{mask[3]}:{mask[4]}:{mask[5]}"
 
 # [Tech-word] Returned random IP-address by mask or not
-def rand_ip():
+def rand_ip()->str:
     global args
     mask=args['payload']
     if not mask or (mask.count('.') != 3 or (len(mask) < 7 or len(mask) > 15)):
@@ -352,7 +358,7 @@ def rand_ip():
 # [Tech-word] Return random XID
 
 # [Tech-word] Return shuffled list of all XID's that can be
-def ex_search_xid():
+def ex_search_xid()->list:
     xid = []
     for _ in range(1000000, 9999999):
         xid.append(_)
@@ -360,7 +366,7 @@ def ex_search_xid():
     return xid
     
 # [Base] Send packeges according to count, timeout, type of package and e.t.c.
-def send_packet(type, args):
+def send_packet(type: str, args: Dict)->bool:
     global packet_handlers
     timer = 1
     sent_packets = 0
@@ -388,13 +394,13 @@ def send_packet(type, args):
     return True
 
 # [Command] Stuffing dict by 'None' value
-def list_clear():
+def list_clear()->None:
     global args
     for _ in args:
         args[_] = None
 
 # [Command] Print dict as pretty-good table :)
-def list_dict(data: Dict[str, Union[str, int]], title: str = "ARGS LIST") -> None:
+def list_dict(data: Dict[str, Union[str, int]], title: str="ARGS LIST")->None:
 
     keys = list(data.keys())
     values = list(data.values())
@@ -422,7 +428,7 @@ def list_dict(data: Dict[str, Union[str, int]], title: str = "ARGS LIST") -> Non
     print(separator)
 
 # [Base] Input with arrow's history
-def history_input(prompt="<< "):
+def history_input(prompt: str="<< ")->str:
     while True:
         line = input(prompt)
         if line:
@@ -430,7 +436,7 @@ def history_input(prompt="<< "):
             return line
 
 # [Base] Interactive shell handler
-def process_input(user_input):
+def process_input(user_input: str)->None:
     global args
     user_input = user_input.strip()
     

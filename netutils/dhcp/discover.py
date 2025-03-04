@@ -2,13 +2,14 @@ import scapy.all as scapy
 from scapy.all import Ether, IP, UDP, BOOTP, DHCP
 
 
-import sys
-sys.path.append('..'*2)
+import sys, os
+sys.path.append(os.path.join('..','..'))
 from config import *
 
 import random
 
-def send_dhcp_discover(xid=None, hostname='', port_src=68, mac_src=None, iface=None, printed=True):
+def send_dhcp_discover(xid: int=None, hostname: str=None, port_src: int=68,
+                       mac_src: str=None, iface: str=None, printed: bool=True)->bool:
 
     if xid is None:
         xid = random.randint(1000000, 9999999)
@@ -29,7 +30,7 @@ def send_dhcp_discover(xid=None, hostname='', port_src=68, mac_src=None, iface=N
         ("message-type", 1),  # DHCP Discover
         ("client_id", b"\x01" + bytes.fromhex(mac_src.replace(":", ""))),
         ("hostname", hostname),
-        ("param_req_list", [1, 3, 15, 6]),  # Запрашиваем маску подсети, роутер, DNS
+        ("param_req_list", [1, 3, 15, 6]), 
         ("end")
     ]
     dhcp = DHCP(options=dhcp_options)
