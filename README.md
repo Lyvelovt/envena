@@ -6,7 +6,7 @@
 <b>Envena</b> - is a powerful tool for generating custom network packets and manipulating them. The user has full control over the protocol headers. This opens up a lot of possibilities. The program is designed as an interactive shell (which makes management user-friendly) and uses a simple syntax. Users can create their own modules, functions, and so on, because the program is designed in a modular way.
 
 ### MAIN OBJECTIVES ###
-The <b>Envena</b> project aims to create a universal tool for analyzing, generating and processing network packets for educational and practical information security purposes. Key goals include:
+The <b>Envena</b> project aims to create a universal tool for analyzing, generating and processing network packets for educational and practical cybersecurity purposes. Key goals include:
 
 • <b>Flexible packet generation:</b> creating packets with arbitrary parameters (or even with arbitrary content) to simulate various network scenarios.
 
