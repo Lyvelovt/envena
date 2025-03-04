@@ -1,5 +1,5 @@
 # envena
-![envena_main](https://github.com/user-attachments/assets/7fe1499c-3825-4746-838b-dffeff6a4562)
+<img width="590" alt="envena_main_menu.png" src="https://github.com/user-attachments/assets/b3c12f1c-3bec-49fe-b4a8-e70062c13ab8" />
 ### DESCRIPTION ###
 <b>Envena</b> - is a powerful tool for generating custom network packets and manipulating them. The user has full control over the protocol headers. This opens up a lot of possibilities. The program is designed as an interactive shell (which makes management user-friendly) and uses a simple syntax. Users can create their own modules, functions, and so on, because the program is designed in a modular way.
 
