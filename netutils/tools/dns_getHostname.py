@@ -11,7 +11,7 @@ def get_hostname(ip):
         return None
 
 def dns_getHostname(args: dict)->None:
-    print("*DNS get-hostname, version: 1.0")
+    print("DNS get-hostname, version: 1.0")
     print(
         f'DNS response: {args['payload']} is at {get_hostname(ip=args['payload'])}')
 

