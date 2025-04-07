@@ -31,21 +31,14 @@ if __name__ == "__main__":
         '''
 
         parser = argparse.ArgumentParser(description=desc, formatter_class=argparse.RawDescriptionHelpFormatter)
-        parser.add_argument("ip", help="target IP.")  # , required=True)
+        parser.add_argument("-ip", help="target IP.", required=True)  # , required=True)
         # parser.add_argument( "-i", "--interface", help="Network interface.")
 
-        args = parser.parse_args()
-        print("DNS-get_hostname, version: 1.0.")
-        get_hostname(args.ip)
-        # print('-'*len(dns[0]))
-        # print(dns[0])
-        # for _ in dns[1]:
-        #     print(_)
-        # for _ in dns[2]:
-        #     print(_)
-        # print('-' * len(dns[2][len(dns[2])-1]))
-        print(f'DNS response: {args.ip} is at {get_hostname(args.ip)}')
+        arg = parser.parse_args()
+        args = {}
+        args['payload'] = arg.ip
+        dns_getHostname(args)
 
     except(KeyboardInterrupt):
-        print('Successfully aborted.')
+        print('Aborted.')
         exit(0)

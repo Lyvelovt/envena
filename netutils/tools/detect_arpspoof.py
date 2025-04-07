@@ -46,5 +46,11 @@ def detect_arpspoof(args: dict)->None:
  
 
 if __name__ == '__main__':
-    arpspoof_packets = sniff(filter="arp", prn=detect_arpspoof_in_package, store=True)
-    print(arpspoof_packets)
+    import argparse
+    parser = argparse.ArgumentParser(description="ARP-spoofing atack detect module.")
+    parser.add_argument("-i", "--iface", help="Network iface to sniff from.", required=False)
+
+    arg = parser.parse_args()
+    args = {}
+    args['iface'] = arg.iface if not None else scapy.conf.iface
+    detect_arpspoof(args)

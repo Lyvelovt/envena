@@ -264,8 +264,8 @@ commands = {
     "tools.arpscan": lambda: arpscan(args=args),
     "tools.dns_getHostname": lambda: dns_getHostname(args=args),
     "tools.detect_arpspoof": lambda: detect_arpspoof(args=args),
-    "ip_forward": lambda: ip_forward(args=args),
-    "raw_packet": lambda: send_packet(type='raw_packet', args=args),
+    "tools.ip_forward": lambda: ip_forward(args=args),
+    "tools.raw_packet": lambda: send_packet(type='raw_packet', args=args),
     "uinfo": lambda: get_my_info()
     # ...
 }

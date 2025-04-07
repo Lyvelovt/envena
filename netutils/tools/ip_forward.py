@@ -2,8 +2,11 @@ import scapy.all as scapy
 from scapy.all import IP, Ether
 from scapy.all import PcapWriter, sniff
 from datetime import datetime
-import sys
-import os
+
+
+import sys, os
+sys.path.append(os.path.join('..','..'))
+from config import *
 
 ip_dst = ''
 mac_dst = ''
@@ -61,6 +64,7 @@ def ip_forward(args):
     
     forwarded_packets = scapy.sniff(filter='ip', prn=addr_spoof, store=True, iface=args['iface'])
     pcap_writer.write(forwarded_packets)
+    print(f'\n{Success}Traffic was writted in \'{filename}\'{Clear}')
 
 if __name__ == '__main__':
     
