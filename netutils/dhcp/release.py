@@ -7,35 +7,36 @@ from config import *
 
 import random
 
-def send_dhcp_release(ip_src: str, ip_dst: str, xid: int, hostname: str=None, iface: str=None,
-                      mac_src: str=None, port_src: int=68, printed: bool=True)->bool:
+def send_dhcp_release(ip_src: str, ip_dst: str, xid: int = random.randint(1000000, 9999999), iface: str=None,
+                      mac_src: str=None, port_src: int=68, port_dst: int=67, printed: bool=True)->bool:
     
-    if xid is None:
-        xid = random.randint(1000000, 9999999)
-    elif isinstance(xid, str):
+
+    port_src=68 if not port_src else port_src
+    port_dst=67 if not port_dst else port_dst    
+    
+    if isinstance(xid, str):
         xid = int(xid)
     elif xid == 'rand_xid':
         xid = []
         for _ in range(1000000, 9999999):
             xid.append(_)
         random.shuffle(xid)
-
-    ether = Ether(dst="ff:ff:ff:ff:ff:ff", src=mac_src)
-    ip = IP(src="0.0.0.0", dst="255.255.255.255")
-    udp = UDP(sport=port_src, dport=67)
-    bootp = BOOTP(chaddr=mac_src.encode(), xid=xid)
-
-    dhcp_options = [
-        ("message-type", 7),  # DHCP Release
-        ("client_id", b"\x01" + bytes.fromhex(mac_src.replace(":", ""))),
-        ("server_id", ip_dst),
-        ("requested_addr", ip_src),
-        ("hostname", hostname), # Optional, but can be included.
-        ("end")
-    ]
-    dhcp = DHCP(options=dhcp_options)
-
-    packet = ether / ip / udp / bootp / dhcp
+    packet = Ether(dst="ff:ff:ff:ff:ff:ff", src=mac_src) / \
+                IP(src="0.0.0.0", dst="255.255.255.255") / \
+                UDP(sport=port_src, dport=port_dst) / \
+                BOOTP(
+                    op=1,
+                    chaddr=bytes.fromhex(mac_src.replace(":", "")),
+                    ciaddr=ip_src,
+                    xid=xid
+                ) / \
+                DHCP(options=[
+                    ("message-type", "release"),
+                    ("client_id", b"\x01" + bytes.fromhex(mac_src.replace(":", ""))),
+                    ("server_id", ip_dst),
+                    ("requested_addr", ip_src),
+                    "end"
+                ])
     
     try:
         scapy.sendp(packet, iface=iface, verbose=False)

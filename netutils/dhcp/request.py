@@ -9,8 +9,11 @@ from config import *
 import random
 
 def send_dhcp_request(ip_src: str, ip_dst: str, xid: int, hostname: str=None, iface: str=None,
-                      mac_src: str=None, port_src: int=68, printed: bool=True)->bool:
+                      mac_src: str=None, port_src: int=68, port_dst: int=67, printed: bool=True)->bool:
 
+    port_src=68 if not port_src else port_src
+    port_dst=67 if not port_dst else port_dst
+    
     if xid is None:
         xid = random.randint(1000000, 9999999)
     elif isinstance(xid, str):
@@ -23,14 +26,14 @@ def send_dhcp_request(ip_src: str, ip_dst: str, xid: int, hostname: str=None, if
     
     ether = Ether(dst="ff:ff:ff:ff:ff:ff", src=mac_src)
     ip = IP(src="0.0.0.0", dst="255.255.255.255")
-    udp = UDP(sport=port_src, dport=67)
+    udp = UDP(sport=port_src, dport=port_dst)
     bootp = BOOTP(chaddr=mac_src.encode(), xid=xid)
     dhcp_options = [
         ("message-type", 3),  # DHCP Request
         ("client_id", b"\x01" + bytes.fromhex(mac_src.replace(":", ""))),
         ("requested_addr", ip_src),
         ("server_id", ip_dst),
-        ("hostname", hostname),
+        #("hostname", hostname),
         ("param_req_list", [1, 3, 15, 6]),
         ("end")
     ]

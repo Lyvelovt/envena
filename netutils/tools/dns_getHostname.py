@@ -13,7 +13,7 @@ def get_hostname(ip):
 def dns_getHostname(args: dict)->None:
     print("DNS get-hostname, version: 1.0")
     print(
-        f'DNS response: {args['payload']} is at {get_hostname(ip=args['payload'])}')
+        f'DNS response: {args['input']} is at {get_hostname(ip=args['input'])}')
 
 
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
         arg = parser.parse_args()
         args = {}
-        args['payload'] = arg.ip
+        args['input'] = arg.ip
         dns_getHostname(args)
 
     except(KeyboardInterrupt):

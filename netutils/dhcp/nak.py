@@ -8,11 +8,14 @@ from config import *
 import random
 
 def send_dhcp_nak(ip_src: str, ip_dst: str, xid: int, mac_src: str, iface: str=None, mac_dst: str=None, port_src: int=67,
-                printed: bool=True, lease_time: int=3600, sub_mask: str='255.255.255.0',
+                port_dst: int=67, printed: bool=True, lease_time: int=3600, sub_mask: str='255.255.255.0',
                 ip_router: str=None, dns_server: str='8.8.8.8')->bool:
     
     if ip_router is None:
         ip_router = ip_src
+    
+    port_src=67 if not port_src else port_src
+    port_dst=68 if not port_dst else port_dst
     
     try:
         lease_time = int(lease_time)
@@ -31,7 +34,7 @@ def send_dhcp_nak(ip_src: str, ip_dst: str, xid: int, mac_src: str, iface: str=N
 
     ether = Ether(dst="ff:ff:ff:ff:ff:ff", src=mac_src)
     ip = IP(src=ip_src, dst="255.255.255.255")
-    udp = UDP(sport=port_src, dport=68)
+    udp = UDP(sport=port_src, dport=port_dst)
     bootp = BOOTP(chaddr=mac_dst.encode(), xid=xid)
 
     dhcp_options = [

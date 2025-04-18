@@ -28,9 +28,12 @@ if os.name == "posix":
     Light_red = "\033[38;5;197m"
 
     # For ART:
-    b = Blue_2 = "\033[1;94m"
-    m = Magenta = "\033[1;95m"
-    M = Dark_Magenta = "\033[0;35m"
+    x = '\033[1m'
+    y = '\033[1;31m'
+    w = '[90m'
+    r = '[0;0;0m'
+    g = '[30m'
+    n = '[37m'
     c = Clear
 else:
     # For not Unix-like
@@ -53,9 +56,12 @@ else:
     Light_red = ""
 
     # For ART:
-    b = Blue_2 = ""
-    m = Magenta = ""
-    M = Dark_Magenta = ""
+    x = ''
+    y = ''
+    w = ''
+    r = ''
+    g = ''
+    n = ''
     c = Clear
 
 
@@ -84,6 +90,8 @@ from netutils.arp.response import *
 from netutils.tools.arpscan import *
 from netutils.tools.dns_getHostname import *
 from netutils.tools.detect_arpspoof import *
+from netutils.tools.dhcp_starve import *
+from netutils.tools.camoverflow import *
 #RAW PACKET SENDER #=========================#
 from netutils.tools.raw_packet import *
 #IP FORWARDING #=============================#
@@ -100,10 +108,6 @@ from netutils.dhcp.inform import *
 
 
 # Color for main-menu art
-w = '[90m'
-r = '[0;0;0m'
-g = '[30m'
-n = '[37m'
 
 envenena_art = [
     f'      {w}..?{n}5{w}??.?5??...                  ',
@@ -113,17 +117,17 @@ envenena_art = [
     f'{g}c{w}?{n}5@5{w}5{n}55555@5{w}55{n}5@5@@@@{w}555{n}5@{w}5??c          ',
     f'{w}55{n}@@@55@55@5{w}5{n}555@5@@@@5{w}55{n}@5{w}555{n}5?{w}c        ',
     f'{w}5{n}@@@@{w}5{n}5@5@@5@@5@@5@@@@555{n}@{w}555{n}@@{w}???c      ',
-    f'{w}?{n}@5{w}?5?..5{n}@@@@@@@@@@@@@@@55{n}5{w}5{n}5@@{w}55?{n}5{w}.         {'\033[1;31m'}<---Envena!!!{r}',
+    f'{w}?{n}@5{w}?5?..5{n}@@@@@@@@@@@@@@@55{n}5{w}5{n}5@@{w}55?{n}5{w}.         {y}<---Envena!!!{r}',
     f'{w}???       c{n}55@@@@@@@@@@@@@@@@@55{w}5{n}5@5{w}?    ',
     f'{w}?          {w}55{n}5@@@%@@@@@@@5@@@@{w}5{n}5{w}5{n}@5{w}555        {Muted}~~version: {envena_version}~~{r}',
-    f'           {w}?{n}@@@ {w}c.{n}5%@%%@5@@@@@@5@@{w}55{n}5{w}5?      {'\033[1;31m'}by Lyvelovt Studio{r}',
-    f'           {w}?{n}%%{w}.    ?{n}@@@@@%@@@@@@@@{w}55{n}@{w}5?.     {'\033[1;31m'}https://github.com/Lyvelovt{r}',
-    f'           {w}?{n}@{g}c     {w}c{n}@5@@{w}?5{n}@@@@@5@@@5@@@{w}?.    {'\033[1;31m'}https://github.com/Lyvelovt/envena.git{r}',
+    f'           {w}?{n}@@@ {w}c.{n}5%@%%@5@@@@@@5@@{w}55{n}5{w}5?      {y}by Lyvelovt Studio{r}',
+    f'           {w}?{n}%%{w}.    ?{n}@@@@@%@@@@@@@@{w}55{n}@{w}5?.     {y}https://github.com/Lyvelovt{r}',
+    f'           {w}?{n}@{g}c     {w}c{n}@5@@{w}?5{n}@@@@@5@@@5@@@{w}?.    {y}https://github.com/Lyvelovt/envena.git{r}',
     f'                   {g}c{n}@@@{w}.  {g}c{w}5{n}@@@%@@@5{w}5{n}@@{w}??',
     f'                   {w}.{n}%@{w}?     ?{n}@@@5@@@@@5{w}5?',
-    f'                   {w}?5       {w}.{n}@@@{w}c{g}c{w}?{n}@@@@@{w}?    #{Muted + '\033[1m'}Network packages manipulation{r}',
-    f'                   {g}c         {n}@@5    {w}?{n}5@%{w}.    {Muted + '\033[1m'}utility.{r}',
-    f'                            {g}c{n}@@{w}c      ?5     #{Muted + '\033[1m'}Use \'?\' or \'help\' for help info.{r}',
+    f'                   {w}?5       {w}.{n}@@@{w}c{g}c{w}?{n}@@@@@{w}?    #{Muted + x}Network packages manipulation{r}',
+    f'                   {g}c         {n}@@5    {w}?{n}5@%{w}.    {Muted + x}utility.{r}',
+    f'                            {g}c{n}@@{w}c      ?5     #{Muted + x}Use \'?\' or \'help\' for help info.{r}',
     f'                             {w}5{g}c          ',
     f'                             {w}c{r}           '
 ]
@@ -151,7 +155,7 @@ help                -    Show this text.
 
 Ready-made toolss:
 arp_scan             -    scanning network using ARP protocol. Input ip
-                            range must be in 'payload' and use format 'x.x.x.x-255'.
+                            range must be in 'input' and use format 'x.x.x.x-255'.
                             Output is IP|MAC|HOSTNAME.
 dns_getHostname     -    Send DNS protocol request. Get hostname by IP-address.
                             Output is variable of hostname.
@@ -169,7 +173,7 @@ mac_src       -    source MAC-address, by default - your MAC-address.
 count         -    count of packets to send.
 timeout       -    timeout between sending packets in seconds.
 interface     -    network interface.
-payload       -    payload or specific input data for module.
+input       -    input or specific input data for module.
 sub_mask      -    sudnet mask. Default = 255.255.255.0.
 xid           -    XID for DHCP packets.
 ip_router     -    router's IP-address.
@@ -266,6 +270,8 @@ commands = {
     "tools.detect_arpspoof": lambda: detect_arpspoof(args=args),
     "tools.ip_forward": lambda: ip_forward(args=args),
     "tools.raw_packet": lambda: send_packet(type='raw_packet', args=args),
+    "tools.dhcp_starve": lambda: dhcp_starve(args=args),
+    "tools.cam_overflow": lambda: cam_overflow(args=args),
     "uinfo": lambda: get_my_info()
     # ...
 }
@@ -297,7 +303,7 @@ args = {
     'count': 1,
     'timeout': 1,
     'iface': scapy.conf.iface,
-    'payload': None,
+    'input': None,
     'sub_mask': "255.255.255.0",
     'xid': None,
     'ip_router': None,
@@ -334,9 +340,9 @@ def print_art()->None:
 # [Tech-word] Returned random MAC-address by mask or not
 def rand_mac()->str:
     global args
-    mask=args['payload']
+    mask=args['input']
     if not mask or (mask.count(':') != 5 and len(mask) != 17):
-        if mask: print(f'{Error}Error:{Clear} {Error_text}There is not MAC-address mask in \'payload\' arg.{Clear}')
+        if mask: print(f'{Error}Error:{Clear} {Error_text}There is not MAC-address mask in \'input\' arg.{Clear}')
         mask = 'xx:xx:xx:xx:xx:xx'
     mask = mask.split(':')
     for i, _ in enumerate(mask, start=0):
@@ -351,9 +357,9 @@ def rand_mac()->str:
 # [Tech-word] Returned random IP-address by mask or not
 def rand_ip()->str:
     global args
-    mask=args['payload']
+    mask=args['input']
     if not mask or (mask.count('.') != 3 or (len(mask) < 7 or len(mask) > 15)):
-        if mask: print(f'{Error}Error:{Clear} {Error_text}There is not IP-address mask in \'payload\' arg.{Clear}')
+        if mask: print(f'{Error}Error:{Clear} {Error_text}There is not IP-address mask in \'input\' arg.{Clear}')
         mask = 'x.x.x.x'
     mask = mask.split('.')
     for i, _ in enumerate(mask, start=0):

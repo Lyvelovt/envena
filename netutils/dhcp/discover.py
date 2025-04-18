@@ -8,7 +8,7 @@ from config import *
 
 import random
 
-def send_dhcp_discover(xid: int=None, hostname: str=None, port_src: int=68,
+def send_dhcp_discover(xid: int=None, hostname: str=None, port_src: int=68, port_dst: int=67,
                        mac_src: str=None, iface: str=None, printed: bool=True)->bool:
 
     if xid is None:
@@ -20,16 +20,17 @@ def send_dhcp_discover(xid: int=None, hostname: str=None, port_src: int=68,
         for _ in range(1000000, 9999999):
             xid.append(_)
         random.shuffle(xid)
-    
+    port_src=68 if not port_src else port_src
+    port_dst=67 if not port_dst else port_dst
     
     ether = Ether(dst="ff:ff:ff:ff:ff:ff", src=mac_src)
     ip = IP(src="0.0.0.0", dst="255.255.255.255")
-    udp = UDP(sport=port_src, dport=67)
+    udp = UDP(sport=port_src, dport=port_dst)
     bootp = BOOTP(chaddr=mac_src.encode(), xid=xid)
     dhcp_options = [
         ("message-type", 1),  # DHCP Discover
         ("client_id", b"\x01" + bytes.fromhex(mac_src.replace(":", ""))),
-        ("hostname", hostname),
+        #("hostname", hostname),
         ("param_req_list", [1, 3, 15, 6]), 
         ("end")
     ]

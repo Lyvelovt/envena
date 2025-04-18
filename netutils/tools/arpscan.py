@@ -43,13 +43,14 @@ def get_mac(ip_dst, ip_src, mac_src):
     answered_list = scapy.srp(arp_request_broadcast, timeout=1, verbose=False)[0]
     return answered_list[0][1].hwsrc if answered_list else None    
 
-def scan_network(ip_range, ip_src=None, mac_src=None):
+def scan_network(ip_range: str, ip_src: str=None, mac_src: str=None, iface: str=scapy.conf.iface)->list:
     anim_num = 0
     anim = '/|\\-'
     devices = []
     num = 0
     random.shuffle(ip_range)
     for ip in ip_range:
+        if ip == (ip_src if ip_src != None else scapy.get_if_addr(iface)): continue
         mac = get_mac(ip_dst=ip, mac_src=mac_src, ip_src=ip_src)
         if mac:
             hostname = get_hostname(ip)
@@ -67,20 +68,20 @@ def scan_network(ip_range, ip_src=None, mac_src=None):
     return devices
 
 
-def arpscan(args):
+def arpscan(args: dict)->None:
     start_time = time.time()
-    if '-' in args['payload']:
-        ip = args['payload'].split('-')
+    if '-' in args['input']:
+        ip = args['input'].split('-')
         ip[0] = ip[0].split('.')
         ip_range = [f"{ip[0][0] + '.' + ip[0][1] + '.' + ip[0][2]}." + str(i) for i in
                     range(int(ip[0][3]), 1 + int(ip[1]))]
     else:
-        ip = args['payload'].split('.')
+        ip = args['input'].split('.')
         ip_range = [f"{ip[0] + '.' + ip[1] + '.' + ip[2]}." + str(i) for i in
                     range(int(ip[3]), 1 + int(ip[3]))]
     print("ARP-Scanner, version: 1.0")
     print('*Scanning started')
-    devices_info = scan_network(ip_range=ip_range, mac_src=args['mac_src'], ip_src=args['ip_src'])
+    devices_info = scan_network(ip_range=ip_range, mac_src=args['mac_src'], ip_src=args['ip_src'], iface=args['iface'])
     if devices_info:
         print(f'Scan finished in {round(time.time() - start_time, 3)} s.')
         print('Detected device(s):')
@@ -109,7 +110,7 @@ if __name__ == "__main__":
         parser.add_argument("-ip", help="target IP or range.")  # , required=True)
 
         arg = parser.parse_args()
-        args['payload'] = arg.ip
+        args['input'] = arg.ip
         arpscan(args)
     except(KeyboardInterrupt):
         print('Successfully aborted.')
