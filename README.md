@@ -1,5 +1,4 @@
-
-<img width="1000" alt="envena_main_menu.png" src="https://github.com/user-attachments/assets/57e71c86-c907-4e05-8bc1-8efcc9533508" />
+<img width="592" alt="envena.png" src="https://github.com/user-attachments/assets/9eed1889-75df-4034-a848-c2098563230b" />
 
 # envena
 ### DESCRIPTION ###
