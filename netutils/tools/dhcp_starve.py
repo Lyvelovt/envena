@@ -8,10 +8,10 @@ from config import *
 import time, random
 
 def rand_mac()->str:
-    return f"{hex(random.randint(0, 255))}:{hex(random.randint(0, 255))}:{hex(random.randint(0, 255))}:{hex(random.randint(0, 255))}:{hex(random.randint(0, 255))}:{hex(random.randint(0, 255))}"
-
+    return ":".join(f"{random.randint(0, 255):02x}" for _ in range(6))
 
 def dhcp_starve(args: dict)->None:
+    if not validate_args(iface=args['iface']): return()
     print('DHCP-starvation attack module, version 1.0')
     iface = args['iface']
     try:
@@ -54,7 +54,9 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="DHCP-starvation attack module.")
     parser.add_argument("-i", "--iface", required=True, help="Network interface.")
-    args = parser.parse_args()
+    arg = parser.parse_args()
     
+    agrs = {'iface': arg.iface}
+
     # Запускаем атаку
-    dhcp_starve(args.iface)
+    dhcp_starve(args)

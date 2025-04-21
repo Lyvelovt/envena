@@ -7,6 +7,7 @@ from config import *
 
 
 def send_raw_packet(input: str=None, iface: str=None, printed: bool=True)->bool:
+    if not validate_args(input=input, iface=iface): return False
     with open(input, 'r') as pkt_file:
         input = pkt_file.read()
         input = bytes.fromhex(input)

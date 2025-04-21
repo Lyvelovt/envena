@@ -1,13 +1,9 @@
-import scapy.all as scapy
-
 import sys
 sys.path.append('..'*2)
 from config import *
 
-
-def send_arp_request(ip_dst, mac_dst, ip_src, mac_src, iface, printed=True):
-    """Sends an ARP request with the specified parameters."""
-    
+def send_arp_request(ip_dst, mac_dst, ip_src, mac_src, iface, printed=True)->bool:
+    if not validate_args(ip_dst=ip_dst, ip_src=ip_src, mac_src=mac_src, mac_dst=mac_dst): return False
     if mac_dst == 'broadcast':
         mac_dst = 'ff:ff:ff:ff:ff:ff'
     if mac_src == 'broadcast':

@@ -8,15 +8,12 @@ from config import *
 import random
 
 def send_dhcp_ack(ip_dst: str, ip_src: str, mac_dst: str, xid: int, lease_time: int=3600, sub_mask: str="255.255.255.0",
-                   ip_router: str=None, dns_server: str="8.8.8.8", iface: str=None, mac_src: str=None,
+                   dns_server: str="8.8.8.8", iface: str=None, mac_src: str=None,
                    port_src: int=67, port_dst: int=68, printed: bool=True)->bool:
-
-    if ip_router is None:
-        ip_router = ip_src
     
     port_src=67 if not port_src else port_src
     port_dst=68 if not port_dst else port_dst
-    
+
     try:
         lease_time = int(lease_time)
     except ValueError:
@@ -26,7 +23,13 @@ def send_dhcp_ack(ip_dst: str, ip_src: str, mac_dst: str, xid: int, lease_time: 
         xid = random.randint(1000000, 9999999)
     elif isinstance(xid, str):
         xid = int(xid)
-        
+
+    if not validate_args(ip_dst=ip_dst, ip_src=ip_src, mac_dst=mac_dst, xid=xid, lease_time=lease_time, sub_mask=sub_mask,
+                   dns_server=dns_server, iface=iface, mac_src=mac_src,
+                   port_src=port_src, port_dst=port_dst): return False
+
+
+
     ether = Ether(dst=mac_dst, src=mac_src)
     ip = IP(src=ip_src, dst=ip_dst)
     udp = UDP(sport=port_src, dport=port_dst)
@@ -36,7 +39,7 @@ def send_dhcp_ack(ip_dst: str, ip_src: str, mac_dst: str, xid: int, lease_time: 
         ("server_id", ip_src),
         ("lease_time", lease_time),
         ("sub_mask", sub_mask),
-        ("router", ip_router),
+        ("router", ip_src),
         ("dns", dns_server),
         ("end")
     ]

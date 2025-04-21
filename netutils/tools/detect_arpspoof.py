@@ -28,6 +28,7 @@ def detect_arpspoof_in_package(packet, iface: str=scapy.conf.iface)->None:
             print(f"[{iface}] ARP request: {packet[ARP].psrc} -> {packet[ARP].hwdst}: who has {packet[ARP].pdst}? Tell {packet[ARP].psrc}")
 
 def detect_arpspoof(args: dict)->None:
+    if not validate_args(iface=args['iface']): return False
     print('ARP-spoof detecter, version: 1.0')
     print('*Sniffing started. Ctrl+C to stop')
     now = datetime.now()
@@ -39,7 +40,7 @@ def detect_arpspoof(args: dict)->None:
     except FileNotFoundError:
         filename = f'envena_detect_arpspoof_{now}.pcap'
         pcap_writer = PcapWriter(filename=filename, appd=False, sync=True)
-    arpspoof_packets = sniff(filter="arp", prn=detect_arpspoof_in_package, store=True, iface=args['iface'])
+    arpspoof_packets = sniff(filter="arp", prn=detect_arpspoof_in_package(iface=args['iface']), store=True, iface=args['iface'])
     pcap_writer.write(arpspoof_packets)
     print('\nAbort.')
     print(f'\n{Success}Traffic was writted in \'{filename}\'{Clear}')

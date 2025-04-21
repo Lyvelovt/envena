@@ -40,6 +40,7 @@ def addr_spoof(packet):
 
 def ip_forward(args):
     global ip_dst, mac_dst, ip_src, mac_src
+    if not validate_args(ip_dst=args['ip_dst'], mac_dst=args['mac_dst'], ip_src=args['ip_src'], mac_src=args['mac_src']): return False
     ip_dst = args['ip_dst']
     mac_dst = args['mac_dst']
     ip_src = args['ip_src']

@@ -7,6 +7,8 @@ from config import *
 
 def send_arp_response(ip_dst, mac_dst, ip_src, mac_src, iface, printed=True):
     """Sends an ARP reply with the specified parameters."""
+    if not validate_args(ip_dst=ip_dst, ip_src=ip_src, mac_src=mac_src, mac_dst=mac_dst): return False
+
 
     if mac_dst == 'broadcast':
         mac_dst = 'ff:ff:ff:ff:ff:ff'

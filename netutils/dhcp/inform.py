@@ -22,6 +22,9 @@ def send_dhcp_inform(ip_src: str, ip_dst: str, xid: int=None, hostname: str=None
 
     port_src=68 if not port_src else port_src
     port_dst=67 if not port_dst else port_dst
+    
+    if not validate_args(ip_src=ip_src, ip_dst=ip_dst, xid=xid, iface=iface, mac_src=mac_src,
+                     port_src=port_src, port_dst=port_dst): return False
 
     ether = Ether(dst="ff:ff:ff:ff:ff:ff", src=mac_src)
     ip = IP(src=ip_src, dst=ip_dst)

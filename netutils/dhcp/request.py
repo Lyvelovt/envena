@@ -23,7 +23,8 @@ def send_dhcp_request(ip_src: str, ip_dst: str, xid: int, hostname: str=None, if
         for _ in range(1000000, 9999999):
             xid.append(_)
         random.shuffle(xid)
-    
+    if not validate_args(ip_src=ip_src, ip_dst=ip_dst, xid=xid, iface=iface,
+                      mac_src=mac_src, port_src=port_src, port_dst=port_dst): return False
     ether = Ether(dst="ff:ff:ff:ff:ff:ff", src=mac_src)
     ip = IP(src="0.0.0.0", dst="255.255.255.255")
     udp = UDP(sport=port_src, dport=port_dst)

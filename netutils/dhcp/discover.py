@@ -23,6 +23,10 @@ def send_dhcp_discover(xid: int=None, hostname: str=None, port_src: int=68, port
     port_src=68 if not port_src else port_src
     port_dst=67 if not port_dst else port_dst
     
+    if not validate_args(xid=xid, port_src=port_src, port_dst=port_dst,
+                       mac_src=mac_src, iface=iface): return False
+
+
     ether = Ether(dst="ff:ff:ff:ff:ff:ff", src=mac_src)
     ip = IP(src="0.0.0.0", dst="255.255.255.255")
     udp = UDP(sport=port_src, dport=port_dst)

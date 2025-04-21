@@ -21,6 +21,8 @@ def send_dhcp_release(ip_src: str, ip_dst: str, xid: int = random.randint(100000
         for _ in range(1000000, 9999999):
             xid.append(_)
         random.shuffle(xid)
+    if not validate_args(ip_src=ip_src, ip_dst=ip_dst, xid=xid, iface=iface,
+                      mac_src=mac_src, port_src=port_src, port_dst=port_dst): return False
     packet = Ether(dst="ff:ff:ff:ff:ff:ff", src=mac_src) / \
                 IP(src="0.0.0.0", dst="255.255.255.255") / \
                 UDP(sport=port_src, dport=port_dst) / \

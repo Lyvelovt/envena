@@ -31,6 +31,9 @@ def send_dhcp_nak(ip_src: str, ip_dst: str, xid: int, mac_src: str, iface: str=N
         for _ in range(1000000, 9999999):
             xid.append(_)
         random.shuffle(xid)
+    
+    if not validate_args(ip_src=ip_src, ip_dst=ip_dst, xid=xid, mac_src=mac_src, iface=iface, mac_dst=mac_dst, port_src=port_src,
+                port_dst=port_dst, lease_time=lease_time, sub_mask=sub_mask, dns_server=dns_server): return False
 
     ether = Ether(dst="ff:ff:ff:ff:ff:ff", src=mac_src)
     ip = IP(src=ip_src, dst="255.255.255.255")
