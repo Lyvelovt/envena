@@ -4,11 +4,6 @@ import os
 bye_word = 'Bye-bye! Quiting...'
 envena_version = 1.7
 
-def main_exit()->None:
-    print(bye_word)
-    exit()
-
-
 # Colors
 if os.name == "posix":
     # For Unix-like
@@ -122,7 +117,7 @@ def validate_args(**kwargs)->None:
     noneIsFount = True
     for arg_name, arg_value in kwargs.items():
         if arg_value is None:
-            print(f"{Error}Error: {Error_text}arg \"{arg_name}\" is required!")
+            print(f"{Error}Error: {Error_text}arg \"{arg_name}\" is required!{Clear}")
             noneIsFount = False
     return noneIsFount
 

@@ -39,8 +39,8 @@ def detect_arpspoof(args: dict)->None:
         pcap_writer = PcapWriter(filename=filename, append=False, sync=True)
     except FileNotFoundError:
         filename = f'envena_detect_arpspoof_{now}.pcap'
-        pcap_writer = PcapWriter(filename=filename, appd=False, sync=True)
-    arpspoof_packets = sniff(filter="arp", prn=detect_arpspoof_in_package(iface=args['iface']), store=True, iface=args['iface'])
+        pcap_writer = PcapWriter(filename=filename, append=False, sync=True)
+    arpspoof_packets = sniff(filter="arp", prn=lambda pkt: detect_arpspoof_in_package(pkt, iface=args['iface']), store=True, iface=args['iface'])
     pcap_writer.write(arpspoof_packets)
     print('\nAbort.')
     print(f'\n{Success}Traffic was writted in \'{filename}\'{Clear}')
@@ -53,5 +53,5 @@ if __name__ == '__main__':
 
     arg = parser.parse_args()
     args = {}
-    args['iface'] = arg.iface if not None else scapy.conf.iface
+    args['iface'] = arg.iface if arg.iface is not None else scapy.conf.iface
     detect_arpspoof(args)
