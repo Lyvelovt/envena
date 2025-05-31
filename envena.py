@@ -1,4 +1,39 @@
 
+import sys
+
+if '--i-am-too-stupid' in sys.argv:
+    import subprocess
+    def get_pip_version():
+        try:
+            result = subprocess.run(
+                [sys.executable, "-m", "pip", "--version"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=True,
+                text=True
+            )
+            # Пример строки: "pip 23.0.1 from /... (python 3.11)"
+            version_str = result.stdout.split()[1]
+            return tuple(map(int, version_str.split(".")))
+        except Exception as e:
+            print(f"Error in determining the version of pip: {e}")
+            return None
+    
+    pip_version = get_pip_version()
+
+    command = [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"]
+
+    if pip_version and pip_version >= (23, 0):
+        command.append("--break-system-packages")
+
+    try:
+        subprocess.run(command, check=True)
+        print("Successfully installed requirements.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error while install 'requirements.txt': {e}")
+        print("Try to install requirements using 'pip (pip3) install -r requirements.txt (--break-system-packages)'")
+        sys.exit(1)
+
 from config import *
 from commands import *
 from functions import validate_ip, validate_eth, envena_panic

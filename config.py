@@ -111,6 +111,6 @@ else:
 try:
     import scapy.all as scapy
 except ModuleNotFoundError:
-    print(f'{Fatal_Error}Error: "Scapy" must been installed. Try: "pip3 install scapy".{Clear}')
-    print(f'{Info}You also can run program with "--i-am-too-stupid" flag if you do not know how to install dependencies.{Clear}')
+    print(f"{Fatal_Error}Error: 'Scapy' must been installed. Try: 'pip3 install -r requirements.txt'.{Clear}")
+    print(f"{Info}You also can run program with '--i-am-too-stupid' flag if you do not know how to install dependencies.{Clear}")
     main_exit()

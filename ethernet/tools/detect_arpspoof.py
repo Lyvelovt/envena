@@ -3,8 +3,8 @@ import sys
 import os
 sys.path.append(os.path.join('..','..'))
 from config import scapy, Fatal_Error, Clear, Success, scapy
-from scapy import ARP
-from scapy import PcapWriter, sniff
+from scapy.all import ARP
+from scapy.all import PcapWriter, sniff
 from functions import validate_args
 detect_arpspoof_v = 1.0
 
