@@ -1,18 +1,15 @@
-import socket
-
-import sys, os
+import sys
+import os
 sys.path.append(os.path.join('..','..'))
-from config import *
+from functions import validate_args, get_hostname
+dns_getHostname_v = 1.0
 
-def get_hostname(ip):
-    try:
-        return socket.gethostbyaddr(ip)[0]
-    except socket.herror:
-        return None
+
 
 def dns_getHostname(args: dict)->None:
-    if not validate_args(input=args['input']): return False
-    print("DNS get-hostname, version: 1.0")
+    if not validate_args(input=args['input']):
+        return False
+    print(f"DNS get-hostname, version: {dns_getHostname_v}")
     print(
         f'DNS response: {args['input']} is "{get_hostname(ip=args['input'])}".')
 

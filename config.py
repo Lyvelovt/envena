@@ -1,8 +1,10 @@
 import os
-
 # Word that always print with exit
 bye_word = 'Bye-bye! Quiting...'
-envena_version = 1.7
+envena_version = 1.8
+def main_exit()->None:
+    print(bye_word)
+    exit()
 
 # Colors
 if os.name == "posix":
@@ -16,7 +18,8 @@ if os.name == "posix":
     Back = "\033[48;5;236m"
     Muted = "\033[37m"
     Back_red = "\033[101m"
-
+    Info = "\033[1;34m"
+    
     Blink = "\033[5m"
     Blue = "\033[38;5;117m"
     Orange = "\033[38;5;208m"
@@ -34,7 +37,7 @@ if os.name == "posix":
     n = '[37m'
     c = Clear
 else:
-    # For Windows
+    # For Windows and others
     try:
         import colorama
         colorama.init()
@@ -48,6 +51,7 @@ else:
         Back = colorama.Back.BLACK
         Back_red = colorama.Back.RED
         Muted = colorama.Fore.LIGHTBLACK_EX
+        Info = colorama.Style.BRIGHT + colorama.Fore.BLUE
 
         Blink = colorama.Style.BRIGHT
         Blue = colorama.Fore.LIGHTBLUE_EX
@@ -67,6 +71,7 @@ else:
         c = Clear
     except ImportError:
         print('Error: failed to import colorama library. Colored output will be disabled. To fix it try "pip3 install colorama".')
+        print('You also can run program with "--i-am-too-stupid" flag if you do not know how to install dependencies.')
         Clear = ""
         Error = ""
         Fatal_Error = ""
@@ -105,30 +110,7 @@ else:
 
 try:
     import scapy.all as scapy
-    from scapy import *
-
 except ModuleNotFoundError:
-    print(f"{Fatal_Error}Error: \"Scapy\" must been installed. Try: \"pip3 install scapy\"{Clear}")
+    print(f'{Fatal_Error}Error: "Scapy" must been installed. Try: "pip3 install scapy".{Clear}')
+    print(f'{Info}You also can run program with "--i-am-too-stupid" flag if you do not know how to install dependencies.{Clear}')
     main_exit()
-
-
-# [Base] Check all args are not None
-def validate_args(**kwargs)->None:
-    noneIsFount = True
-    for arg_name, arg_value in kwargs.items():
-        if arg_value is None:
-            print(f"{Error}Error: {Error_text}arg \"{arg_name}\" is required!{Clear}")
-            noneIsFount = False
-    return noneIsFount
-
-
-
-
-# Help info that print with 'help' or '?'
-# ARGS SECTION #================================================#
-
-# Dict that consists of net-packets types. 
-# You can add your packet-module and add to this dict.
-
-
-

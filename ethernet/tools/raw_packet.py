@@ -1,10 +1,8 @@
-import scapy.all as scapy
-from scapy.all import Ether
-
-import sys, os
+import sys
+import os
 sys.path.append(os.path.join('..', '..'))
-from config import *
-
+from config import Fatal_Error, Error_text, Clear, scapy
+from functions import validate_args
 
 def send_raw_packet(input: str=None, iface: str=None, printed: bool=True)->bool:
     if not validate_args(input=input, iface=iface): return False

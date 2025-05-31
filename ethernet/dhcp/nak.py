@@ -1,13 +1,13 @@
-import scapy.all as scapy
-from scapy.all import Ether, IP, UDP, BOOTP, DHCP
-
-import sys, os
+import sys
+import os
 sys.path.append(os.path.join('..','..'))
-from config import *
+from config import scapy, Error_text, Fatal_Error, Clear
+from scapy.all import Ether, IP, UDP, BOOTP, DHCP
+from functions import validate_args
 
 import random
 
-def send_dhcp_nak(ip_src: str, ip_dst: str, xid: int, mac_src: str, iface: str=None, mac_dst: str=None, port_src: int=67,
+def send_dhcp_nak(ip_src: str, ip_dst: str, xid: int, eth_src: str, iface: str=None, eth_dst: str=None, port_src: int=67,
                 port_dst: int=67, printed: bool=True, lease_time: int=3600, sub_mask: str='255.255.255.0',
                 ip_router: str=None, dns_server: str='8.8.8.8')->bool:
     
@@ -26,19 +26,20 @@ def send_dhcp_nak(ip_src: str, ip_dst: str, xid: int, mac_src: str, iface: str=N
         xid = random.randint(1000000, 9999999)
     elif isinstance(xid, str):
         xid = int(xid)
-    elif xid == 'rand_xid':
+    elif xid == 'ex_search_xid':
         xid = []
         for _ in range(1000000, 9999999):
             xid.append(_)
         random.shuffle(xid)
     
-    if not validate_args(ip_src=ip_src, ip_dst=ip_dst, xid=xid, mac_src=mac_src, iface=iface, mac_dst=mac_dst, port_src=port_src,
-                port_dst=port_dst, lease_time=lease_time, sub_mask=sub_mask, dns_server=dns_server): return False
+    if not validate_args(ip_src=ip_src, ip_dst=ip_dst, xid=xid, eth_src=eth_src, iface=iface, eth_dst=eth_dst, port_src=port_src,
+                port_dst=port_dst, lease_time=lease_time, sub_mask=sub_mask, dns_server=dns_server):
+        return False
 
-    ether = Ether(dst="ff:ff:ff:ff:ff:ff", src=mac_src)
+    ether = Ether(dst="ff:ff:ff:ff:ff:ff", src=eth_src)
     ip = IP(src=ip_src, dst="255.255.255.255")
     udp = UDP(sport=port_src, dport=port_dst)
-    bootp = BOOTP(chaddr=mac_dst.encode(), xid=xid)
+    bootp = BOOTP(chaddr=eth_dst.encode(), xid=xid)
 
     dhcp_options = [
         ("message-type", 6),  # DHCP NAK
@@ -57,7 +58,7 @@ def send_dhcp_nak(ip_src: str, ip_dst: str, xid: int, mac_src: str, iface: str=N
         scapy.sendp(packet, iface=iface, verbose=False)
         if printed:
             print(
-                f"[{iface}] DHCP nak: {ip_src} -> {mac_dst}: Refused to issue {ip_dst}")
+                f"[{iface}] DHCP nak: {ip_src} -> {eth_dst}: Refused to issue {ip_dst}")
             scapy.hexdump(packet)
         return True
     except Exception as e:

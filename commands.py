@@ -1,69 +1,52 @@
-# This file contains all the commands and modules (sending packets of different protocols
-# and ready-made scripts). Use this file to add your modules.
+# This file contains commands that the user can use. 
+# Use this file to add your modules, arguments, commands, etc. 
+# This file is used by the file "envena.py " and it will affect 
+# all other files and modules.
+
+# Import libs
 import time
 import os
+from random import randint
 import inspect
 import platform
-from typing import Dict, Union
-from banner import envenena_art
+from typing import Dict
+
+# Import o
+from banner import envena_art 
 from help import help_info
-from oui import manufactures
-from config import *
-# Importing all modules:
+from config import Clear, Error, Success, Error_text,\
+    main_exit, scapy, envena_version
+
+# Import all modules:
 # ARP #======================================#
-from netutils.arp.request import *
-from netutils.arp.response import *
-# READY-MADE toolsS #========================#
-from netutils.tools.arpscan import *
-from netutils.tools.dns_getHostname import *
-from netutils.tools.detect_arpspoof import *
-from netutils.tools.dhcp_starve import *
-from netutils.tools.camoverflow import *
+from ethernet.arp.request import send_arp_request
+from ethernet.arp.response import send_arp_response
+# READY-MADE TOOLS #=========================#
+from ethernet.tools.arpscan import arpscan
+from ethernet.tools.dns_getHostname import dns_getHostname
+from ethernet.tools.detect_arpspoof import detect_arpspoof
+from ethernet.tools.dhcp_starve import dhcp_starve
+from ethernet.tools.camoverflow import cam_overflow
 # RAW PACKET SENDER #========================#
-from netutils.tools.raw_packet import *
-#IP FORWARDING #============================#
-from netutils.tools.ip_forward import *
+from ethernet.tools.raw_packet import send_raw_packet
+#IP FORWARDING #=============================#
+from ethernet.tools.ip_forward import ip_forward # this shit does not working for now
 # DHCP #=====================================#
-from netutils.dhcp.discover import *
-from netutils.dhcp.ack import *
-from netutils.dhcp.offer import *
-from netutils.dhcp.request import *
-from netutils.dhcp.nak import *
-from netutils.dhcp.release import *
-from netutils.dhcp.inform import *
+from ethernet.dhcp.discover import send_dhcp_discover
+from ethernet.dhcp.ack import send_dhcp_ack
+from ethernet.dhcp.offer import send_dhcp_offer
+from ethernet.dhcp.request import send_dhcp_request
+from ethernet.dhcp.nak import send_dhcp_nak
+from ethernet.dhcp.release import send_dhcp_release
+from ethernet.dhcp.inform import send_dhcp_inform
 # DATABASE #=================================#
-from oui import *
+# import sqlite3
+# database/oui.db
+# FUNCTIONS #================================#
+from functions import rand_ip, rand_eth, get_manufacture, get_sub_ip, get_ip_broadcast
 
-
-
-# Importing all modules:
-# ARP #======================================#
-from netutils.arp.request import *
-from netutils.arp.response import *
-# READY-MADE toolsS #========================#
-from netutils.tools.arpscan import *
-from netutils.tools.dns_getHostname import *
-from netutils.tools.detect_arpspoof import *
-from netutils.tools.dhcp_starve import *
-from netutils.tools.camoverflow import *
-# RAW PACKET SENDER #========================#
-from netutils.tools.raw_packet import *
-#IP FORWARDING #============================#
-from netutils.tools.ip_forward import *
-# DHCP #=====================================#
-from netutils.dhcp.discover import *
-from netutils.dhcp.ack import *
-from netutils.dhcp.offer import *
-from netutils.dhcp.request import *
-from netutils.dhcp.nak import *
-from netutils.dhcp.release import *
-from netutils.dhcp.inform import *
-# DATABASE #=================================#
-from oui import *
-
-
-
-
+# Contains the packet headers. When sending a packet, 
+# it is checked for its presence in this dictionary.
 packet_handlers = {
     'arp.response': send_arp_response,
     'arp.request': send_arp_request,
@@ -86,7 +69,7 @@ commands = {
     "list": lambda: list_dict(args),
     "clear": lambda: os.system('cls' if platform.system == 'Windows' else 'clear'),
     "list clear": lambda: list_clear(),
-    "maninfo": lambda: print_manufacture(args['input']),
+    "minfo": lambda: get_manufacture(args['input'], printed=True),
     "arp.request": lambda: send_packet(type='arp.request', args=args),
     "arp.response": lambda: send_packet(type='arp.response', args=args),
     "dhcp.discover": lambda: send_packet(type='dhcp.discover', args=args), 
@@ -107,28 +90,12 @@ commands = {
     # ...
 }
 
-
-# Dict that consists of words that will be reserved for constants or functions.
-# They can be used by entering their names in the shell or by passing them as a
-# value to the function input. 
-tech_words = {
-    "None": lambda: None,
-    "my_ip": lambda: scapy.get_if_addr(args['iface']),
-    "my_mac": lambda: scapy.get_if_hwaddr(args['iface']),
-    "broadcast": lambda: "ff:ff:ff:ff:ff:ff",
-    "ip_broadcast": lambda: "255.255.255.255",
-    "rand_mac": lambda: rand_mac(),
-    "rand_ip": lambda: rand_ip(),
-    "rand_xid": lambda: randint(1000000, 9999999),
-    # ...
-
-}
-
+# All arguments
 args = {
     'ip_dst': None,
     'ip_src': None,
-    'mac_dst': None,
-    'mac_src': None,
+    'eth_dst': None,
+    'eth_src': None,
     'port_dst': None,
     'port_src': None,
     'count': 1,
@@ -136,10 +103,41 @@ args = {
     'iface': scapy.conf.iface,
     'input': None,
     'sub_mask': "255.255.255.0",
+    'sub_ip': None,
     'xid': None,
     'dns_server': '8.8.8.8',
     # ...
 }
+# Calculate the subnet address based on own IP
+args['sub_ip'] = get_sub_ip(mask=args['sub_mask'], host_ip=scapy.get_if_addr(args['iface']))
+
+# Dict that consists of words that will be reserved for constants or functions.
+# They can be used by entering their names in the shell or by passing them as a
+# value to the function input. 
+tech_words = {
+    "None": lambda: None,
+    "my_ip": lambda: scapy.get_if_addr(args['iface']),
+    "my_eth": lambda: scapy.get_if_hwaddr(args['iface']),
+    "eth_bcast": lambda: "ff:ff:ff:ff:ff:ff",
+    "ip_bcast": lambda: get_ip_broadcast(host_ip=scapy.get_if_addr(args['iface']), mask=args['sub_mask']),
+    "rand_eth": lambda: rand_eth(args['input']),
+    "rand_ip": lambda: rand_ip(args['input']),
+    "rand_xid": lambda: randint(0, 0xFFFFFFFF),
+    "rand_port": lambda: randint(1, 65535),
+    "eth_noaddr": lambda: '00:00:00:00:00:00',
+    "ip_noaddr": lambda: '0.0.0.0'
+    # ...
+    
+}
+
+# Lists with dictionary arguments that specify the format of the variable value (integer, IP or MAC address, etc.)
+args_int_list = 'timeout', 'count', 'xid', 'port_src', 'port_dst'
+args_ip_list = 'ip_src', 'ip_dst', 'dns_server', 'sub_mask', 'sub_ip'
+args_eth_list = 'eth_src', 'eth_dst'
+
+# List that consists all users interfaces names
+ifaces_list = scapy.get_if_list()
+
 
 
 # FUNTIONS SECTION #============================================#
@@ -147,103 +145,62 @@ args = {
 def get_my_info()->None:
     print(
         "*-={USER INFO}=-*\n"
-        f"Founded interfaces......: {', '.join(scapy.get_if_list())}\n"
+        f"Founded interfaces......: {', '.join(ifaces_list)}\n"
         f"Interface as default....: {scapy.conf.iface}\n"
-        f"Own MAC-address.........: {scapy.get_if_hwaddr(args['iface'] if args['iface'] in scapy.get_if_list() else scapy.conf.iface)}\n"
+        f"Own eth-address.........: {scapy.get_if_hwaddr(args['iface'] if args['iface'] in scapy.get_if_list() else scapy.conf.iface)}\n"
         f"Own IP-address..........: {scapy.get_if_addr(args['iface'] if args['iface'] in scapy.get_if_list() else scapy.conf.iface)}\n"
         f"Envena version..........: {envena_version}\n"
         f"Program running as root.: {True if os.getuid() == 0 else False}"
         )
-
-# [Base] Print manufacturer's company
-def print_manufacture(mac: str=None)->bool:
-    if mac.lower() in manufactures:
-        print(f'Manufacture of "{mac}" is {manufactures[mac.lower()]}')
-        return True
-    else:
-        print(f'Failed to find manufacturer of "{mac}" from database.')
-        return False
-
-# [Base] Animated-print art
+    
+# Animated-print art
 def print_art()->None:
-    for line in envenena_art:
+    for line in envena_art:
         print(line)
         time.sleep(0.02)
 
-# [Tech-word] Returned random MAC-address by mask or not
-def rand_mac()->str:
-    global args
-    mask=args['input']
-    if not mask or (mask.count(':') != 5 and len(mask) != 17):
-        if mask: print(f'{Error}Error:{Clear} {Error_text}There is not MAC-address mask in \'input\' arg.{Clear}')
-        mask = 'xx:xx:xx:xx:xx:xx'
-    mask = mask.split(':')
-    for i, _ in enumerate(mask, start=0):
-        if _ != 'xx': continue
-        octet = str(hex(randint(0, 255)))
-        if len(octet) < 4:
-            mask[i] = '0' + octet[2]
-        else:
-            mask[i] = octet[2] + octet[3]
-    return f"{mask[0]}:{mask[1]}:{mask[2]}:{mask[3]}:{mask[4]}:{mask[5]}"
-
-
-# [Tech-word] Returned random IP-address by mask or not
-def rand_ip()->str:
-    global args
-    mask=args['input']
-    if not mask or (mask.count('.') != 3 or (len(mask) < 7 or len(mask) > 15)):
-        if mask: print(f'{Error}Error:{Clear} {Error_text}There is not IP-address mask in \'input\' arg.{Clear}')
-        mask = 'x.x.x.x'
-    mask = mask.split('.')
-    for i, _ in enumerate(mask, start=0):
-        if _ != 'x': continue
-        mask[i] = str(randint(0, 255))
-    return f"{mask[0]}.{mask[1]}.{mask[2]}.{mask[3]}"
-    
-# [Tech-word] Return shuffled list of all XID's that can be
-def ex_search_xid()->list:
-    xid = []
-    for _ in range(1000000, 9999999):
-        xid.append(_)
-    random.shuffle(xid)
-    return xid
-    
-# [Base] Send packeges according to count, timeout, type of package and e.t.c.
+# Send packeges according to count, timeout, type of package and e.t.c.
 def send_packet(type: str, args: Dict)->bool:
     global packet_handlers
-    timer = 1
+    dot_timer = 0 # For animated '...' output
+    word_timer = 0 # For animated 'Sending' output
+    word_sending = 'sending' # Word that will be animated while sending...
     sent_packets = 0
-    count = int(args['count'])
-    timeout = int(args['timeout'])
+    count = args['count']
+    timeout = args['timeout']
     handler = packet_handlers.get(type)
     if not handler:
         print(f'{Error}Error:{Clear} {Error_text}unknown packet type: {type}{Clear}')
         return False
 
     handler_params = inspect.signature(handler).parameters
-
+    
     filtered_args = {k: v for k, v in args.items() if k in handler_params}
-
-    for _ in range(count, 0, -1) or count < 0:
-        print('Sending' + '.' * timer, end='\r')
-        if handler(**filtered_args, printed=(_ == int(args['count']))):
+    current = count if count > 0 else float('inf') # If count < 0 then the cycle 
+    first = True # Flag that indicating the first run through the cycle
+    while current:
+        print(word_sending[:word_timer] + word_sending[word_timer].upper() + word_sending[word_timer+1:] + '.' * dot_timer, end='\r')
+        if handler(**filtered_args, printed=first): # Send package
             sent_packets += 1
-        if _ != 1: time.sleep(timeout)
-        timer += 1
-        if timer > 3:
-            timer = 1
-            print('Sending   ', end='\r\r')
-    print(f"{Success}{sent_packets} packet(s) sent.{Clear}")
+        if not first:
+            time.sleep(timeout)
+        dot_timer += 1
+        dot_timer %= 4 # Cycle the timer from 0 to 3
+        word_timer += 1
+        word_timer %= 7
+        current -= 1
+        first = False
+        print(word_sending[:word_timer] + word_sending[word_timer].upper() + word_sending[word_timer+1:]+' '*3, end='\r\r')
+    print(f"\n\r{Success}{sent_packets} packet(s) sent.{Clear}")
     return True
 
-# [Command] Stuffing dict by 'None' value
+# Stuffing dict by 'None' value
 def list_clear()->None:
     global args
     for _ in args:
         args[_] = None
 
-# [Command] Print dict as pretty-good table :)
+# Print dict as pretty-good table :)
 def list_dict(args: dict, title: str="*-={ARGS LIST}=-*")->None:
     max_size = 0
     for arg in args:
@@ -253,16 +210,9 @@ def list_dict(args: dict, title: str="*-={ARGS LIST}=-*")->None:
     for arg in args:
         print(f'{arg}{'.'*(max_size-len(arg))}: {args[arg]}')
         
-# [Base] Input with arrow's history
-def history_input(prompt: str="<-= ")->str:
+# Input with arrow's history
+def history_input(prompt: str='')->str:
     while True:
         line = input(prompt)
         if line:
-            # print('\033[F', end='')
             return line
-
-
-def main_exit()->None:
-    print(bye_word)
-    exit()
-

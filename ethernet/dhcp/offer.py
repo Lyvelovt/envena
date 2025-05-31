@@ -1,15 +1,15 @@
-import scapy.all as scapy
-from scapy.all import Ether, IP, UDP, BOOTP, DHCP
-
-import sys, os
+import sys
+import os
 sys.path.append(os.path.join('..','..'))
-from config import *
+from config import scapy, Error_text, Fatal_Error, Clear
+from scapy.all import Ether, IP, UDP, BOOTP, DHCP
+from functions import validate_args
 
 import random
 
-def send_dhcp_offer(ip_dst: str, ip_src: str, mac_dst: str, xid: int, lease_time: int=3600, sub_mask: str="255.255.255.0",
+def send_dhcp_offer(ip_dst: str, ip_src: str, eth_dst: str, xid: int, lease_time: int=3600, sub_mask: str="255.255.255.0",
                     dns_server: str="8.8.8.8", iface: str=None,
-                    mac_src: str=None, port_src: int=67, port_dst: int=68, printed: bool=True)->bool:
+                    eth_src: str=None, port_src: int=67, port_dst: int=68, printed: bool=True)->bool:
 
     port_src=67 if not port_src else port_src
     port_dst=68 if not port_dst else port_dst    
@@ -23,20 +23,21 @@ def send_dhcp_offer(ip_dst: str, ip_src: str, mac_dst: str, xid: int, lease_time
         xid = random.randint(1000000, 9999999)
     elif isinstance(xid, str):
         xid = int(xid)
-    elif xid == 'rand_xid':
+    elif xid == 'ex_search_xid':
         xid = []
         for _ in range(1000000, 9999999):
             xid.append(_)
         random.shuffle(xid)
     
-    if not validate_args(ip_dst=ip_dst, ip_src=ip_src, mac_dst=mac_dst, xid=xid, lease_time=lease_time, sub_mask=sub_mask,
+    if not validate_args(ip_dst=ip_dst, ip_src=ip_src, eth_dst=eth_dst, xid=xid, lease_time=lease_time, sub_mask=sub_mask,
                     dns_server=dns_server, iface=iface,
-                    mac_src=mac_src, port_src=port_src, port_dst=port_dst): return False
+                    eth_src=eth_src, port_src=port_src, port_dst=port_dst):
+        return False
 
-    ether = Ether(dst=mac_dst, src=mac_src)
+    ether = Ether(dst=eth_dst, src=eth_src)
     ip = IP(src=ip_src, dst=ip_dst)
     udp = UDP(sport=port_src, dport=port_dst)
-    bootp = BOOTP(op=2, yiaddr=ip_dst, chaddr=mac_dst.encode(), xid=xid)
+    bootp = BOOTP(op=2, yiaddr=ip_dst, chaddr=eth_dst.encode(), xid=xid)
     dhcp_options = [
         ("message-type", 2),  # DHCP Offer
         ("server_id", ip_src),
@@ -54,7 +55,7 @@ def send_dhcp_offer(ip_dst: str, ip_src: str, mac_dst: str, xid: int, lease_time
         scapy.sendp(packet, iface=iface, verbose=False)
         if printed:
             print(
-                f"[{iface}] DHCP offer: {ip_src} -> {mac_dst}: {ip_dst} is free. {mac_dst} can get it")
+                f"[{iface}] DHCP offer: {ip_src} -> {eth_dst}: {ip_dst} is free. {eth_dst} can get it")
             scapy.hexdump(packet)
 
         return True

@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.pyo
+
+.DS_Store
+
+.idea/
+.vscode/
+
+*.log
+*.pcap
+
+*.swp
+*.bak
+*.tmp
+

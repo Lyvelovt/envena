@@ -1,21 +1,28 @@
-from config import *
+from config import envena_version
 help_info = f"""
 Envena v{envena_version}.
 
 ### AVAILABLE COMMANDS ###
-arp.request         -    send ARP-request.
-arp.response        -    send ARP-reply.
-dhcp.discover       -    send DHCP-discover.
-dhcp.offer          -    send DHCP-offer.
-dhcp.request        -    send DHCP-request.
-dhcp.ack            -    send DHCP-ack.
-dhcp.nak            -    send DHCP-nak.
-dhcp.release        -    send DHCP-release.
-dhcp.info           -    send DHCP-info.
 list                -    show all value of args.
 exit                -    exit from envena shell.
 help                -    show this text.
 ?                   -    the same as 'help'.
+uinfo               -    show user information.
+minfo               -    get manufacturer by MAC-address OUI. 'input' = target MAC.
+rand_eth            -    get random MAC-address by mask or not. 'input' = mask, where
+                         '00' - random byte. Example: 'a1:00:3c:00:e5:00' => 2-nd, 4-th and 6-th
+                         octets will be randomized.
+rand_ip             -    get random IP-address by mask or not. 'input' = mask, where
+                         '0' - random number. Example: '192.0.1.0' => 2-nd and 4-th numbers
+                         will be randomized.
+rand_xid            -    get random XID for DHCP protocol.
+my_eth              -    get MAC-address from your iface.
+my_ip               -    get IP-address from your iface.
+eth_bcast           -    same as 'ff:ff:ff:ff:ff:ff'.
+ip_bcats            -    broadcats address in your subnet. Example: '255.255.255.0'.
+clear               -    clear the terminal.
+list clear          -    equating all args to 'None'.
+
 
 ### READY-MADE TOOLS ###
 tools.raw_packet          -    reads raw packet from file and sends it.
@@ -38,8 +45,8 @@ ip_dst        -    destination-IP address.
 ip_src        -    source IP-address, by default - your IP address.
 port_dst      -    destination port.
 port_src      -    source port.
-mac_dst       -    destination MAC-address.
-mac_src       -    source MAC-address, by default - your MAC-address.
+eth_dst       -    destination MAC-address.
+eth_src       -    source MAC-address, by default - your MAC-address.
 count         -    count of packets to send.
 timeout       -    timeout between sending packets in seconds.
 iface         -    network interface.
@@ -49,30 +56,20 @@ xid           -    XID for DHCP packets.
 dns_server    -    DNS server for getting IP-address from domen.
                       Default = 8.8.8.8 (Google Public DNS).
 
-
-### INFORMATION ###
-1. By default all args is 'None'. 'None' source arg contains your default information.
-That is, if 'ip_src=None' (this applies to the rest of the arguments,
-not just ip_src), then the packet will be sent under your IP-address.
-2. You can leave the value of the arg empty, in this case it will 
-take the value zero. That is, if 'ip.src=', then the sender's address in 
-the packet will be specified as 0x00.0x00.0x00.0x00, in other words, 'no address'.
-
-
 ### MODULES INFO ###
 --- ARP ---
 
 arp.request:
     ip_dst      -       the IP address of the device whose MAC address is being requested.
     ip_src      -       source IP address.
-    mac_dst     -       destination MAC address (default: broadcast).
-    mac_src     -       source MAC-address.
+    eth_dst     -       destination MAC address (default: broadcast).
+    eth_src     -       source MAC-address.
 
 arp.response:
     ip_dst      -       destination IP address (default: ip_broadcast).
     ip_src      -       source IP address, who is telling his MAC address.
-    mac_dst     -       destination MAC address (default: broadcast).
-    mac_src     -       source MAC-address, that will be telling.
+    eth_dst     -       destination MAC address (default: broadcast).
+    eth_src     -       source MAC-address, that will be telling.
 
 --- DHCP ---
 
@@ -80,30 +77,30 @@ dhcp.discover:
     xid         -       transaction ID (randomly generated if None).
     port_src    -       source UDP port (default: 68).
     port_dst    -       destination port (default: 67).
-    mac_src     -       source MAC address.
+    eth_src     -       source MAC address.
     iface       -       network interface (optional).
 
 dhcp.ack:
     ip_dst      -       IP address to assign to the client.
     ip_src      -       DHCP server IP address.
-    mac_dst     -       client's MAC address.
+    eth_dst     -       client's MAC address.
     xid         -       transaction ID (random if None).
     sub_mask    -       subnet mask (default: "255.255.255.0").
     dns_server  -       DNS server IP (default: "8.8.8.8").
     iface       -       network interface to use (optional).
-    mac_src     -       server MAC address (optional).
+    eth_src     -       server MAC address (optional).
     port_src    -       source UDP port (default: 67).
     port_dst    -       destination UDP port (default: 68).
 
 dhcp.offer:
     ip_dst      -       offered IP address.
     ip_src      -       DHCP server IP.
-    mac_dst     -       client's MAC address.
+    eth_dst     -       client's MAC address.
     xid         -       transaction ID (random if None).
     sub_mask    -       subnet mask (default: "255.255.255.0").
     dns_server  -       DNS server IP (default: "8.8.8.8").
     iface       -       network interface (optional).
-    mac_src     -       server MAC address (optional).
+    eth_src     -       server MAC address (optional).
     port_src    -       source UDP port (default: 67).
     port_dst    -       destination UDP port (default: 68).
 
@@ -112,7 +109,7 @@ dhcp.release:
     ip_dst      -       DHCP server IP.
     xid         -       transaction ID (random if None or 'rand_xid').
     iface       -       network interface (optional).
-    mac_src     -       client's MAC address (required).
+    eth_src     -       client's MAC address (required).
     port_src    -       source UDP port (default: 68).
     port_dst    -       destination UDP port (default: 67).
 
@@ -121,7 +118,7 @@ dhcp.request:
     ip_dst      -       DHCP server IP.
     xid         -       transaction ID (random if None).
     iface       -       network interface (optional).
-    mac_src     -       client's MAC address (required).
+    eth_src     -       client's MAC address (required).
     port_src    -       source UDP port (default: 68).
     port_dst    -       destination UDP port (default: 67).
 
@@ -130,7 +127,7 @@ dhcp.inform:
     ip_dst      -       DHCP server IP.
     xid         -       transaction ID (random if None).
     iface       -       network interface (optional).
-    mac_src     -       client's MAC address.
+    eth_src     -       client's MAC address.
     port_src    -       source UDP port (default: 68).
     port_dst    -       destination UDP port (default: 67).
 
@@ -138,14 +135,14 @@ dhcp.inform:
 
 arpscan:
     input       -       IP range to scan (format: "192.168.1.1" or "192.168.1.1-100").
-    mac_src     -       source MAC address for ARP packets.
+    eth_src     -       source MAC address for ARP packets.
     ip_src      -       source IP address for ARP packets.
     iface       -       network interface to use.
 
 cam_overflow:
     iface       -       network interface to use.
     input       -       payload content (default: 64 'X' characters).
-    mac_dst     -       target MAC address (optional).
+    eth_dst     -       target MAC address (optional).
     timeout     -       packets per second rate (default: 500).
 
 dhcp_starve:
@@ -160,9 +157,9 @@ send_raw_packet:
 
 ip_forward:
     ip_dst      -       destination IP address.
-    mac_dst     -       destination MAC address.
+    eth_dst     -       destination MAC address.
     ip_src      -       source IP address (router).
-    mac_src     -       source MAC address (router).
+    eth_src     -       source MAC address (router).
     iface       -       network interface to use.
 """
 

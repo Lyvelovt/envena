@@ -1,12 +1,12 @@
-import scapy.all as scapy
-from scapy.all import ARP
-from scapy.all import PcapWriter, sniff
 from datetime import datetime
-
-import sys, os
+import sys
+import os
 sys.path.append(os.path.join('..','..'))
-from config import *
-
+from config import scapy, Fatal_Error, Clear, Success, scapy
+from scapy import ARP
+from scapy import PcapWriter, sniff
+from functions import validate_args
+detect_arpspoof_v = 1.0
 
 arp_table = {}
 arp_table[scapy.get_if_addr(scapy.conf.iface)] = scapy.get_if_hwaddr(scapy.conf.iface)
@@ -29,7 +29,7 @@ def detect_arpspoof_in_package(packet, iface: str=scapy.conf.iface)->None:
 
 def detect_arpspoof(args: dict)->None:
     if not validate_args(iface=args['iface']): return False
-    print('ARP-spoof detecter, version: 1.0')
+    print(f'ARP-spoof detecter, version: {detect_arpspoof_v}')
     print('*Sniffing started. Ctrl+C to stop')
     now = datetime.now()
     
@@ -48,7 +48,7 @@ def detect_arpspoof(args: dict)->None:
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser(description="ARP-spoofing atack detect module.")
+    parser = argparse.ArgumentParser(description=f"ARP-spoofing atack detect module. Version: {detect_arpspoof_v}")
     parser.add_argument("-i", "--iface", help="Network iface to sniff from.", required=False)
 
     arg = parser.parse_args()

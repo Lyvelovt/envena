@@ -1,39 +1,24 @@
-import random
-import scapy.all as scapy
-import socket
 import time
-import sys, os
+import sys
+import os
 sys.path.append(os.path.join('..','..'))
-from config import *
-from oui import *
-
-def get_manufacturer(mac: str)->str:
-    if not mac:
-        return "Unknown"
-    oui = mac.lower().split(":")[:3]  # Берем первые 3 байта
-    oui_str = ":".join(oui)
-    if oui_str in manufactures:
-        return manufactures[oui_str]
-    else: return "Unknown"
-
-def get_hostname(ip: str)->str:
-    try:
-        return socket.gethostbyaddr(ip)[0]
-    except socket.herror:
-        return None
+from config import scapy, Error, Error_text, Clear
+from functions import get_hostname, get_manufacture, validate_args, validate_ip
+from random import shuffle
+arpscan_v = 2.1
 
 def print_aligned_table(devices: list)->None:
     if not devices:
         return
     
     max_ip = max(max(len(d["ip"]) for d in devices), len("IP"))
-    max_mac = max(max(len(d["mac"]) for d in devices), len("MAC"))
+    max_eth = max(max(len(d["eth"]) for d in devices), len("MAC"))
     max_host = max(max(len(str(d["hostname"])) for d in devices), len("HOSTNAME"))
-    max_manuf = max(max(len(str(get_manufacturer(d["mac"]))) for d in devices), len("MANUFACTURER"))
+    max_manuf = max(max(len(str(get_manufacture(d["eth"], printed=False))) for d in devices), len("MANUFACTURER"))
     
     headers = [
         f"{'IP':<{max_ip}}",
-        f"{'MAC':<{max_mac}}",
+        f"{'MAC':<{max_eth}}",
         f"{'HOSTNAME':<{max_host}}",
         f"{'MANUFACTURER':<{max_manuf}}"
     ]
@@ -41,7 +26,7 @@ def print_aligned_table(devices: list)->None:
     
     sep = "  ".join([
         "-" * max_ip,
-        "-" * max_mac,
+        "-" * max_eth,
         "-" * max_host,
         "-" * max_manuf
     ])
@@ -49,24 +34,24 @@ def print_aligned_table(devices: list)->None:
     
     for device in devices:
         hostname = device.get("hostname", "-")
-        manufacturer = get_manufacturer(device["mac"]) or "-"
+        manufacturer = get_manufacture(eth=device["eth"], printed=False) or "-"
         
         row = [
             f"{device['ip']:<{max_ip}}",
-            f"{device['mac']:<{max_mac}}",
+            f"{device['eth']:<{max_eth}}",
             f"{hostname:<{max_host}}",
             f"{manufacturer:<{max_manuf}}"
         ]
         print("  ".join(row))
 
-def scan_network(ip_range: str, ip_src: str=None, mac_src: str=None, iface: str=scapy.conf.iface, timeout: int=4)->list:
+def scan_network(ip_range: str, ip_src: str=None, eth_src: str=None, iface: str=scapy.conf.iface, timeout: int=4)->list:
     devices = []
     answered = []
     
     # Filter out our own IP
     self_ip = ip_src if ip_src else scapy.get_if_addr(iface)
     target_ips = [ip for ip in ip_range if ip != self_ip]
-    random.shuffle(target_ips)
+    shuffle(target_ips)
     
     # ARP sniff callback
     def arp_callback(pkt):
@@ -79,23 +64,23 @@ def scan_network(ip_range: str, ip_src: str=None, mac_src: str=None, iface: str=
     sniffer.start()
     
     # Send all ARP requests at once
-    arp_request = scapy.ARP(pdst=target_ips, psrc=ip_src or scapy.get_if_addr(iface), hwsrc=mac_src)
+    arp_request = scapy.ARP(pdst=target_ips, psrc=ip_src or scapy.get_if_addr(iface), hwsrc=eth_src)
     broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
     scapy.sendp(broadcast/arp_request, verbose=False)
     
     # Wait for responses
-    print(f'Scanning(0...{len(target_ips)})... \r', end='')
+    print(f'Scanning(1..{len(target_ips)})... \r', end='')
     time.sleep(timeout)
     sniffer.stop()
     
     # Process responses
     for pkt in answered:
         ip = pkt[scapy.ARP].psrc
-        mac = pkt[scapy.ARP].hwsrc
+        eth = pkt[scapy.ARP].hwsrc
         hostname = get_hostname(ip)
         devices.append({
             "ip": ip,
-            "mac": mac,
+            "eth": eth,
             "hostname": hostname
         })
     
@@ -105,7 +90,34 @@ def scan_network(ip_range: str, ip_src: str=None, mac_src: str=None, iface: str=
     return devices
 
 def arpscan(args: dict)->None:
-    if not validate_args(ip_src=args['ip_src'], mac_src=args['mac_src'], iface=args['iface'], timeout=args['timeout']): return False
+    if not validate_args(
+        input=args['input'], ip_src=args['ip_src'],
+        eth_src=args['eth_src'], iface=args['iface'],
+        timeout=args['timeout']):
+        return False
+    
+    # invalid_ip is a flag to validate IP
+    invalid_ip = False
+    if not validate_ip(ip=args['input']):
+        if not '-' in args['input']:
+            invalid_ip = True
+        elif validate_ip(ip=args['input'].split('-')[0]):
+            
+            for char in args['input'].split('-')[1]:
+                    if not char in '0123456789':
+                        invalid_ip = True
+                        break
+            if args['input'].split('-')[1] == '':
+                invalid_ip = True
+            if not invalid_ip:
+                if int(args['input'].split('-')[1]) > 255:
+                    invalid_ip = True
+        else:
+            invalid_ip = True
+
+    if invalid_ip:
+        print(f"{Error}Error: {Error_text}arg \"input\" is invalid! Must be IP (or IP range) in arg \"input\".{Clear}")
+        return False
     start_time = time.time()
     if '-' in args['input']:
         ip = args['input'].split('-')
@@ -117,9 +129,9 @@ def arpscan(args: dict)->None:
         ip_range = [f"{ip[0] + '.' + ip[1] + '.' + ip[2]}." + str(i) for i in
                     range(int(ip[3]), 1 + int(ip[3]))]
     
-    print("ARP-Scanner, version: 1.0")
+    print(f"ARP-Scanner, version: {arpscan_v}")
     print('*Scanning started')
-    devices_info = scan_network(ip_range=ip_range, mac_src=args['mac_src'], ip_src=args['ip_src'], iface=args['iface'], timeout=int(args['timeout']))
+    devices_info = scan_network(ip_range=ip_range, eth_src=args['eth_src'], ip_src=args['ip_src'], iface=args['iface'], timeout=int(args['timeout']))
     
     if devices_info:
         print(f'Scan finished in {round(time.time() - start_time, 3)} s.')
@@ -135,7 +147,7 @@ if __name__ == "__main__":
         
         import argparse
 
-        desc = '''ARP-Scanner is a Local Area Network scanner that using ARP. Version: 2.1
+        desc = f'''ARP-Scanner is a Local Area Network scanner use ARP protocol. Version: {arpscan_v}
         
         base using:
           python3 arpscan.py -ip <192.168.1.10-20>  # will scan from 192.168.1.10 to 192.168.1.20
@@ -149,7 +161,7 @@ if __name__ == "__main__":
         arg = parser.parse_args()
         arg.timeout = 3 if not arg.timeout else arg.timeout
 
-        args = {'input': arg.ip, 'timeout': arg.timeout, 'mac_src': scapy.get_if_hwaddr(scapy.conf.iface), 'ip_src': scapy.get_if_addr(scapy.conf.iface), 'iface': scapy.conf.iface}
+        args = {'input': arg.ip, 'timeout': arg.timeout, 'eth_src': scapy.get_if_hwaddr(scapy.conf.iface), 'ip_src': scapy.get_if_addr(scapy.conf.iface), 'iface': scapy.conf.iface}
         arpscan(args)
     except(KeyboardInterrupt):
         print('Successfully aborted.')

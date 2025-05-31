@@ -1,7 +1,7 @@
 # This file contains a banner that will be visible in the terminal when
 # launching the envena command shell.
 from config import *
-envenena_art = [
+envena_art = [
     f'      {w}..?{n}5{w}??.?5??...                  ',
     f'  {g}c{w}??.?{n}5{w}???5{n}5{w}???5{n}@{w}5??5..c                ',
     f'  {w}5..?555??{n}55{w}5??{n}5@{w}555{n}@{w}5???c              ',
