@@ -1,7 +1,7 @@
 import os
 # Word that always print with exit
 bye_word = 'Bye-bye! Quiting...'
-envena_version = 1.8
+envena_version = 1.9
 def main_exit()->None:
     print(bye_word)
     exit()

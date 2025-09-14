@@ -360,6 +360,11 @@ def run_live(iface, timeout=None):
         print(f"\nAborted.")
 
 def dot11scan(args: dict) -> bool:
+    if not validate_args(
+        input=args['input'], iface=args['iface'],
+        timeout=args['timeout']):
+        return False
+    
     os.system('cls' if platform.system() == 'Windows' else 'clear')
     print(f"Dot11scan, version: {dot11scan_v}")
 

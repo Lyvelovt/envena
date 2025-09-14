@@ -9,13 +9,15 @@ import argparse
 import os
 import sys
 import time
-from src.envena.config import Error, Error_text, Success, Clear, Purple
+import re
+from src.envena.functions import validate_args
+from src.envena.config import Error, Error_text, Success, Clear, Purple, Light_blue
 
 console = Console()
 dot11trilateration_v = 2.1
 
 def latlon_to_xy(lat: float, lon: float, lat0: float, lon0: float) -> Tuple[float,float]:
-    k = 111320.0  # метров на градус широты (приближённо)
+    k = 111320.0
     x = (lon - lon0) * math.cos(math.radians(lat0)) * k
     y = (lat - lat0) * k
     return x, y
@@ -35,12 +37,12 @@ def extract_mac_info_from_pkts(pkts) -> Dict[str, Dict]:
         rssi = None
         if pkt.haslayer(RadioTap):
             try:
-                # может подняться AttributeError/KeyError
+                # Maybe AttributeError/KeyError
                 val = pkt[RadioTap].dBm_AntSignal
                 if val is not None:
                     rssi = float(val)
             except Exception:
-                # не удалось взять RSSI
+                # Falied to get RSSI
                 rssi = None
 
         for addr in (pkt[Dot11].addr1, pkt[Dot11].addr2, pkt[Dot11].addr3):
@@ -63,7 +65,6 @@ def extract_mac_info(pcap_path: str) -> Dict[str, Dict]:
     pkts = rdpcap(pcap_path)
     return extract_mac_info_from_pkts(pkts)
 
-# -------------------- Радиомодель и трилатерация --------------------
 
 def rssi_to_distance(rssi: float, A: float = -40.0, n: float = 2.2) -> float:
     return 10 ** ((A - rssi) / (10 * n))
@@ -148,7 +149,6 @@ def print_results_table(results: Dict[str, Dict]):
 
     console.print(table)
 
-# -------------------- Вспомогательные вводы --------------------
 
 def ask_coordinates(prompt="Enter coordinates (lat lon): ") -> Tuple[float,float]:
     while True:
@@ -178,39 +178,28 @@ def live_capture_iface(iface: str, timeout: int = 10) -> List:
         return []
 
 
-def main():
-    parser = argparse.ArgumentParser(description=f"Dot11Trilateration v{dot11trilateration_v}")
-    parser.add_argument("-p", "--pcaps", nargs=3, help="3 .pcap files (static mode)")
-    parser.add_argument("--iface", help="Interface for live mode (will make 3 sniffs one by one)")
-    parser.add_argument("--timeout", type=int, default=10, help="Duration of sniffing for live mode (default 10)")
-    parser.add_argument("--A", type=float, default=-40.0, help="Parameter 'A' (RSSI at 1m) for model")
-    parser.add_argument("--n", type=float, default=2.2, help="Parameter 'n' (path-loss exponent)")
-    args = parser.parse_args()
-
-    if args.pcaps and args.iface:
-        print(f"{Error}Error: {Error_text}can not to use --pcaps and --iface together{Clear}")
+def dot11trilateration(args: Dict):
+    if not validate_args(
+        input=args['input'],
+        iface=args['iface'],
+        timeout=args['timeout']):
+        return False
+    
+    pcaps_pattern = r'^(p|pcaps)\[\s*[^,\[\]]+\s*(,\s*[^,\[\]]+\s*)*\s*\]$'
+    if args['input'] != '' and args['input'] != None:
+        ainput = args['input'].split(',')
+        ainput = [i.strip(" \n\t") for i in ainput]
+        # ainput = [pcaps (optional), A, n]
+    if not bool(re.fullmatch(pcaps_pattern, ainput[0])) and not args['iface']:
+        print(f"{Error}Error: {Error_text}use pcaps or iface mode{Clear}")
         sys.exit(1)
-    elif not args.pcaps and not args.iface:
-        print(f"{Error}Error: {Error_text}use --pcaps or --iface mode{Clear}")
-        sys.exit(1) 
-
-    if args.iface:
-        print("Using sniffing mode")
-        iface = args.iface
-        d_list = []
-        positions = []
-        for i in range(1,4):
-            console.print(f"\n[cyan]--- Measuring point {i} ---[/cyan]")
-            pos = ask_coordinates(f"Coordinates for point {i} (lat lon): ")
-            positions.append(pos)
-            input(f"Press Enter when you ready to start capturing on {Purple}{iface}{Clear} (snifiing for {args.timeout}s)...")
-            pkts = live_capture_iface(iface, timeout=args.timeout)
-            d = extract_mac_info_from_pkts(pkts)
-            d_list.append(d)
-        d1, d2, d3 = d_list
-        pos1, pos2, pos3 = positions
-    else:
-        for p in args.pcaps:
+    elif bool(re.fullmatch(pcaps_pattern, ainput[0])):
+        pcaps = [i.strip() for i in re.match.group(2).split(',') if i.strip()]
+    
+    
+    
+    if pcaps:
+        for p in pcaps:
             if not os.path.isfile(p):
                 print(f"{Error}Error: {Error_text}PCAP not found: {p}{Clear}")
                 sys.exit(1)
@@ -220,16 +209,45 @@ def main():
         pos2 = ask_coordinates()
         pos3 = ask_coordinates()
         try:
-            d1 = extract_mac_info(args.pcaps[0])
-            d2 = extract_mac_info(args.pcaps[1])
-            d3 = extract_mac_info(args.pcaps[2])
+            d1 = extract_mac_info(pcaps[0])
+            d2 = extract_mac_info(pcaps[1])
+            d3 = extract_mac_info(pcaps[2])
         except Exception as e:
             print(f"{Error}Error: {Error_text}error reading pcap: {e}{Clear}")
             sys.exit(1)
+    
+    else:
+        print("Using sniffing mode")
+        iface = args['iface']
+        d_list = []
+        positions = []
+        for i in range(1,4):
+            print(f"{Light_blue}--- Measuring point {i} ---{Clear}")
+            pos = ask_coordinates(f"Coordinates for point {i} (lat lon): ")
+            positions.append(pos)
+            input(f"Press Enter when you ready to start capturing on {Purple}{iface}{Clear} (snifiing for {args.timeout}s)...")
+            pkts = live_capture_iface(iface, timeout=args.timeout)
+            d = extract_mac_info_from_pkts(pkts)
+            d_list.append(d)
+        d1, d2, d3 = d_list
+        pos1, pos2, pos3 = positions
         
     # вычисляем
     results = locate_devices_from_dicts(d1, d2, d3, pos1, pos2, pos3, A=args.A, n=args.n)
     print_results_table(results)
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=f"Dot11Trilateration module. Version: {dot11trilateration_v}")
+    parser.add_argument("-p", "--pcaps", nargs=3, help="Three .pcap files (static mode)")
+    parser.add_argument("--iface", help="Interface for live mode (will make 3 sniffs one by one)")
+    parser.add_argument("--timeout", type=int, default=10, help="Duration of sniffing for live mode (default 10)")
+    parser.add_argument("--A", type=float, default=-40.0, help="Parameter 'A' (RSSI at 1m) for model")
+    parser.add_argument("--n", type=float, default=2.2, help="Parameter 'n' (path-loss exponent)")
+    args_parsed = parser.parse_args()
+    print(args_parsed.pcaps)
+    args = {
+        'iface': args_parsed.iface,
+        'timeout': args_parsed.timeout,
+        'input': f"p[{args_parsed.pcaps[0]},{args_parsed.pcaps[1]},{args_parsed.pcaps[2]}],{args_parsed.A},{args_parsed.n}"
+    }
+    dot11trilateration(args)

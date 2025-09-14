@@ -39,11 +39,14 @@ from src.modules.ethernet.dhcp.request import send_dhcp_request
 from src.modules.ethernet.dhcp.nak import send_dhcp_nak
 from src.modules.ethernet.dhcp.release import send_dhcp_release
 from src.modules.ethernet.dhcp.inform import send_dhcp_inform
+# DOT11 #====================================#
+from src.modules.dot11.tools.dot11scan import dot11scan
+from src.modules.dot11.tools.dot11trilateration import dot11trilateration
 # DATABASE #=================================#
 # import sqlite3
 # database/oui.db
 # FUNCTIONS #================================#
-from .functions import rand_ip, rand_eth, get_manufacture, get_sub_ip, get_ip_broadcast
+from .functions import rand_ip, rand_eth, get_manufacturer, get_sub_ip, get_ip_broadcast
 
 # Contains the packet headers. When sending a packet, 
 # it is checked for its presence in this dictionary.
@@ -69,7 +72,7 @@ commands = {
     "list": lambda: list_dict(args),
     "clear": lambda: os.system('cls' if platform.system == 'Windows' else 'clear'),
     "list clear": lambda: list_clear(),
-    "minfo": lambda: get_manufacture(args['input'], printed=True),
+    "minfo": lambda: get_manufacturer(args['input'], printed=True),
     "arp.request": lambda: send_packet(type='arp.request', args=args),
     "arp.response": lambda: send_packet(type='arp.response', args=args),
     "dhcp.discover": lambda: send_packet(type='dhcp.discover', args=args), 
@@ -86,6 +89,8 @@ commands = {
     "tools.raw_packet": lambda: send_packet(type='raw_packet', args=args),
     "tools.dhcp_starve": lambda: dhcp_starve(args=args),
     "tools.cam_overflow": lambda: cam_overflow(args=args),
+    "tools.dot11trl": lambda: dot11trilateration(args=args),
+    "tools.dot11scan": lambda: dot11scan(args=args),
     "uinfo": lambda: get_my_info()
     # ...
 }
