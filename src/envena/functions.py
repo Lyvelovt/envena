@@ -120,7 +120,7 @@ def validate_eth(eth: str = '', is_oui: bool = False) -> bool:
     except (ValueError, AttributeError):
         return False
 
-# Returned random IP-address by mask or not
+# Return random IP-address by mask or not
 def rand_ip(mask: str='0.0.0.0')->str:
     if not mask or not validate_ip(ip=mask):
         print(f'{Info}Info: there is not IP-address mask in "input" argument.{Clear}')
@@ -128,7 +128,7 @@ def rand_ip(mask: str='0.0.0.0')->str:
     mask = mask.split('.')
     return f"{str(randint(0, 255)) if mask[0] == '0' else mask[0]}.{str(randint(0, 255)) if mask[1] == '0' else mask[1]}.{str(randint(0, 255)) if mask[2] == '0' else mask[2]}.{str(randint(0, 255)) if mask[3] == '0' else mask[3]}"
 
-# Returned random eth-address by mask or not
+# Return random eth-address by mask or not
 def rand_eth(mask: str='00:00:00:00:00:00')->str:
     if not mask or not validate_eth(eth=mask, is_oui=False):
         print(f'{Info}Info: there is not MAC-address mask in "input" argument.{Clear}')

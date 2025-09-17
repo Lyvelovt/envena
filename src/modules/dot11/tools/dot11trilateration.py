@@ -13,6 +13,7 @@ import re
 from src.envena.functions import validate_args
 from src.envena.config import Error, Error_text, Success, Clear, Purple, Light_blue
 
+
 console = Console()
 dot11trilateration_v = 2.1
 
@@ -180,22 +181,24 @@ def live_capture_iface(iface: str, timeout: int = 10) -> List:
 
 def dot11trilateration(args: Dict):
     if not validate_args(
-        input=args['input'],
         iface=args['iface'],
         timeout=args['timeout']):
         return False
-    
+    ainput = []
+    pcaps = []
     pcaps_pattern = r'^(p|pcaps)\[\s*[^,\[\]]+\s*(,\s*[^,\[\]]+\s*)*\s*\]$'
     if args['input'] != '' and args['input'] != None:
         ainput = args['input'].split(',')
         ainput = [i.strip(" \n\t") for i in ainput]
         # ainput = [pcaps (optional), A, n]
-    if not bool(re.fullmatch(pcaps_pattern, ainput[0])) and not args['iface']:
-        print(f"{Error}Error: {Error_text}use pcaps or iface mode{Clear}")
-        sys.exit(1)
-    elif bool(re.fullmatch(pcaps_pattern, ainput[0])):
-        pcaps = [i.strip() for i in re.match.group(2).split(',') if i.strip()]
-    
+    try:
+        if not bool(re.fullmatch(pcaps_pattern, ainput[0])) and not args['iface']:
+            print(f"{Error}Error: {Error_text}use pcaps or iface mode{Clear}")
+            sys.exit(1)
+        elif bool(re.fullmatch(pcaps_pattern, ainput[0])):
+            pcaps = [i.strip() for i in re.match.group(2).split(',') if i.strip()]
+    except IndexError:
+        pass
     
     
     if pcaps:
@@ -225,8 +228,8 @@ def dot11trilateration(args: Dict):
             print(f"{Light_blue}--- Measuring point {i} ---{Clear}")
             pos = ask_coordinates(f"Coordinates for point {i} (lat lon): ")
             positions.append(pos)
-            input(f"Press Enter when you ready to start capturing on {Purple}{iface}{Clear} (snifiing for {args.timeout}s)...")
-            pkts = live_capture_iface(iface, timeout=args.timeout)
+            input(f"Press Enter when you ready to start capturing on {Purple}{iface}{Clear} (snifiing for {args['timeout']}s)...")
+            pkts = live_capture_iface(iface, timeout=args['timeout'])
             d = extract_mac_info_from_pkts(pkts)
             d_list.append(d)
         d1, d2, d3 = d_list

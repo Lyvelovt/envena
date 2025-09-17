@@ -1,2 +1,3 @@
 scapy>=2.6.1
 colorama; platform_system == "Windows"
+rich

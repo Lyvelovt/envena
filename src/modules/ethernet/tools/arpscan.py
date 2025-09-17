@@ -106,7 +106,7 @@ def arpscan(args: dict)->None:
             invalid_ip = True
 
     if invalid_ip:
-        print(f"{Error}Error: {Error_text}arg \"input\" is invalid! Must be IP (or IP range) in arg \"input\".{Clear}")
+        print(f'{Error}Error: {Error_text}arg "input" is invalid! Must be IP (or IP range) in arg "input".{Clear}')
         return False
     start_time = time.time()
     if '-' in args['input']:

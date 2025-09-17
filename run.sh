@@ -6,4 +6,4 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-python3 main.py
+python3 envena.py

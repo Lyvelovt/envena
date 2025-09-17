@@ -55,7 +55,7 @@ def dhcp_starve(args: dict)->None:
             # Send packet
             try:
                 scapy.sendp(packet, iface=iface, verbose=0)
-                print(f"Sent DHCP Discover from MAC: {eth_src}")
+                print(f"\r{sent_packets}. Sent DHCP Discover from MAC: {eth_src}", end='')
                 sent_packets += 1
             except Exception as e:
                 print(f"{Fatal_Error}Packet was not sent: {Error_text}{e}{Clear}")
@@ -72,4 +72,4 @@ if __name__ == "__main__":
     
     args = {'iface': arg.iface}
 
-    dhcp_starve(args=args)
+    dhcp_starve(args=argsenvena/src/modules/ethernet/tools/dhcp_starve.py )
