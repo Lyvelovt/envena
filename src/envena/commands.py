@@ -203,6 +203,7 @@ def send_packet(type: str, args: Dict)->bool:
 def list_clear()->None:
     global args
     for _ in args:
+        if _ == 'iface': continue
         args[_] = None
 
 # Print dict as pretty-good table :)
