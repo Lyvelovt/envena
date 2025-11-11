@@ -1,12 +1,16 @@
 # This file contains the functions for the program to work
 
+
 from random import randint
 import random
 import string
 import socket
 from .config import Error, Error_text, Clear, Info, Fatal_Error # For colored output
-import sqlite3 # To use oui.db
-import struct
+
+import ipaddress
+
+import netaddr
+from netaddr.core import AddrFormatError
 
 # Get hostname by DNS protocol (can send DNS request only with your IP, 
 # becase based on socket lib)
@@ -22,56 +26,27 @@ def ex_search_xid(from_begin: bool=True)->any:
         xid = 1000000
     for xid in range(1000000, 9999999):
         yield xid
+        
 
-# Get subnet IP-address by subnet mask and IP
-def get_sub_ip(host_ip: str='0.0.0.0', mask: str='255.255.255.0')->str:
+def get_sub_ip(host_ip: str = '0.0.0.0', mask: str = '255.255.255.0')->str:
     if host_ip == '0.0.0.0':
         return '0.0.0.0'
-    ip_int = struct.unpack('!I', socket.inet_aton(host_ip))[0]
-    mask_int = struct.unpack('!I', socket.inet_aton(mask))[0]
-    network_int = ip_int & mask_int
-    return socket.inet_ntoa(struct.pack('!I', network_int))
+    network_cidr_str = f"{host_ip}/{mask}"
+    network_obj = ipaddress.ip_network(network_cidr_str, strict=False)
+    
+    return str(network_obj.network_address)
 
-def get_ip_broadcast(host_ip: str='0.0.0.0', mask: str='255.255.255.0')->str:
+def get_ip_broadcast(host_ip: str = '0.0.0.0', mask: str = '255.255.255.0')->str:
     if host_ip == '0.0.0.0':
         return '0.0.0.0'
-    ip_int = struct.unpack('!I', socket.inet_aton(host_ip))[0]
-    mask_int = struct.unpack('!I', socket.inet_aton(mask))[0]
-    broadcast_int = ip_int | (~mask_int & 0xFFFFFFFF)
-    return socket.inet_ntoa(struct.pack('!I', broadcast_int))
+    network_cidr_str = f"{host_ip}/{mask}"
+    network_obj = ipaddress.ip_network(network_cidr_str, strict=False)
+    
+    return str(network_obj.broadcast_address)
 
-# Print or get manufacturer's company from oui.db by OUI of MAC address
-def get_manufacturer(eth: str=None, printed: bool=False)-> bool | str: # str if not printed
-    if not validate_args(input=eth):
-        return False, ''
-    if not validate_eth(eth=eth, is_oui=True if len(eth.split(':')) == 3 else False):   
-        if printed:
-            print(f'Invalid eth-address "{eth}".')
-        return False
-    else:
-        eth = eth[:8] if len(eth) == 17 else eth
-        conn = sqlite3.connect("database/oui.db")
-        cursor = conn.cursor()
-        
-        cursor.execute(
-            "SELECT manufacturer FROM oui WHERE mac_prefix = ?",
-            (eth.lower(),)
-        )
-        
-        result = cursor.fetchone()
-        conn.close()
-        if result:
-            if printed:
-                print(f'Manufacture of "{eth}" is {result[0]}')
-                return True
-            else:
-                return result[0]
-        else:
-            if printed:
-                print(f'Failed to find manufacturer of "{eth}" from database.')
-                return False
-            else:
-                return "Unknown"
+# Get manufacturer's company by OUI of EUI address
+def get_vendor(eth: str='')->str:
+    return eth.oui.registration().org
             
 # Check all args are not None
 def validate_args(**kwargs)->None:
@@ -85,39 +60,20 @@ def validate_args(**kwargs)->None:
 # Validate IP-address
 def validate_ip(ip: str = '') -> bool:
     try:
-        octets = ip.split('.')
-        if len(octets) != 4:
-            return False
-        
-        for octet in octets:
-            if not octet.isdigit():
-                return False
-            num = int(octet)
-            if not 0 <= num <= 255:
-                return False
-                
+        ip = ipaddress.ip_address(ip)
         return True
-    except (ValueError, AttributeError):
+    except ValueError:
         return False
 
 # Validate eth-address
 def validate_eth(eth: str = '', is_oui: bool = False) -> bool:
     try:
-        if not isinstance(eth, str):
-            return False
-            
-        hex_chars = set("0123456789abcdefABCDEF")
-        parts = eth.split(':')
-        
         if is_oui:
-            if len(parts) != 3 or any(len(p) != 2 for p in parts):
-                return False
+            eth = netaddr.OUI(eth)
         else:
-            if len(parts) != 6 or any(len(p) != 2 for p in parts):
-                return False
-                
-        return all(c in hex_chars for part in parts for c in part)
-    except (ValueError, AttributeError):
+            eth = netaddr.EUI(eth)
+        return True
+    except AddrFormatError, TypeError, ValueError:
         return False
 
 # Return random IP-address by mask or not

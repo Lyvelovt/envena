@@ -1,9 +1,36 @@
+import logging
+import sys
 import os
+
+ROOT_LOGGER_NAME = 'envena'
+LOG_LEVEL = logging.INFO
+LOG_FORMAT = '[%(name)s] [%(levelname)s] %(message)s'
+
+def setup_root_logger():
+    logger = logging.getLogger(ROOT_LOGGER_NAME)
+    logger.setLevel(LOG_LEVEL)
+
+    if not logger.handlers:
+        
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setLevel(LOG_LEVEL)
+        
+        formatter = logging.Formatter(LOG_FORMAT)
+        handler.setFormatter(formatter)
+        
+        logger.addHandler(handler)
+        
+    return logger
+
+ROOT_LOGGER = setup_root_logger()
+
 # Word that always print with exit
-bye_word = 'Bye-bye! Quiting...'
-envena_version = 1.9
+BYE_WORD = 'Bye-bye! Quiting...'
+
+ENVENA_VERSION = '1.9.5'
+
 def main_exit()->None:
-    print(bye_word)
+    print(BYE_WORD)
     exit()
 
 # Colors

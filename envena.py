@@ -20,14 +20,14 @@ if '--i-am-too-stupid' in sys.argv:
     
     # pip_version = get_pip_version()
 
-    command = [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"]
+    command = [sys.executable, "-m", "pip3", "install", "-r", "requirements.txt"]
 
     # if pip_version and pip_version >= (23, 0):
     #     command.append("--break-system-packages")
 
     try:
-        if ['y', 'yes', 'yea', 'ok', 'yup', 'yeap', 'maybe yes i do not sure', 'fuck you stupid clanker', ''] in \
-            input("Do you sure you want to use '--break-system-packages' flag to install requirements? (Y/n)").lower():
+        if input("Do you sure you want to use '--break-system-packages' flag to install requirements? (Y/n): ").lower() in \
+                ['y', 'yes', 'yea', 'ok', 'yup', 'yeap', 'maybe yes i do not sure', 'fuck you stupid clanker', '']:
                 subprocess.run(command, check=True)
         print("Successfully installed requirements.")
     except subprocess.CalledProcessError as e:
@@ -112,7 +112,7 @@ def process_input(user_input: str)->None:
 print_art()
 try:
     while True:
-        command = history_input(prompt=f"╓-[ENVENA{Success}{envena_version}{Clear}]-[{Purple}{args['iface']}{Clear}]\n╙-<< ")
+        command = history_input(prompt=f"╓-[ENVENA{Success}{ENVENA_VERSION}{Clear}]-[{Purple}{args['iface']}{Clear}]\n╙-<< ")
         try:
             process_input(command)
         except KeyboardInterrupt:
@@ -123,4 +123,4 @@ except Exception as e:
     import sys
     envena_panic(type(e), e, e.__traceback__)
 except KeyboardInterrupt:
-    print('\n', bye_word)
+    print('\n', BYE_WORD)

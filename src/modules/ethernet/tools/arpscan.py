@@ -1,8 +1,12 @@
 import time
-import sys
-import os
+# import sys
+import asyncio
+# import os
+import math
+from random import uniform
 from src.envena.config import scapy, Error, Error_text, Clear
-from src.envena.functions import get_hostname, get_manufacturer, validate_args, validate_ip
+from src.envena.functions import get_hostname, get_vendor, validate_args, validate_ip
+# from src.envena.commands import tech_words
 from random import shuffle
 arpscan_v = 2.1
 
@@ -17,13 +21,13 @@ def print_aligned_table(devices: list) -> None:
     table = Table(show_header=True, header_style="bold cyan")
 
     table.add_column("IP", style="green", justify="left")
-    table.add_column("Ethernet Address ", style="magenta", justify="left")
+    table.add_column("Ethernet", style="magenta", justify="left")
     table.add_column("Hostname", style="yellow", justify="left")
-    table.add_column("Manufacturer", style="blue", justify="left")
+    table.add_column("Vendor", style="blue", justify="left")
 
     for device in devices:
         hostname = device.get("hostname", "-")
-        manufacturer = get_manufacturer(eth=device["eth"], printed=False) or "-"
+        manufacturer = get_vendor(eth=device["eth"], printed=False) or "-"
         
         table.add_row(
             device["ip"],
@@ -39,8 +43,8 @@ def scan_network(ip_range: str, ip_src: str=None, eth_src: str=None, iface: str=
     devices = []
     answered = []
     # Filter out our own IP
-    self_ip = ip_src if ip_src else scapy.get_if_addr(iface)
-    target_ips = [ip for ip in ip_range if ip != self_ip]
+    # self_ip = ip_src if ip_src else scapy.get_if_addr(iface)
+    target_ips = [ip for ip in ip_range if ip != ip_src]
     shuffle(target_ips)
     
     # ARP sniff callback
@@ -49,18 +53,32 @@ def scan_network(ip_range: str, ip_src: str=None, eth_src: str=None, iface: str=
             answered.append(pkt)
     
     # Start sniffing in background
+    timeout_coeff = timeout / len(target_ips)
+    
     sniff_filter = "arp"
-    sniffer = scapy.AsyncSniffer(prn=arp_callback, filter=sniff_filter, store=0)
+    sniffer = scapy.AsyncSniffer(iface=iface, prn=arp_callback, filter=sniff_filter, store=0)
+    
     sniffer.start()
     
-    # Send all ARP requests at once
-    arp_request = scapy.ARP(pdst=target_ips, psrc=ip_src or scapy.get_if_addr(iface), hwsrc=eth_src)
-    broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
-    scapy.sendp(broadcast/arp_request, verbose=False)
+    for ip in target_ips:
+        scapy.sendp(
+                scapy.Ether(dst='ff:ff:ff:ff:ff:ff', src=eth_src) /
+                scapy.ARP(pdst=ip,
+                          psrc=ip_src,
+                          hwsrc=eth_src),
+                verbose=False, iface=iface)
+        print(f'Processing {ip}...  \r', end='')
+        delay = timeout_coeff + uniform(-timeout_coeff / 3, timeout_coeff / 3)
+        time.sleep(delay)
+    print(' '*29, end='\r')  
+        # arp_request = scapy.ARP(pdst=ip, psrc=ip_src, hwsrc=eth_src)
+        # print(arp_request)
+    # broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
+    # scapy.sendp(broadcast/arp_request, verbose=False)
     
     # Wait for responses
-    print(f'Scanning(1..{len(target_ips)})... \r', end='')
-    time.sleep(timeout)
+    # print(f'Scanning(1..{len(target_ips)})... \r', end='')
+    # time.sleep(timeout)
     sniffer.stop()
     
     # Process responses
@@ -76,8 +94,8 @@ def scan_network(ip_range: str, ip_src: str=None, eth_src: str=None, iface: str=
     
     print(f'Scanning({len(target_ips)}/{len(target_ips)})   ')
     print(' '*22 + '\r', end='')
-    
-    return devices
+    deduplicated_devices = [dict(t) for t in set(tuple(d.items()) for d in devices)]
+    return deduplicated_devices
 
 def arpscan(args: dict)->None:
     if not validate_args(
@@ -147,11 +165,14 @@ if __name__ == "__main__":
         parser = argparse.ArgumentParser(description=desc, formatter_class=argparse.RawDescriptionHelpFormatter)
         parser.add_argument("-ip", help="target IP or range.", required=True)
         parser.add_argument("-t", "--timeout", help="waiting time for responses in seconds.", required=False)
+        parser.add_argument("-i", "--iface", help="interface to scanning from.", required=False)
         
-        arg = parser.parse_args()
-        arg.timeout = 3 if not arg.timeout else arg.timeout
+        cli_args = parser.parse_args()
+        cli_args.timeout = 3 if not cli_args.timeout else cli_args.timeout
+        cli_args.iface = scapy.conf.iface if not cli_args.iface else cli_args.iface
 
-        args = {'input': arg.ip, 'timeout': arg.timeout, 'eth_src': scapy.get_if_hwaddr(scapy.conf.iface), 'ip_src': scapy.get_if_addr(scapy.conf.iface), 'iface': scapy.conf.iface}
+        args = {'input': cli_args.ip, 'timeout': cli_args.timeout, 'eth_src': scapy.get_if_hwaddr(cli_args.iface), \
+            'ip_src': scapy.get_if_addr(cli_args.iface), 'iface': cli_args.iface}
         arpscan(args)
     except(KeyboardInterrupt):
         print('Aborted.')

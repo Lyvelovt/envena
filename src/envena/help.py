@@ -1,6 +1,6 @@
-from .config import envena_version
+from .config import ENVENA_VERSION
 help_info = f"""
-Envena v{envena_version}.
+Envena v{ENVENA_VERSION}.
 
 ### AVAILABLE COMMANDS ###
 list                -    show all value of args.

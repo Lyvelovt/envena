@@ -1,26 +1,33 @@
-import sys
-import os
-from src.envena.config import Fatal_Error, Error_text, Clear, scapy
-from src.envena.functions import validate_args
+from src.envena.base.tool import Tool
+from scapy.all import sendp, hexdump
+from src.envena.base.arguments import Arguments
 
-def send_raw_packet(input: str=None, iface: str=None, printed: bool=True)->bool:
-    if not validate_args(input=input, iface=iface): return False
-    with open(input, 'r') as pkt_file:
-        input = pkt_file.read()
-        input = bytes.fromhex(input)
+def send_raw_packet(param, printed: bool=True)->bool:
+    with open(param.input, 'r') as pkt_file:
+        dump = pkt_file.read()
+        dump = bytes.fromhex(dump)
     try:
-        scapy.sendp(input, verbose=False, iface=iface)
-        if printed: scapy.hexdump(input)
+        sendp(dump, verbose=False, iface=param.iface)
+        if printed: hexdump(dump)
         return True
     except Exception as e:
-        print(f"{Fatal_Error}Packet was not sent: {Error_text}{e}{Clear}")
+        param.logger.error(f"Packet was not sent: {e}")
         return False
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser(description="Raw packet send module.")
-    parser.add_argument("-i", "--iface", help="Network iface to send from.", required=False)
-    parser.add_argument("-f", "--file", help="The hexdump file to send", required=True)
+    parser = argparse.ArgumentParser(description="Raw packet send script")
+    parser.add_argument("-i", "--iface", help="network interface to send from", required=False)
+    parser.add_argument("-f", "--file", help="the hexstream file to send", required=True)
 
-    arg = parser.parse_args()
-    send_raw_packet(input=arg.file, iface=arg.iface)
+    cli_args = parser.parse_args()
+
+    args = Arguments()
+    
+
+    args.input = cli_args.file
+    args.iface = cli_args.iface
+    
+    raw_packet = Tool(args=args, tool_func=send_raw_packet, VERSION=1.1)
+
+    raw_packet.start_tool()

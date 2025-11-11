@@ -7,7 +7,7 @@ from statistics import mean
 
 from src.envena.config import scapy, Clear, Success, Error, Error_text, Purple
 from scapy.all import sniff, rdpcap, Dot11, Dot11Beacon, Dot11ProbeResp, RadioTap
-from src.envena.functions import validate_args, get_manufacturer
+from src.envena.functions import validate_args, get_vendor
 
 from rich.console import Console
 from rich.table import Table
@@ -136,7 +136,7 @@ def process_packet(pkt):
 
             # manufacturer
             if ap["manufacturer"] is None:
-                ap["manufacturer"] = get_manufacturer(bssid)
+                ap["manufacturer"] = get_vendor(bssid)
 
             # signal
             if rssi is not None:
@@ -170,11 +170,11 @@ def process_packet(pkt):
                 if src and src != bssid:
                     aps[bssid]["clients"].add(src)
                     devices[src]["seen_as"].add("client")
-                    devices[src]["manufacturer"] = devices[src].get("manufacturer") or get_manufacturer(src)
+                    devices[src]["manufacturer"] = devices[src].get("manufacturer") or get_vendor(src)
                 if dst and dst != bssid:
                     aps[bssid]["clients"].add(dst)
                     devices[dst]["seen_as"].add("client")
-                    devices[dst]["manufacturer"] = devices[dst].get("manufacturer") or get_manufacturer(dst)
+                    devices[dst]["manufacturer"] = devices[dst].get("manufacturer") or get_vendor(dst)
                 # update ap last seen and signals
                 if rssi is not None:
                     aps[bssid]["signals"].append(rssi)
@@ -195,14 +195,14 @@ def process_packet(pkt):
             if src:
                 devices[src]["last_seen"] = ts
                 if devices[src].get("manufacturer") is None:
-                    devices[src]["manufacturer"] = get_manufacturer(src)
+                    devices[src]["manufacturer"] = get_vendor(src)
                 if rssi is not None:
                     devices[src].setdefault("signals", []).append(rssi)
                     if len(devices[src]["signals"])>100: devices[src]["signals"].pop(0)
             if dst:
                 devices[dst]["last_seen"] = ts
                 if devices[dst].get("manufacturer") is None:
-                    devices[dst]["manufacturer"] = get_manufacturer(dst)
+                    devices[dst]["manufacturer"] = get_vendor(dst)
                 if rssi is not None:
                     devices[dst].setdefault("signals", []).append(rssi)
                     if len(devices[dst]["signals"])>100: devices[dst]["signals"].pop(0)
@@ -219,7 +219,7 @@ def process_packet(pkt):
                     devices[client].setdefault("signals", []).append(rssi)
                     if len(devices[client]["signals"])>100: devices[client]["signals"].pop(0)
                 if devices[client].get("manufacturer") is None:
-                    devices[client]["manufacturer"] = get_manufacturer(client)
+                    devices[client]["manufacturer"] = get_vendor(client)
         else:
             # other
             src = _mac_norm(dot11.addr2) if dot11.addr2 else None
@@ -233,7 +233,7 @@ def process_packet(pkt):
                         devices[mac].setdefault("signals", []).append(rssi)
                         if len(devices[mac]["signals"])>100: devices[mac]["signals"].pop(0)
                     if devices[mac].get("manufacturer") is None:
-                        devices[mac]["manufacturer"] = get_manufacturer(mac)
+                        devices[mac]["manufacturer"] = get_vendor(mac)
 
 
 def _build_table(source_label="live"):
@@ -264,7 +264,7 @@ def _build_table(source_label="live"):
 
         for bssid, info in ap_items:
             ssid = info.get("ssid") or "-"
-            manuf = info.get("manufacturer") or get_manufacturer(bssid)
+            manuf = info.get("manufacturer") or get_vendor(bssid)
             dev_type = "AP"
             enc = info.get("enc") or "-"
             avg = round(mean(info["signals"]),1) if info.get("signals") else None
@@ -278,7 +278,7 @@ def _build_table(source_label="live"):
             if clients:
                 for c in clients:
                     cinfo = devices.get(c, {})
-                    cman = cinfo.get("manufacturer") or get_manufacturer(c)
+                    cman = cinfo.get("manufacturer") or get_vendor(c)
                     ctype = "Client"
                     cavg = _avg_signal(devices, c)
                     cavg_s = str(cavg) if cavg is not None else "-"

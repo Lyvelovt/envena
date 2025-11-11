@@ -11,7 +11,7 @@ envena_art = [
     f'{w}5{n}@@@@{w}5{n}5@5@@5@@5@@5@@@@555{n}@{w}555{n}@@{w}???c      ',
     f'{w}?{n}@5{w}?5?..5{n}@@@@@@@@@@@@@@@55{n}5{w}5{n}5@@{w}55?{n}5{w}.         {y}<---Envena!!!{r}',
     f'{w}???       c{n}55@@@@@@@@@@@@@@@@@55{w}5{n}5@5{w}?    ',
-    f'{w}?          {w}55{n}5@@@%@@@@@@@5@@@@{w}5{n}5{w}5{n}@5{w}555        {Muted}~~version: {envena_version}~~{r}',
+    f'{w}?          {w}55{n}5@@@%@@@@@@@5@@@@{w}5{n}5{w}5{n}@5{w}555        {Muted}~~version: {ENVENA_VERSION}~~{r}',
     f'           {w}?{n}@@@ {w}c.{n}5%@%%@5@@@@@@5@@{w}55{n}5{w}5?      {y}by Lyvelovt Studio{r}',
     f'           {w}?{n}%%{w}.    ?{n}@@@@@%@@@@@@@@{w}55{n}@{w}5?.     {y}https://github.com/Lyvelovt{r}',
     f'           {w}?{n}@{g}c     {w}c{n}@5@@{w}?5{n}@@@@@5@@@5@@@{w}?.    {y}https://github.com/Lyvelovt/envena.git{r}',

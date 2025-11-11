@@ -1,17 +1,9 @@
-import sys
-import os
-from src.envena.functions import validate_args, get_hostname
+from src.envena.functions import get_hostname
 dns_getHostname_v = 1.0
 
-
-
-def dns_getHostname(args: dict)->None:
-    if not validate_args(input=args['input']):
-        return False
-    print(f"DNS get-hostname, version: {dns_getHostname_v}")
+def dns_getHostname(param)->None:
     print(
         f'DNS response: {args['input']} is "{get_hostname(ip=args['input'])}".')
-
 
 
 
@@ -22,13 +14,7 @@ if __name__ == "__main__":
         
         import argparse
 
-        desc = '''Get hostname by IP address using DNS protocol\n
-        \n
-        base using:
-          get_hostname -ip <192.168.1.10>
-        '''
-
-        parser = argparse.ArgumentParser(description=desc, formatter_class=argparse.RawDescriptionHelpFormatter)
+        parser = argparse.ArgumentParser(description="Script witch get host domain name by IP-address", formatter_class=argparse.RawDescriptionHelpFormatter)
         parser.add_argument("-ip", help="target IP.", required=True)  # , required=True)
         # parser.add_argument( "-i", "--interface", help="Network interface.")
 

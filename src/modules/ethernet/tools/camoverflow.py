@@ -1,7 +1,4 @@
 import time
-import sys
-import os
-from src.envena.config import Fatal_Error, Error_text, Clear, scapy, Success
 from scapy.all import Ether
 from src.envena.functions import validate_args, rand_eth
 from random import uniform

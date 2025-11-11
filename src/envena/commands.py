@@ -15,7 +15,7 @@ from typing import Dict
 from .banner import envena_art 
 from .help import help_info
 from .config import Clear, Error, Success, Error_text,\
-    main_exit, scapy, envena_version
+    main_exit, scapy, ENVENA_VERSION
 
 # Import all modules:
 # ARP #======================================#
@@ -46,7 +46,7 @@ from src.modules.dot11.tools.dot11trilateration import dot11trilateration
 # import sqlite3
 # database/oui.db
 # FUNCTIONS #================================#
-from .functions import rand_ip, rand_eth, get_manufacturer, get_sub_ip, get_ip_broadcast
+from .functions import rand_ip, rand_eth, get_vendor, get_sub_ip, get_ip_broadcast
 
 # Contains the packet headers. When sending a packet, 
 # it is checked for its presence in this dictionary.
@@ -72,7 +72,7 @@ commands = {
     "list": lambda: list_dict(args),
     "clear": lambda: os.system('cls' if platform.system == 'Windows' else 'clear'),
     "list clear": lambda: list_clear(),
-    "minfo": lambda: get_manufacturer(args['input'], printed=True),
+    "vinfo": lambda: print(f'Vendor of "{args['input']}": {get_vendor(args['input'])}'),
     "arp.request": lambda: send_packet(type='arp.request', args=args),
     "arp.response": lambda: send_packet(type='arp.response', args=args),
     "dhcp.discover": lambda: send_packet(type='dhcp.discover', args=args), 
@@ -150,11 +150,13 @@ ifaces_list = scapy.get_if_list()
 def get_my_info()->None:
     print(
         "*-={USER INFO}=-*\n"
-        f"Founded interfaces......: {', '.join(ifaces_list)}\n"
+        f"Founded interfaces......: {','.join(ifaces_list)}\n"
         f"Interface as default....: {scapy.conf.iface}\n"
-        f"Own eth-address.........: {scapy.get_if_hwaddr(args['iface'] if args['iface'] in scapy.get_if_list() else scapy.conf.iface)}\n"
+        f"Interface vendor........: {get_vendor(args['iface'])}\n"
+        f"Own MAC-address.........: {scapy.get_if_hwaddr(args['iface'] if args['iface'] in scapy.get_if_list() else scapy.conf.iface)}\n"
         f"Own IP-address..........: {scapy.get_if_addr(args['iface'] if args['iface'] in scapy.get_if_list() else scapy.conf.iface)}\n"
-        f"Envena version..........: {envena_version}\n"
+        f"Envena version..........: {ENVENA_VERSION}\n"
+        f"Network type............: {...}\n"
         f"Program running as root.: {True if os.getuid() == 0 else False}"
         )
     
