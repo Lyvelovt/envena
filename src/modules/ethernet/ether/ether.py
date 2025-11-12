@@ -2,7 +2,7 @@
 # from src.envena.functions import validate_args
 from scapy.all import hexdump, Ether, sendp
 
-def send_loop(param, printed=True)->bool:
+def send_ether(param, printed=True)->bool:
     eth_src=str(param.eth_src).replace('-', ':')
     eth_dst=str(param.eth_dst).replace('-', ':')
     iface=str(param.iface)
@@ -17,7 +17,7 @@ def send_loop(param, printed=True)->bool:
     try:
         sendp(packet, iface=iface, verbose=False)
         if printed:
-            param.logger.info(f"Sent LOOP: {eth_src} -> {eth_dst}{'' if payload == '' else f": {payload}"}")
+            param.logger.info(f"Sent Ether: {eth_src} -> {eth_dst}{'' if payload == '' else f": {payload}"}")
             hexdump(packet)
         return True
     except Exception as e:

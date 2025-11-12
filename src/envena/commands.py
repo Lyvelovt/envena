@@ -84,7 +84,7 @@ commands = {
     "dhcp.inform": lambda: send_packet(type='dhcp.inform', args=args),
     "tools.arpscan": lambda: arpscan(args=args),
     "tools.dns_getHostname": lambda: dns_getHostname(args=args),
-    "tools.detect_arpspoof": lambda: detect_arpspoof(args=args),
+    "tools.detect_arpspoof": lambda: detect_arpspoof(param=args),
     "tools.ip_forward": lambda: ip_forward(args=args),
     "tools.raw_packet": lambda: send_packet(type='raw_packet', args=args),
     "tools.dhcp_starve": lambda: dhcp_starve(args=args),

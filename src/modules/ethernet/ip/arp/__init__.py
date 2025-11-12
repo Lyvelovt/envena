@@ -1,5 +1,5 @@
 import enum
-from src.modules.ethernet import EthernetProtocol
+from src.modules.ethernet.ip import IPProtocol
 from .request import send_arp_request
 from .response import send_arp_response
 
@@ -7,15 +7,15 @@ class ARPPacketType(enum.Enum):
     REQUEST = (1, send_arp_request)
     RESPONSE = (2, send_arp_response)
 
-class ARPPacket(EthernetProtocol):
+class ARPPacket(IPProtocol):
     def _get_send_func_by_type(self, packet_type: ARPPacketType):
         return packet_type.value[1]
     
     __slots__ = ('iface','count','timeout','send_func',
-                             'ip_src','ip_dst','eth_src','eth_dst','packet_type')
+                             'ip_src','ip_dst','eth_src','eth_dst','packet_type', 'logger')
      
     def __init__(self, iface, count, timeout, \
-        ip_src, ip_dst, eth_src, eth_dst, packet_type):
+        ip_src, eth_src, eth_dst, packet_type):
         
         self.packet_type = packet_type
         

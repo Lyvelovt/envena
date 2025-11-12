@@ -1,26 +1,26 @@
 import enum
 from src.modules.ethernet import EthernetProtocol
-from .loop import send_loop
+from .ether import send_ether
 
-class EthernetPacketType(enum.Enum):
-    LOOP = (1, send_loop)
+class EtherPacketType(enum.Enum):
+    Ether = (1, send_ether)
 
-class LOOPPacket(EthernetProtocol):
-    def _get_send_func_by_type(self, packet_type: EthernetPacketType):
+class EtherPacket(EthernetProtocol):
+    def _get_send_func_by_type(self, packet_type: EtherPacketType):
         return packet_type.value[1]
     
     __slots__ = ('iface','count','timeout','send_func',
-                             'ip_src','ip_dst','eth_src','eth_dst','packet_type', 'payload')
+                             'eth_src','eth_dst','packet_type', 'payload', 'logger')
      
     def __init__(self, iface, count, timeout, \
-        ip_src, ip_dst, eth_src, eth_dst, packet_type, payload=''):
+        eth_src, eth_dst, packet_type, payload=''):
         
         self.packet_type = packet_type
         
         send_func = self.send_func
 
-        super().__init__(iface, count, timeout, ip_src, \
-            ip_dst, eth_src, eth_dst, send_func)
+        super().__init__(iface, count, timeout,
+            eth_src, eth_dst, send_func)
         
         if isinstance(payload, str):
             self.payload = payload
@@ -28,7 +28,7 @@ class LOOPPacket(EthernetProtocol):
     
     def __setattr__(self, name, value):
         if name == 'packet_type':
-            if not isinstance(value, EthernetPacketType):
+            if not isinstance(value, EtherPacketType):
                 raise TypeError('invalid packet type got')
             
             send_func = self._get_send_func_by_type(value)

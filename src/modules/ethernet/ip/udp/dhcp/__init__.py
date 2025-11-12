@@ -25,7 +25,7 @@ class DHCPPacket(UDPProtocol):
     __slots__ = ('iface','count','timeout','send_func',
                              'ip_src','ip_dst','eth_src','eth_dst','packet_type',
                              'xid', 'hostname', 'lease_time', 'sub_mask', 'dns_server',
-                             'port_src', 'port_dst', 'param_req_list')
+                             'port_src', 'port_dst', 'param_req_list', 'logger')
     
     def _get_send_func_by_type(self, packet_type: DHCPPacketType):
         return packet_type.value[1]

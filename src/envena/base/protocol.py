@@ -4,7 +4,7 @@ from time import sleep
 from src.envena.config import ROOT_LOGGER_NAME
 
 class BaseProtocol:
-    __slots__ = ('iface','count','timeout','send_func')
+    __slots__ = ('iface','count','timeout','send_func', '_word_sending', '_dot_timer', '_word_timer')
     
     def __init__(self, iface, count, timeout, send_func):
         self.send_func = None
@@ -17,7 +17,7 @@ class BaseProtocol:
         else:
             raise TypeError("iface must be 'str'")
         
-        self.logger = logging.getLogger(f'{ROOT_LOGGER_NAME}.{__class__.__name__}*{self.iface}')
+        self.logger = logging.getLogger(f'{ROOT_LOGGER_NAME}.{__class__.__name__}/{self.iface}')
         
         if isinstance(count, int) or count is math.inf:
             self.count = count
@@ -46,19 +46,21 @@ class BaseProtocol:
         self._dot_timer = (dot_timer + 1) % 4  # Цикл 0-3
         self._word_timer = (word_timer + 1) % len(word) # Цикл по длине слова
         
-    def send_packet(self):
+    def send_packet(self, printed=True):
         sent_packets = 0
         first_send = True
         try:
             while sent_packets <= self.count:
-                if self.send_func(param=self, printed=first_send):
+                if self.send_func(param=self, printed=first_send and printed):
                     sent_packets += 1
                 if first_send:
                     first_send = False
-                self._print_animated_sending(self._word_sending, self._dot_timer, self._word_timer)
+                if printed:
+                    self._print_animated_sending(self._word_sending, self._dot_timer, self._word_timer)
                 sleep(self.timeout)
-            print()
-            self.logger.info(f'Successfully sent {sent_packets} packet(s)')
+            if printed:
+                print()
+                self.logger.info(f'Successfully sent {sent_packets} packet(s)')
         except KeyboardInterrupt:
-            self.logger.info(f'Successfully sent {sent_packets} packet(s)')
-            print('\nAborted')
+            if printed:
+                self.logger.info(f'Successfully sent {sent_packets} packet(s)')

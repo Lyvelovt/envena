@@ -31,84 +31,84 @@ class Arguments:
                 object.__setattr__(self, name, ipaddress.ip_address(value))
                 return
             else:
-                self.logger.error('invalid IP-address')
+                self.logger.error('Invalid IP-address got')
         elif name == 'ip_src':
             if validate_ip(value):
                 object.__setattr__(self, name,ipaddress.ip_address(value))
                 return
             else:
-                self.logger.error('invalid IP-address')
+                self.logger.error('Invalid IP-address got')
         elif name == 'eth_dst':
             if validate_eth(value):
                 object.__setattr__(self, name, netaddr.EUI(value))
                 return
             else:
-                self.logger.error('invalid MAC-address')
+                self.logger.error('Invalid MAC-address got')
         elif name == 'eth_src':
             if validate_eth(value):
                 object.__setattr__(self, name, netaddr.EUI(value))
                 return
             else:
-                self.logger.error('invalid MAC-address')
+                self.logger.error('Invalid MAC-address got')
         elif name == 'port_src':
             if isinstance(value, int) and 0 <= value <= 65535:
                 object.__setattr__(self, name,  value)
                 return
             else:
-                self.logger.error('invalid port')
+                self.logger.error('Invalid port got')
         elif name == 'port_dst':
             if isinstance(value, int) and 0 <= value <= 65535:
                 object.__setattr__(self, name, value)
                 return
             else:
-                self.logger.error('invalid port')
+                self.logger.error('Invalid port got')
         elif name == 'count':
             if isinstance(value, int) or value == inf:
                 object.__setattr__(self, name, value)
                 return
             else:
-                self.logger.error('invalid count')
+                self.logger.error('Invalid count got')
         elif name == 'timeout':
             if isinstance(value, float) or isinstance(value, int):
                 object.__setattr__(self, name, value)
                 return
             else:
-                self.logger.error('invalid timeout')
+                self.logger.error('Invalid timeout got')
         elif name == 'iface':
             if isinstance(value, str) and value in get_if_list():
                 object.__setattr__(self, name, value)
                 return
             else:
-                self.logger.error('invalid interface')
+                self.logger.error('Invalid interface got')
         elif name == 'sub_mask':
             if validate_ip(value):
                 object.__setattr__(self, name, value)
                 return
             else:
-                self.logger.error('invalid IP-address')
+                self.logger.error('Invalid IP-address got')
         elif name == 'sub_ip':
             if validate_ip(value):
                 object.__setattr__(self, name, value)
                 return
             else:
-                self.logger.error('invalid IP-address')
+                self.logger.error('Invalid IP-address got')
         elif name == 'xid':
             if isinstance(value, int):
                 object.__setattr__(self, name, value)
                 return
             else:
-                self.logger.error('invalid XID')
+                self.logger.error('Invalid XID got')
         elif name == 'dns_server':
             if validate_ip(value):
                 object.__setattr__(self, name, value)
                 return
             else:
-                self.logger.error('invalid IP-address')
+                self.logger.error('Invalid IP-address got')
         elif name == 'input':
             if isinstance(value, str):
                 object.__setattr__(self, name, value)
                 return
             else:
-                self.logger.error('invalid input')
+                self.logger.error('nvalid input got')
         else:
-                self.logger.error('invalid argument got')
+                self.logger.error('Invalid argument got')

