@@ -24,7 +24,7 @@ from src.modules.ethernet.arp.response import send_arp_response
 # READY-MADE TOOLS #=========================#
 from src.modules.ethernet.tools.arpscan import arpscan
 from src.modules.ethernet.tools.dns_getHostname import dns_getHostname
-from src.modules.ethernet.tools.detect_arpspoof import detect_arpspoof
+from src.modules.ethernet.tools.detect_mitm import detect_arpspoof
 from src.modules.ethernet.tools.dhcp_starve import dhcp_starve
 from src.modules.ethernet.tools.camoverflow import cam_overflow
 # RAW PACKET SENDER #========================#
