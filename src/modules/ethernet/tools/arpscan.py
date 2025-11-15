@@ -1,12 +1,11 @@
 import time
 from random import uniform
-from src.envena.config import scapy, Error, Error_text, Clear
-from src.envena.functions import get_hostname, get_vendor, validate_args, validate_ip
+from src.envena.functions import get_hostname, get_vendor, parse_ip_ranges
 from random import shuffle
 from src.modules.ethernet.ip.arp import ARPPacket, ARPPacketType
 from src.envena.base.arguments import Arguments
 from src.envena.base.tool import Tool
-from scapy.all import conf, get_if_hwaddr, get_if_addr
+from scapy.all import conf, get_if_hwaddr, get_if_addr, conf, ARP, AsyncSniffer
 
 arpscan_v = 2.1
 
@@ -26,20 +25,22 @@ def print_aligned_table(devices: list) -> None:
     table.add_column("Vendor", style="blue", justify="left")
 
     for device in devices:
-        hostname = device.get("hostname", "-")
-        manufacturer = get_vendor(eth=device["eth"], printed=False) or "-"
+        hostname = device.get("hostname", "unknown")
+        vendor = get_vendor(eth=device["eth"])
+        if not vendor:
+            vendor = "unknown"
         
         table.add_row(
             device["ip"],
             device["eth"],
             hostname,
-            manufacturer
+            vendor
         )
 
     console.print(table)
 
 
-def scan_network(logger, ip_range: str, ip_src: str=None, eth_src: str=None, iface: str=scapy.conf.iface, timeout: int=4)->list:
+def scan_network(logger, ip_range: str, ip_src: str=None, eth_src: str=None, iface: str=conf.iface, timeout: int=4)->list:
     devices = []
     answered = []
     # Filter out our own IP
@@ -49,21 +50,21 @@ def scan_network(logger, ip_range: str, ip_src: str=None, eth_src: str=None, ifa
     
     # ARP sniff callback
     def arp_callback(pkt):
-        if pkt[scapy.ARP].op == 2:  # is-at (response)
+        if pkt[ARP].op == 2:  # is-at (response)
             answered.append(pkt)
     
     # Start sniffing in background
     timeout_coeff = timeout / len(target_ips)
     
     sniff_filter = "arp"
-    sniffer = scapy.AsyncSniffer(iface=iface, prn=arp_callback, filter=sniff_filter, store=0)
+    sniffer = AsyncSniffer(iface=iface, prn=arp_callback, filter=sniff_filter, store=0)
     
     sniffer.start()
     
     for ip in target_ips:
         ARPPacket(iface=iface, count=1, timeout=0, ip_src=ip_src,
-                  , eth_src=eth_src, eth_dst='ff:ff:ff:ff:ff:ff',
-                  packet_type=ARPPacketType.REQUEST).send_packet()
+                  ip_dst=ip, eth_src=eth_src, eth_dst='ff:ff:ff:ff:ff:ff',
+                  packet_type=ARPPacketType.REQUEST).send_packet(printed=False)
         # scapy.sendp(
         #         scapy.Ether(dst='ff:ff:ff:ff:ff:ff', src=eth_src) /
         #         scapy.ARP(pdst=ip,
@@ -81,12 +82,13 @@ def scan_network(logger, ip_range: str, ip_src: str=None, eth_src: str=None, ifa
     # Wait for responses
     # print(f'Scanning(1..{len(target_ips)})... \r', end='')
     # time.sleep(timeout)
-    sniffer.stop()
+    if sniffer.running:
+        sniffer.stop()
     
     # Process responses
     for pkt in answered:
-        ip = pkt[scapy.ARP].psrc
-        eth = pkt[scapy.ARP].hwsrc
+        ip = pkt[ARP].psrc
+        eth = pkt[ARP].hwsrc
         hostname = get_hostname(ip)
         devices.append({
             "ip": ip,
@@ -94,31 +96,31 @@ def scan_network(logger, ip_range: str, ip_src: str=None, eth_src: str=None, ifa
             "hostname": hostname
         })
     
-    logger.info(f'Scanning({len(target_ips)}/{len(target_ips)})')
+    logger.info(f'Scanned ({len(target_ips)}/{len(target_ips)})')
     deduplicated_devices = [dict(t) for t in set(tuple(d.items()) for d in devices)]
     return deduplicated_devices
 
 def arpscan(param, logger)->None:
-    
-    start_time = time.time()
-    if '-' in param.input:
-        ip = param.input.split('-')
-        ip[0] = ip[0].split('.')
-        ip_range = [f"{ip[0][0] + '.' + ip[0][1] + '.' + ip[0][2]}." + str(i) for i in
-                    range(int(ip[0][3]), 1 + int(ip[1]))]
-    else:
-        ip = param.input.split('.')
-        ip_range = [f"{ip[0] + '.' + ip[1] + '.' + ip[2]}." + str(i) for i in
-                    range(int(ip[3]), 1 + int(ip[3]))]
-    
-    devices_info = scan_network(logger=logger, ip_range=ip_range, eth_src=param.eth_src, ip_src=param.ip_src, iface=param.iface, timeout=param.timeout)
-    
-    if devices_info:
+    try:
+        start_time = time.time()
+        
+        try:
+            ip_range = parse_ip_ranges(param.input)
+        except ValueError:
+            logger.fatal('Invalid IP-address(es) got')
+            return
+        
+        devices_info = scan_network(logger=logger, ip_range=ip_range, eth_src=param.eth_src, ip_src=param.ip_src, iface=param.iface, timeout=param.timeout)
+        
+        if devices_info:
+            logger.info(f'Scan finished in {round(time.time() - start_time, 3)} s.')
+            logger.info('Detected device(s):')
+            print_aligned_table(devices_info)
+        else:
+            logger.info("Failed to detect device(s) on the network")
+        
+    except KeyboardInterrupt:
         logger.info(f'Scan finished in {round(time.time() - start_time, 3)} s.')
-        logger.info('Detected device(s):')
-        print_aligned_table(devices_info)
-    else:
-        logger.info("Failed to detect device(s) on the network")
 
 if __name__ == "__main__":
     import argparse

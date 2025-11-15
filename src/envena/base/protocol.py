@@ -30,6 +30,7 @@ class BaseProtocol:
             raise TypeError("timeout must be 'float' or 'int'")
         
         if not callable(send_func):
+            # self.logger.info(f'{send_func} is not callable')
             raise TypeError('send function must be callable')
         else:
             self.send_func = send_func
@@ -50,7 +51,7 @@ class BaseProtocol:
         sent_packets = 0
         first_send = True
         try:
-            while sent_packets <= self.count:
+            while sent_packets < self.count:
                 if self.send_func(param=self, printed=first_send and printed):
                     sent_packets += 1
                 if first_send:

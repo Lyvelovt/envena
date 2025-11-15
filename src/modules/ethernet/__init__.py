@@ -6,7 +6,7 @@ class EthernetProtocol(BaseProtocol):
     __slots__ = ('iface','count','timeout','send_func',
                              'eth_src','eth_dst')
     
-    def __init__(self, iface, count, timeout, eth_src, eth_dst, send_func):
+    def __init__(self, iface, count, timeout, send_func, eth_src, eth_dst):
         
         super().__init__(iface, count, timeout, send_func)
         

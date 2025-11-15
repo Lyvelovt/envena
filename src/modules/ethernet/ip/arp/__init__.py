@@ -12,17 +12,17 @@ class ARPPacket(IPProtocol):
         return packet_type.value[1]
     
     __slots__ = ('iface','count','timeout','send_func',
-                             'ip_src','ip_dst','eth_src','eth_dst','packet_type', 'logger')
+                             'ip_src','ip_dst','eth_src','eth_dst', 'packet_type', 'logger')
      
     def __init__(self, iface, count, timeout, \
-        ip_src, eth_src, eth_dst, packet_type):
+        ip_src, ip_dst, eth_src, eth_dst, packet_type):
         
         self.packet_type = packet_type
         
         send_func = self.send_func
-
-        super().__init__(iface, count, timeout, ip_src, \
-            ip_dst, eth_src, eth_dst, send_func)
+        
+        super().__init__(iface, count, timeout, send_func,
+            ip_src, ip_dst, eth_src, eth_dst, port_src=0, port_dst=0)
         
     
     def __setattr__(self, name, value):

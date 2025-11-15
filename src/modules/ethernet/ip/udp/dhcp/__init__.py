@@ -30,7 +30,7 @@ class DHCPPacket(UDPProtocol):
     def _get_send_func_by_type(self, packet_type: DHCPPacketType):
         return packet_type.value[1]
     
-    def __init__(self, iface, count, timeout, \
+    def __init__(self, iface, count, timeout, 
         ip_src, ip_dst, eth_src, eth_dst, packet_type,
         port_src=67, port_dst=68, lease_time=360, xid=randint(1_000_000, 9_999_999),
         hostname='', param_req_list: list=[1, 3, 15, 6], sub_mask=ipaddress.ip_address('255.255.255.0'),

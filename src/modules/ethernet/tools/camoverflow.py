@@ -8,10 +8,10 @@ from src.modules.ethernet.ether import EtherPacket, EtherPacketType
 
 
 def cam_overflow(param, logger)->None:
-    param.timeout = 0.002 if not param.timeout else param.timeout
-    sent_packets = 0
-    param.iface = conf.iface if not param.iface else param.iface
-    param.input = 'X'*64 if not param.input else param.input
+    # param.timeout = 0.002 if not param.timeout else param.timeout
+    # sent_packets = 0
+    # param.iface = conf.iface if not param.iface else param.iface
+    # param.input = 'X'*64 if not param.input else param.input
     
     try:
         eth_src=rand_eth()

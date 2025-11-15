@@ -10,15 +10,19 @@ from .config import Error, Error_text, Clear, Info, Fatal_Error # For colored ou
 import ipaddress
 
 import netaddr
-from netaddr.core import AddrFormatError
+from netaddr.core import AddrFormatError, NotRegisteredError
 
 # Get hostname by DNS protocol (can send DNS request only with your IP, 
 # becase based on socket lib)
-def get_hostname(ip) -> str | None:
+def get_hostname(ip) -> str:
     try:
-        return socket.gethostbyaddr(ip)[0]
+        hostname = socket.gethostbyaddr(ip)[0]
+        if not hostname or hostname == '':
+            return ip
+        else:
+            return hostname
     except socket.herror:
-        return None
+        return ip
 
 # Brute force attack to XID (for now unuseful shit)
 def ex_search_xid(from_begin: bool=True)->any:
@@ -45,8 +49,12 @@ def get_ip_broadcast(host_ip: str = '0.0.0.0', mask: str = '255.255.255.0')->str
     return str(network_obj.broadcast_address)
 
 # Get manufacturer's company by OUI of EUI address
-def get_vendor(eth: str='')->str:
-    return eth.oui.registration().org
+def get_vendor(eth: str='')->str|None:
+    eth=netaddr.EUI(eth)
+    try:
+        return eth.oui.registration().org
+    except NotRegisteredError:
+        return None
             
 # Check all args are not None
 def validate_args(**kwargs)->None:
@@ -56,6 +64,55 @@ def validate_args(**kwargs)->None:
             print(f"{Error}Error: {Error_text}arg \"{arg_name}\" is required!{Clear}")
             noneIsFount = False
     return noneIsFount
+
+import ipaddress
+import re
+from typing import List, Union
+
+def parse_ip_ranges(ip_range: str) -> List[str]:
+    elements = [e.strip() for e in ip_range.split(',') if e.strip()]
+    parsed_ips: List[ipaddress.IPv4Address] = []
+    
+    range_regex = re.compile(r'^(\d{1,3}\.\d{1,3}\.\d{1,3}\.)(\d{1,3})-(\d{1,3})$')
+
+    octet_range_regex = re.compile(r'^(\d{1,3}\.\d{1,3}\.)(\d{1,3})-(\d{1,3})(\.\d{1,3})$')
+    
+    for element in elements:
+        try:
+            if '/' in element:
+                network = ipaddress.ip_network(element)
+                parsed_ips.extend(list(network.hosts()))
+            else:
+                parsed_ips.append(ipaddress.ip_address(element))
+                
+        except ValueError:
+            match_last_octet = range_regex.match(element)
+            if match_last_octet:
+                prefix, start_str, end_str = match_last_octet.groups()
+                start, end = int(start_str), int(end_str)
+                
+                if not (0 <= start <= 255 and 0 <= end <= 255 and start <= end):
+                    raise ValueError(f"invalid range for last octet: {element}")
+                    
+                for i in range(start, end + 1):
+                    parsed_ips.append(ipaddress.ip_address(f"{prefix}{i}"))
+                continue
+                
+            match_octet_range = octet_range_regex.match(element)
+            if match_octet_range:
+                prefix, start_str, end_str, suffix = match_octet_range.groups()
+                start, end = int(start_str), int(end_str)
+                
+                if not (0 <= start <= 255 and 0 <= end <= 255 and start <= end):
+                    raise ValueError(f"invalid range for middle octet: {element}")
+                
+                for i in range(start, end + 1):
+                    parsed_ips.append(str(ipaddress.ip_address(f"{prefix}{i}{suffix}")))
+                continue
+
+            raise ValueError(f"invalid or unsupported IP format: {element}")
+
+    return parsed_ips
 
 # Validate IP-address
 def validate_ip(ip: str = '') -> bool:
