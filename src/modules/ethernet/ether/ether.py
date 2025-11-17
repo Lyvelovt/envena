@@ -9,7 +9,7 @@ def send_ether(param, printed=True)->bool:
     payload=param.payload
     
     # Creates an Ethernet packet for the data link layer
-    ether = Ether(src=eth_src, dst=eth_dst)
+    ether = Ether(src=eth_src, dst=eth_dst) / payload
 
     packet = ether
 

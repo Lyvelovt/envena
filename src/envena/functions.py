@@ -1,14 +1,16 @@
 # This file contains the functions for the program to work
-
-
 from random import randint
 import random
 import string
 import socket
 from .config import Error, Error_text, Clear, Info, Fatal_Error # For colored output
+import ipaddress
+import re
+from typing import List
 
 import ipaddress
 
+from scapy.all import Ether, ARP, srp, conf
 import netaddr
 from netaddr.core import AddrFormatError, NotRegisteredError
 
@@ -65,10 +67,6 @@ def validate_args(**kwargs)->None:
             noneIsFount = False
     return noneIsFount
 
-import ipaddress
-import re
-from typing import List, Union
-
 def parse_ip_ranges(ip_range: str) -> List[str]:
     elements = [e.strip() for e in ip_range.split(',') if e.strip()]
     parsed_ips: List[ipaddress.IPv4Address] = []
@@ -113,6 +111,24 @@ def parse_ip_ranges(ip_range: str) -> List[str]:
             raise ValueError(f"invalid or unsupported IP format: {element}")
 
     return parsed_ips
+
+def get_mac(target_ip: str, iface: str = conf.iface, timeout: float = 1.0) -> str | None:
+    ether_layer = Ether(dst="ff:ff:ff:ff:ff:ff")
+    arp_request = ARP(pdst=target_ip)
+    
+    answered, unanswered = srp(
+        ether_layer / arp_request, 
+        timeout=timeout, 
+        iface=iface, 
+        verbose=0,
+        retry=0
+    )
+    
+    if answered:
+        mac_address = answered[0][1].hwsrc
+        return mac_address.lower()
+    
+    return None
 
 # Validate IP-address
 def validate_ip(ip: str = '') -> bool:

