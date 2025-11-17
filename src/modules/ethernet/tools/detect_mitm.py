@@ -113,8 +113,8 @@ def detect_mitm(param, logger)->None:
     except FileNotFoundError:
         filename = f'envena_detect_arpspoof_{now}.pcap'
         pcap_writer = PcapWriter(filename=filename, append=False, sync=True)
-    arpspoof_packets = sniff(prn=lambda pkt: detect_mitm_in_package(packet=pkt, logger=logger, ARP_TABLE=ARP_TABLE, 
-                            gateway_ip=param.input, KNOWN_GATEWAY_TTL=KNOWN_GATEWAY_TTL), 
+    arpspoof_packets = sniff(prn=lambda pkt: detect_mitm_in_package(packet=pkt, logger=logger, 
+                            gateway_ip=param.input), 
                              store=True, iface=param.iface)
     pcap_writer.write(arpspoof_packets)
     logger.info(f'Traffic was writted in "{filename}"')

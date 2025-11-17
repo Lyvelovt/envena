@@ -130,6 +130,28 @@ def get_mac(target_ip: str, iface: str = conf.iface, timeout: float = 1.0) -> st
     
     return None
 
+import ipaddress
+from typing import Optional
+
+def parse_submask(sub_mask: str) -> Optional[int]:
+    sub_mask = sub_mask.strip()
+
+    if sub_mask.startswith('/'):
+        sub_mask = sub_mask[1:]
+    
+    try:
+        prefix_len = int(sub_mask)
+        if 0 <= prefix_len <= 32:
+            return prefix_len
+    except ValueError:
+        pass
+
+    try:
+        network_obj = ipaddress.ip_network(f'0.0.0.0/{sub_mask}', strict=False)
+        return network_obj.prefixlen
+    except ValueError:
+        return None
+
 # Validate IP-address
 def validate_ip(ip: str = '') -> bool:
     try:

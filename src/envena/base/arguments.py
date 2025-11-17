@@ -1,4 +1,4 @@
-from src.envena.functions import validate_eth, validate_ip
+from src.envena.functions import validate_eth, validate_ip, parse_submask
 import netaddr
 import ipaddress
 import logging
@@ -81,8 +81,8 @@ class Arguments:
             else:
                 self.logger.error('Invalid interface got')
         elif name == 'sub_mask':
-            if validate_ip(value):
-                object.__setattr__(self, name, value)
+            if parse_submask(value):
+                object.__setattr__(self, name, parse_submask(value))
                 return
             else:
                 self.logger.error('Invalid IP-address got')

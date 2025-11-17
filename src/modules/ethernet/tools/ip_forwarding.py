@@ -16,7 +16,7 @@ def check_subnet_membership(ip_to_check: str, local_interface_cidr: str) -> bool
     return ipaddress.ip_address(ip_to_check) in local_network
 
 
-def addr_spoof(packet, my_ip, my_eth, gateway_mac, netmask, logger, iface):
+def addr_spoof(packet, my_ip, my_eth, gateway_mac, submask, logger, iface):
     global ARP_TABLE
     
     if not (packet.haslayer(IP) and packet.haslayer(Ether)):
@@ -26,7 +26,7 @@ def addr_spoof(packet, my_ip, my_eth, gateway_mac, netmask, logger, iface):
         return
     
     if packet[IP].dst != my_ip and packet[Ether].dst == my_eth:
-        if check_subnet_membership(packet[IP].dst, f'{my_ip}{netmask}'):
+        if check_subnet_membership(packet[IP].dst, f'{my_ip}/{submask}'):
             if packet[IP].dst in ARP_TABLE:
                 packet[Ether].dst = ARP_TABLE[packet[IP].dst]
             else:
@@ -55,7 +55,7 @@ def ip_forwarding(param, logger):
     my_eth = get_if_hwaddr(param.iface)
     my_ip = get_if_addr(param.iface)
     gateway_mac = str(param.eth_dst).replace('-',':')
-    netmask = param.input
+    submask = param.sub_mask
     
     now = datetime.now()
     filename = f'ip_forwarding_{now.strftime("%Y%m%d_%H%M%S")}.pcap'
@@ -67,7 +67,7 @@ def ip_forwarding(param, logger):
         pcap_writer = PcapWriter(filename=filename, append=False, sync=True)
 
     forwarded_packets = sniff(prn=lambda pkt: addr_spoof(packet=pkt, my_ip=my_ip, my_eth=my_eth, 
-                                                        gateway_mac=gateway_mac, netmask=netmask, 
+                                                        gateway_mac=gateway_mac, submask=submask, 
                                                         logger=logger, iface=param.iface), store=False, iface=param.iface)
     pcap_writer.write(forwarded_packets)
     logger.info(f'Traffic was written in "{filename}"')
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     # parser.add_argument("--ip_dst", "-id", help="Destination IP address (victim).", required=True)
     # parser.add_argument("--eth_dst", "-ed", help="Destination MAC address (victim).", required=True)
     parser.add_argument("--gateway", "-g", help="gateway MAC-address", required=True, type=str)
-    parser.add_argument("--netmask", "-nm", help="mask of your network (default: '/24')", required=False, type=str, default='/24')
+    parser.add_argument("--submask", "-sm", help="subnet mask of your network (default: '/24')", required=False, type=str, default='/24')
     parser.add_argument("-i", "--iface", help="Network interface to send from.", required=False, type=str, default=conf.iface)
 
     cli_args = parser.parse_args()
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     
     args.iface = cli_args.iface
     args.eth_dst = cli_args.gateway
-    args.input = cli_args.netmask
+    args.sub_mask = cli_args.submask
     
     
     t_ip_forwarding = Tool(tool_func=ip_forwarding, VERSION=1.3, args=args)
