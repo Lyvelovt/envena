@@ -16,14 +16,19 @@ def check_subnet_membership(ip_to_check: str, local_interface_cidr: str) -> bool
     return ipaddress.ip_address(ip_to_check) in local_network
 
 
-def addr_spoof(packet, my_ip, my_eth, gateway_mac, submask, logger, iface):
+def addr_spoof(packet, my_ip, my_eth, gateway_mac, submask, logger, iface, nottl=False):
     global ARP_TABLE
     
     if not (packet.haslayer(IP) and packet.haslayer(Ether)):
         return
-
-    if packet[IP].ttl == 1 or packet[Ether].src == my_eth:
+    
+    if packet[Ether].src == my_eth:
         return
+    
+    if packet[IP].ttl <= 1 and not nottl:
+        logger.info('TTL ended, packet was dropped')
+        return
+    
     
     if packet[IP].dst != my_ip and packet[Ether].dst == my_eth:
         if check_subnet_membership(packet[IP].dst, f'{my_ip}/{submask}'):
@@ -47,7 +52,7 @@ def addr_spoof(packet, my_ip, my_eth, gateway_mac, submask, logger, iface):
     
         del packet[IP].chksum
     
-        sendp(packet, iface=iface, verbose=0)
+        sendp(packet, iface=iface, verbose=0, count=1)
         logger.info(f'{packet[IP].src} -> {packet[IP].dst}')
     
 
@@ -56,6 +61,9 @@ def ip_forwarding(param, logger):
     my_ip = get_if_addr(param.iface)
     gateway_mac = str(param.eth_dst).replace('-',':')
     submask = param.sub_mask
+    nottl = True if param.input == 'nottl' else False
+    
+    # filter_str = f"ip and not host {my_ip} and not ether src {my_eth}"
     
     now = datetime.now()
     filename = f'ip_forwarding_{now.strftime("%Y%m%d_%H%M%S")}.pcap'
@@ -63,12 +71,13 @@ def ip_forwarding(param, logger):
     try:
         pcap_writer = PcapWriter(filename=filename, append=False, sync=True)
     except Exception:
-        filename = f'ip_forwarding_{now.strftime("%Y%m%d_%H%M%S")}.pcap'
+        # filename = f'ip_forwarding_{now.strftime("%Y%m%d_%H%M%S")}.pcap'
         pcap_writer = PcapWriter(filename=filename, append=False, sync=True)
 
     forwarded_packets = sniff(prn=lambda pkt: addr_spoof(packet=pkt, my_ip=my_ip, my_eth=my_eth, 
                                                         gateway_mac=gateway_mac, submask=submask, 
-                                                        logger=logger, iface=param.iface), store=False, iface=param.iface)
+                                                        logger=logger, iface=param.iface, nottl=nottl), store=False, iface=param.iface)
+                            #   filter=filter_str)
     pcap_writer.write(forwarded_packets)
     logger.info(f'Traffic was written in "{filename}"')
 
@@ -79,7 +88,8 @@ if __name__ == '__main__':
     # parser.add_argument("--eth_dst", "-ed", help="Destination MAC address (victim).", required=True)
     parser.add_argument("--gateway", "-g", help="gateway MAC-address", required=True, type=str)
     parser.add_argument("--submask", "-sm", help="subnet mask of your network (default: '/24')", required=False, type=str, default='/24')
-    parser.add_argument("-i", "--iface", help="Network interface to send from.", required=False, type=str, default=conf.iface)
+    parser.add_argument("-i", "--iface", help="network interface to send from", required=False, type=str, default=conf.iface)
+    parser.add_argument('-nt', '--nottl', help='do not reduce TTL when forwarding a packet (may cause loops)', action='store_true')
 
     cli_args = parser.parse_args()
     
@@ -88,7 +98,8 @@ if __name__ == '__main__':
     args.iface = cli_args.iface
     args.eth_dst = cli_args.gateway
     args.sub_mask = cli_args.submask
+    args.input = 'nottl' if cli_args.nottl else ''
     
     
-    t_ip_forwarding = Tool(tool_func=ip_forwarding, VERSION=1.3, args=args)
+    t_ip_forwarding = Tool(tool_func=ip_forwarding, VERSION=1.4, args=args)
     t_ip_forwarding.start_tool()

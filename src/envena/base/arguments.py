@@ -109,6 +109,6 @@ class Arguments:
                 object.__setattr__(self, name, value)
                 return
             else:
-                self.logger.error('nvalid input got')
+                self.logger.error('Invalid input got')
         else:
                 self.logger.error('Invalid argument got')
