@@ -4,31 +4,33 @@ import ipaddress
 
 class IPProtocol(EthernetProtocol):
     __slots__ = ('iface','count','timeout','send_func',
-                             'ip_src','ip_dst','eth_src','eth_dst',
-                             'port_src','port_dst')
+                             'ip_src','ip_dst','eth_src','eth_dst','ttl')
     
     def __init__(self, iface, count, timeout, send_func, ip_src, \
-        ip_dst, eth_src, eth_dst, port_src, port_dst):
+        ip_dst, eth_src, eth_dst, ttl):
         
         super().__init__(iface, count, timeout, send_func, eth_src, eth_dst)
         
         if validate_ip(ip_src):
             self.ip_src = ipaddress.ip_address(ip_src)
         else:
-            raise ValueError('invalid ip_src IP address got')
+            raise ValueError('invalid ip_src IP-address got')
         if validate_ip(ip_dst):
             self.ip_dst = ipaddress.ip_address(ip_dst)
         else:
-            raise ValueError('invalid ip_dst IP address got')
+            raise ValueError('invalid ip_dst IP-address got')
         
-        if isinstance(port_src, int) and 0 <= port_src <= 65535:
-            self.port_src = port_src
+        # if isinstance(port_src, int) and 0 <= port_src <= 65535:
+        #     self.port_src = port_src
+        # else:
+        #     raise ValueError('invalid port_src port got')
+        
+        # if isinstance(port_dst, int) and 0 <= port_dst <= 65535:
+        #     self.port_dst = port_dst
+        # else:
+        #     raise ValueError('invalid port_dst port got')
+
+        if isinstance(ttl, int) and 1 <= ttl <= 255:
+            self.ttl = ttl
         else:
-            raise ValueError('invalid port_src port got')
-        
-        if isinstance(port_dst, int) and 0 <= port_dst <= 65535:
-            self.port_dst = port_dst
-        else:
-            raise ValueError('invalid port_dst port got')
-        
-        
+            raise ValueError('invlaid TTL got')

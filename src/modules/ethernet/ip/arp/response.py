@@ -1,6 +1,3 @@
-# from src.envena.config import scapy, Error_text, Fatal_Error, Clear
-# from src.envena.functions import validate_args
-import logging
 from scapy.all import ARP, Ether, sendp, hexdump
 
 def send_arp_response(param, printed=True):

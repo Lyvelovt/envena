@@ -34,14 +34,14 @@ class DHCPPacket(UDPProtocol):
         ip_src, ip_dst, eth_src, eth_dst, packet_type,
         port_src=67, port_dst=68, lease_time=360, xid=randint(1_000_000, 9_999_999),
         hostname='', param_req_list: list=[1, 3, 15, 6], sub_mask=ipaddress.ip_address('255.255.255.0'),
-        ip_router=None, dns_server='8.8.8.8'):
+        ip_router=None, dns_server='8.8.8.8', ttl=128):
         
         self.packet_type = packet_type
         
         send_func = self.send_func
 
         super().__init__(iface, count, timeout, ip_src, \
-            ip_dst, eth_src, eth_dst, send_func, port_src, port_dst)
+            ip_dst, eth_src, eth_dst, send_func, port_src, port_dst, ttl=ttl)
         
         if validate_ip(sub_mask):
             self.sub_mask = ipaddress.ip_address(sub_mask)
