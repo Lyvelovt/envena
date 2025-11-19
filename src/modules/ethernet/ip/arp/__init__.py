@@ -22,7 +22,7 @@ class ARPPacket(IPProtocol):
         send_func = self.send_func
         
         super().__init__(iface, count, timeout, send_func,
-            ip_src, ip_dst, eth_src, eth_dst, port_src=0, port_dst=0)
+            ip_src, ip_dst, eth_src, eth_dst, ttl=128)
         
     
     def __setattr__(self, name, value):
