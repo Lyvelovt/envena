@@ -14,11 +14,11 @@ class IPProtocol(EthernetProtocol):
         if validate_ip(ip_src):
             self.ip_src = ipaddress.ip_address(ip_src)
         else:
-            raise ValueError('invalid ip_src IP-address got')
+            raise ValueError(f'invalid ip_src {ip_src} IP-address got')
         if validate_ip(ip_dst):
             self.ip_dst = ipaddress.ip_address(ip_dst)
         else:
-            raise ValueError('invalid ip_dst IP-address got')
+            raise ValueError(f'invalid ip_dst {ip_dst} IP-address got')
         
         # if isinstance(port_src, int) and 0 <= port_src <= 65535:
         #     self.port_src = port_src

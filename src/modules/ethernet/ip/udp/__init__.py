@@ -5,8 +5,8 @@ class UDPProtocol(IPProtocol):
                              'ip_src','ip_dst','eth_src','eth_dst',
                              'port_src','port_dst','ttl')
     
-    def __init__(self, iface, count, timeout, ip_src, \
-        ip_dst, eth_src, eth_dst, send_func, port_src, port_dst, ttl=128):
+    def __init__(self, iface, count, timeout, send_func, eth_src, eth_dst, ip_src,
+        ip_dst, port_src, port_dst, ttl=128):
         
         super().__init__(iface, count, timeout, send_func, ip_src, ip_dst, eth_src, eth_dst, ttl=ttl)
         

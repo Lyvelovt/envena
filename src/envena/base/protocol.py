@@ -50,18 +50,20 @@ class BaseProtocol:
     def send_packet(self, printed=True):
         sent_packets = 0
         first_send = True
-        try:
-            while sent_packets < self.count:
-                if self.send_func(param=self, printed=first_send and printed):
-                    sent_packets += 1
-                if first_send:
-                    first_send = False
-                if printed:
-                    self._print_animated_sending(self._word_sending, self._dot_timer, self._word_timer)
-                sleep(self.timeout)
+        # try:
+        while sent_packets < self.count:
+            if self.send_func(param=self, printed=first_send and printed):
+                sent_packets += 1
+            if first_send:
+                first_send = False
             if printed:
-                print()
-                self.logger.info(f'Successfully sent {sent_packets} packet(s)')
-        except KeyboardInterrupt:
-            if printed:
-                self.logger.info(f'Successfully sent {sent_packets} packet(s)')
+                self._print_animated_sending(self._word_sending, self._dot_timer, self._word_timer)
+            sleep(self.timeout)
+        if printed:
+            print()
+            self.logger.info(f'Successfully sent {sent_packets} packet(s)')
+        # except KeyboardInterrupt:
+        #     if printed:
+        #         self.logger.info(f'Successfully sent {sent_packets} packet(s)')
+            # return None
+        #     exit()

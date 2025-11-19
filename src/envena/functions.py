@@ -10,7 +10,7 @@ from typing import List
 
 import ipaddress
 
-from scapy.all import Ether, ARP, srp, conf
+from scapy.all import Ether, ARP, srp, conf, get_if_addr, get_if_hwaddr
 import netaddr
 from netaddr.core import AddrFormatError, NotRegisteredError
 
@@ -113,11 +113,13 @@ def parse_ip_ranges(ip_range: str) -> List[str]:
     return parsed_ips
 
 def get_mac(target_ip: str, iface: str = conf.iface, timeout: float = 1.0) -> str | None:
-    ether_layer = Ether(dst="ff:ff:ff:ff:ff:ff")
-    arp_request = ARP(pdst=target_ip)
+    eth_src = get_if_hwaddr(iface)
+    ip_src = get_if_addr(iface)
+    # ether_layer = Ether(dst="ff:ff:ff:ff:ff:ff", src=eth_src)
+    arp_request = ARP(pdst=target_ip, psrc=ip_src, hwdst='ff:ff:ff:ff:ff:ff', hwsrc=eth_src, op='who-has')
     
     answered, unanswered = srp(
-        ether_layer / arp_request, 
+        arp_request, 
         timeout=timeout, 
         iface=iface, 
         verbose=0,

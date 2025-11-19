@@ -8,7 +8,7 @@ def send_icmp_echo_reply(param, printed=True)->bool:
     iface = str(param.iface)
     ttl = param.ttl
     seq = param.seq
-    id_ = param.id
+    icmp_id = param.icmp_id
     payload = param.payload
     
     packet = Ether(
@@ -19,7 +19,7 @@ def send_icmp_echo_reply(param, printed=True)->bool:
         src=ip_src,
         ttl=ttl
         ) / ICMP(
-        id=id_,
+        id=icmp_id,
         seq=seq,
         type=0
     )

@@ -14,14 +14,14 @@ class ICMPPacketType(enum.Enum):
 class ICMPPacket(IPProtocol):
     __slots__ = ('iface','count','timeout','send_func',
                              'ip_src','ip_dst','eth_src','eth_dst','packet_type',
-                             'seq','id','payload','logger')
+                             'seq','icmp_id','payload','logger')
     
     def _get_send_func_by_type(self, packet_type: ICMPPacketType):
         return packet_type.value[1]
     
-    def __init__(self, iface, count, timeout, 
-        ip_src, ip_dst, eth_src, eth_dst, packet_type,
-        seq, indef, ttl, payload=''):
+    def __init__(self, iface, count, timeout, eth_src, eth_dst,
+        ip_src, ip_dst, packet_type,
+        seq, icmp_id, ttl, payload=''):
         
         self.packet_type = packet_type
         
@@ -35,8 +35,8 @@ class ICMPPacket(IPProtocol):
         else:
             raise TypeError('invalid seq got')
         
-        if isinstance(indef, int) and 0 <= indef <= 65535:
-            self.id = indef
+        if isinstance(icmp_id, int) and 0 <= icmp_id <= 65535:
+            self.icmp_id = icmp_id
         else:
             raise TypeError('invalid id got')
 

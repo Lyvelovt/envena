@@ -13,8 +13,8 @@ class EthernetProtocol(BaseProtocol):
         if validate_eth(eth_src):
             self.eth_src = netaddr.EUI(eth_src)
         else:
-            raise ValueError('invalid eth_src MAC address got')
+            raise ValueError(f'invalid eth_src "{eth_src}" MAC-address got')
         if validate_eth(eth_dst):
             self.eth_dst = netaddr.EUI(eth_dst)
         else:
-            raise ValueError('invalid eth_dst MAC address got')
+            raise ValueError(f'invalid eth_dst "{eth_dst}" MAC-address got')
