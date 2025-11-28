@@ -4,6 +4,8 @@ import random
 import string
 import socket
 from .config import Error, Error_text, Clear, Info, Fatal_Error # For colored output
+from src.envena.banner import envena_art
+import time
 import ipaddress
 import re
 from typing import List
@@ -13,6 +15,14 @@ import ipaddress
 from scapy.all import Ether, ARP, srp, conf, get_if_addr, get_if_hwaddr, sendp
 import netaddr
 from netaddr.core import AddrFormatError, NotRegisteredError
+
+
+
+# Animated-print art
+def print_art()->None:
+    for line in envena_art:
+        print(line)
+        time.sleep(0.02)
 
 # Get hostname by DNS protocol (can send DNS request only with your IP, 
 # becase based on socket lib)
@@ -170,7 +180,7 @@ def validate_eth(eth: str = '', is_oui: bool = False) -> bool:
         else:
             eth = netaddr.EUI(eth)
         return True
-    except AddrFormatError, TypeError, ValueError:
+    except (AddrFormatError, TypeError, ValueError):
         return False
 
 # Return random IP-address by mask or not

@@ -1,11 +1,13 @@
 import logging
 from src.envena.config import ROOT_LOGGER_NAME
-from src.envena.base.arguments import Arguments
+from src.envena.base.arguments import Arguments, public_args
+
+
 
 class Tool:
     __slots__ = ('VERSION', 'tool_func', 'logger', 'args')
     
-    def __init__(self, tool_func: function, VERSION: float, args: Arguments):
+    def __init__(self, tool_func: function, VERSION: float, args: Arguments = public_args):
         self.logger = logging.getLogger(f'{ROOT_LOGGER_NAME}.{__class__.__name__}/{args.iface}')
         self.tool_func = None
         

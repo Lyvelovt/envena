@@ -160,11 +160,7 @@ def get_my_info()->None:
         f"Program running as root.: {True if os.getuid() == 0 else False}"
         )
     
-# Animated-print art
-def print_art()->None:
-    for line in envena_art:
-        print(line)
-        time.sleep(0.02)
+
 
 # Send packeges according to count, timeout, type of package and e.t.c.
 def send_packet(type: str, args: Dict)->bool:

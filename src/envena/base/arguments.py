@@ -31,84 +31,106 @@ class Arguments:
                 object.__setattr__(self, name, ipaddress.ip_address(value))
                 return
             else:
-                self.logger.error('Invalid IP-address got')
+                raise ValueError(f'Invalid value "{value}" for "{name}"')
+            
         elif name == 'ip_src':
             if validate_ip(value):
                 object.__setattr__(self, name,ipaddress.ip_address(value))
                 return
             else:
-                self.logger.error('Invalid IP-address got')
+                raise ValueError(f'Invalid value "{value}" for "{name}"')
+            
         elif name == 'eth_dst':
             if validate_eth(value):
                 object.__setattr__(self, name, netaddr.EUI(value))
                 return
             else:
-                self.logger.error('Invalid MAC-address got')
+                raise ValueError(f'Invalid value "{value}" for "{name}"')
+            
         elif name == 'eth_src':
             if validate_eth(value):
                 object.__setattr__(self, name, netaddr.EUI(value))
                 return
             else:
-                self.logger.error('Invalid MAC-address got')
+                raise ValueError(f'Invalid value "{value}" for "{name}"')
+            
         elif name == 'port_src':
-            if isinstance(value, int) and 0 <= value <= 65535:
+            if not isinstance(value, int):
+                raise TypeError(f'Invalid value "{value}" for "{name}"')
+            elif not 0 <= value <= 65535:
+                raise ValueError(f'Invalid value "{value}" for "{name}"')
+            else:
                 object.__setattr__(self, name,  value)
                 return
-            else:
-                self.logger.error('Invalid port got')
+            
         elif name == 'port_dst':
-            if isinstance(value, int) and 0 <= value <= 65535:
+            if not isinstance(value, int):
+                raise TypeError(f'Invalid value "{value}" for "{name}"')
+            elif not 0 <= value <= 65535:
+                raise ValueError(f'Invalid value "{value}" for "{name}"')
+            else:
                 object.__setattr__(self, name, value)
                 return
-            else:
-                self.logger.error('Invalid port got')
+            
         elif name == 'count':
-            if isinstance(value, int) or value == inf:
+            if not (isinstance(value, int) or value == inf):
+                raise TypeError(f'Invalid value "{value}" for "{name}"')
+            else:
                 object.__setattr__(self, name, value)
                 return
-            else:
-                self.logger.error('Invalid count got')
+            
         elif name == 'timeout':
-            if isinstance(value, float) or isinstance(value, int):
+            if not (isinstance(value, float) or isinstance(value, int)):
+                raise TypeError(f'Invalid value "{value}" for "{name}"')
+            else:
                 object.__setattr__(self, name, value)
                 return
-            else:
-                self.logger.error('Invalid timeout got')
+            
         elif name == 'iface':
-            if isinstance(value, str) and value in get_if_list():
+            if not isinstance(value, str):
+                raise TypeError(f'Invalid value "{value}" for "{name}"')
+            elif not value in get_if_list():
+                raise ValueError(f'Invalid value "{value}" for "{name}"')
+            else:
                 object.__setattr__(self, name, value)
                 return
-            else:
-                self.logger.error('Invalid interface got')
+            
         elif name == 'sub_mask':
             if parse_submask(value):
                 object.__setattr__(self, name, parse_submask(value))
                 return
             else:
-                self.logger.error('Invalid IP-address got')
+                raise ValueError(f'Invalid value "{value}" for "{name}"')
+            
         elif name == 'sub_ip':
             if validate_ip(value):
                 object.__setattr__(self, name, value)
                 return
             else:
-                self.logger.error('Invalid IP-address got')
+                raise ValueError(f'Invalid value "{value}" for "{name}"')
+            
         elif name == 'xid':
             if isinstance(value, int):
                 object.__setattr__(self, name, value)
                 return
             else:
-                self.logger.error('Invalid XID got')
+                raise TypeError(f'Invalid value "{value}" for "{name}"')
+            
         elif name == 'dns_server':
             if validate_ip(value):
                 object.__setattr__(self, name, value)
                 return
             else:
-                self.logger.error('Invalid IP-address got')
+                raise ValueError(f'Invalid value "{value}" for "{name}"')
+            
         elif name == 'input':
             if isinstance(value, str):
                 object.__setattr__(self, name, value)
                 return
             else:
-                self.logger.error('Invalid input got')
+                raise TypeError(f'Invalid value "{value}" for "{name}"')
+            
         else:
-                self.logger.error('Invalid argument got')
+                raise AttributeError(f'Invalid argument "{name}"')
+
+public_args = Arguments()

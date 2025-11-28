@@ -181,7 +181,7 @@ def live_capture_iface(iface: str, timeout: int = 10) -> List:
 
 def dot11trilateration(args: Dict):
     if not validate_args(
-        iface=args['iface'],
+        # iface=args['iface'],
         timeout=args['timeout']):
         return False
     ainput = []
@@ -191,17 +191,21 @@ def dot11trilateration(args: Dict):
         ainput = args['input'].split(',')
         ainput = [i.strip(" \n\t") for i in ainput]
         # ainput = [pcaps (optional), A, n]
-    try:
-        if not bool(re.fullmatch(pcaps_pattern, ainput[0])) and not args['iface']:
-            print(f"{Error}Error: {Error_text}use pcaps or iface mode{Clear}")
-            sys.exit(1)
-        elif bool(re.fullmatch(pcaps_pattern, ainput[0])):
-            pcaps = [i.strip() for i in re.match.group(2).split(',') if i.strip()]
-    except IndexError:
-        pass
+    # try:
+    #     if not bool(re.fullmatch(pcaps_pattern, ainput[0])) and not args['iface']:
+    #         print(f"{Error}Error: {Error_text}use pcaps or iface mode{Clear}")
+    #         sys.exit(1)
+    #     elif bool(re.fullmatch(pcaps_pattern, ainput[0])):
+    #         pcaps = [i.strip() for i in re.match.group(2).split(',') if i.strip()]
+    # except IndexError:
+    #     pass
+    print(ainput[0][2:])
+    pcaps = [ainput[0][2:], ainput[1], ainput[2][0:10]]
+    print(pcaps)
+    args['A'] = 40.0
+    args['n'] = 2.2
     
-    
-    if pcaps:
+    if pcaps or True:
         for p in pcaps:
             if not os.path.isfile(p):
                 print(f"{Error}Error: {Error_text}PCAP not found: {p}{Clear}")
@@ -236,13 +240,13 @@ def dot11trilateration(args: Dict):
         pos1, pos2, pos3 = positions
         
     # вычисляем
-    results = locate_devices_from_dicts(d1, d2, d3, pos1, pos2, pos3, A=args.A, n=args.n)
+    results = locate_devices_from_dicts(d1, d2, d3, pos1, pos2, pos3, A=args['A'], n=args['n'])
     print_results_table(results)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=f"Dot11Trilateration module. Version: {dot11trilateration_v}")
     parser.add_argument("-p", "--pcaps", nargs=3, help="Three .pcap files (static mode)")
-    parser.add_argument("--iface", help="Interface for live mode (will make 3 sniffs one by one)")
+    parser.add_argument("--iface", help="Interface for live mode (will make 3 sniffs one by one)", required=False)
     parser.add_argument("--timeout", type=int, default=10, help="Duration of sniffing for live mode (default 10)")
     parser.add_argument("--A", type=float, default=-40.0, help="Parameter 'A' (RSSI at 1m) for model")
     parser.add_argument("--n", type=float, default=2.2, help="Parameter 'n' (path-loss exponent)")

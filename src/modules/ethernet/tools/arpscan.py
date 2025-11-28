@@ -3,7 +3,7 @@ from random import uniform
 from src.envena.functions import get_hostname, get_vendor, parse_ip_ranges
 from random import shuffle
 from src.modules.ethernet.ip.arp import ARPPacket, ARPPacketType
-from src.envena.base.arguments import Arguments
+from src.envena.base.arguments import public_args
 from src.envena.base.tool import Tool
 from scapy.all import conf, get_if_hwaddr, get_if_addr, conf, ARP, AsyncSniffer
 
@@ -102,6 +102,9 @@ def scan_network(logger, ip_range: str, ip_src: str=None, eth_src: str=None, ifa
 
 def arpscan(param, logger)->None:
     try:
+        iface = param.iface if param.iface else str(conf.iface)
+        eth_src = get_if_hwaddr(iface)
+        ip_src = get_if_addr(iface)
         start_time = time.time()
         
         try:
@@ -110,7 +113,8 @@ def arpscan(param, logger)->None:
             logger.fatal('Invalid IP-address(es) got')
             return
         
-        devices_info = scan_network(logger=logger, ip_range=ip_range, eth_src=param.eth_src, ip_src=param.ip_src, iface=param.iface, timeout=param.timeout)
+        devices_info = scan_network(logger=logger, ip_range=ip_range, eth_src=eth_src, ip_src=ip_src, 
+                                    iface=iface, timeout=param.timeout if param.timeout else 10)
         
         if devices_info:
             logger.info(f'Scan finished in {round(time.time() - start_time, 3)} s.')
@@ -121,6 +125,9 @@ def arpscan(param, logger)->None:
         
     except KeyboardInterrupt:
         logger.info(f'Scan finished in {round(time.time() - start_time, 3)} s.')
+
+
+t_arpscan = Tool(tool_func=arpscan, VERSION=2.2)
 
 if __name__ == "__main__":
     import argparse
@@ -138,12 +145,10 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--iface", help="interface to scanning from", required=False, default=str(conf.iface))
     
     cli_args = parser.parse_args()
-    args = Arguments()
-    args.iface = cli_args.iface
-    args.input = cli_args.ip
-    args.timeout = cli_args.timeout
-    args.eth_src = get_if_hwaddr(args.iface)
-    args.ip_src = get_if_addr(args.iface)
+    # args = Arguments()
+    public_args.iface = cli_args.iface
+    public_args.input = cli_args.ip
+    public_args.timeout = cli_args.timeout
     
-    t_arpscan = Tool(tool_func=arpscan, VERSION=2.2, args=args)
+    
     t_arpscan.start_tool()

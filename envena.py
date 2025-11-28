@@ -36,8 +36,8 @@ if '--i-am-too-stupid' in sys.argv:
         sys.exit(1)
 
 from src.envena.config import *
-from src.envena.commands import *
-from src.envena.functions import validate_ip, validate_eth, envena_panic
+# from src.envena.commands import *
+from src.envena.functions import *
 import readline
 # Shell input
 def process_input(user_input: str)->None:
