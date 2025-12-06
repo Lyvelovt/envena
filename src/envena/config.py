@@ -138,6 +138,7 @@ else:
 try:
     import scapy.all as scapy
 except ModuleNotFoundError:
+    pass
     print(f"{Fatal_Error}Error: 'Scapy' must been installed. Try: 'pip3 install -r requirements.txt'.{Clear}")
     print(f"{Info}You also can run 'envena.py' with '--i-am-too-stupid' flag if you do not know how to install dependencies.{Clear}")
-    main_exit()
+    #main_exit()

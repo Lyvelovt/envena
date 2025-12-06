@@ -26,50 +26,27 @@ class Arguments:
             object.__setattr__(self, name, value)
             return
         
-        if name == 'ip_dst':
+        if name in ['ip_dst', 'ip_src', 'sub_ip', 'dns_server']:
             if validate_ip(value):
                 object.__setattr__(self, name, ipaddress.ip_address(value))
                 return
             else:
                 raise ValueError(f'Invalid value "{value}" for "{name}"')
             
-        elif name == 'ip_src':
-            if validate_ip(value):
-                object.__setattr__(self, name,ipaddress.ip_address(value))
-                return
-            else:
-                raise ValueError(f'Invalid value "{value}" for "{name}"')
-            
-        elif name == 'eth_dst':
+        elif name in ['eth_dst', 'eth_src']:
             if validate_eth(value):
                 object.__setattr__(self, name, netaddr.EUI(value))
                 return
             else:
                 raise ValueError(f'Invalid value "{value}" for "{name}"')
             
-        elif name == 'eth_src':
-            if validate_eth(value):
-                object.__setattr__(self, name, netaddr.EUI(value))
-                return
-            else:
-                raise ValueError(f'Invalid value "{value}" for "{name}"')
-            
-        elif name == 'port_src':
+        elif name in ['port_src', 'port_dst']:
             if not isinstance(value, int):
                 raise TypeError(f'Invalid value "{value}" for "{name}"')
             elif not 0 <= value <= 65535:
                 raise ValueError(f'Invalid value "{value}" for "{name}"')
             else:
                 object.__setattr__(self, name,  value)
-                return
-            
-        elif name == 'port_dst':
-            if not isinstance(value, int):
-                raise TypeError(f'Invalid value "{value}" for "{name}"')
-            elif not 0 <= value <= 65535:
-                raise ValueError(f'Invalid value "{value}" for "{name}"')
-            else:
-                object.__setattr__(self, name, value)
                 return
             
         elif name == 'count':
@@ -102,26 +79,12 @@ class Arguments:
             else:
                 raise ValueError(f'Invalid value "{value}" for "{name}"')
             
-        elif name == 'sub_ip':
-            if validate_ip(value):
-                object.__setattr__(self, name, value)
-                return
-            else:
-                raise ValueError(f'Invalid value "{value}" for "{name}"')
-            
         elif name == 'xid':
             if isinstance(value, int):
                 object.__setattr__(self, name, value)
                 return
             else:
                 raise TypeError(f'Invalid value "{value}" for "{name}"')
-            
-        elif name == 'dns_server':
-            if validate_ip(value):
-                object.__setattr__(self, name, value)
-                return
-            else:
-                raise ValueError(f'Invalid value "{value}" for "{name}"')
             
         elif name == 'input':
             if isinstance(value, str):
