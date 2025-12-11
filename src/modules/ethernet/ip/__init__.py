@@ -9,7 +9,7 @@ class IPProtocol(EthernetProtocol):
     def __init__(self, iface, count, timeout, send_func, ip_src, \
         ip_dst, eth_src, eth_dst, ttl):
         
-        super().__init__(iface, count, timeout, send_func, eth_src, eth_dst)
+        super().__init__(iface=iface, send_func=send_func, count=count, timeout=timeout, eth_src=eth_src, eth_dst=eth_dst)
         
         if validate_ip(ip_src):
             self.ip_src = ipaddress.ip_address(ip_src)

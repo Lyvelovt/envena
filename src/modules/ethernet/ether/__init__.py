@@ -19,8 +19,8 @@ class EtherPacket(EthernetProtocol):
         
         send_func = self.send_func
 
-        super().__init__(iface, count, timeout,
-            send_func, eth_src, eth_dst)
+        super().__init__(iface, send_func, count, timeout,
+            eth_src, eth_dst)
         
         if isinstance(payload, str):
             self.payload = payload

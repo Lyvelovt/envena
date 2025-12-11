@@ -61,6 +61,7 @@ if os.name == "posix":
     w = '[90m'
     r = '[0;0;0m'
     g = '[30m'
+    b = '\033[96m'
     n = '[37m'
     c = Clear
 else:
@@ -93,6 +94,7 @@ else:
         y = colorama.Style.BRIGHT + colorama.Fore.RED
         w = colorama.Fore.LIGHTBLACK_EX
         r = colorama.Style.RESET_ALL
+        b = Style.BRIGHT + Fore.CYAN
         g = colorama.Fore.BLACK
         n = colorama.Fore.WHITE
         c = Clear

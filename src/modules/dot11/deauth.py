@@ -16,7 +16,7 @@ def send_deauth(param, printed: bool=True, two_way: bool=True)->bool:
             if printed:
                 param.logger.info(f"Sent deauth frame: {hw_src} -> {hw_dst}. BSSID: {bssid}")
                 hexdump(packet)
-            return True
+                return True
         else:
             sendp(packet, iface=iface, verbose=False)
             

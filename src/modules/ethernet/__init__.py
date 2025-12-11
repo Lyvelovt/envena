@@ -8,7 +8,7 @@ class EthernetProtocol(BaseProtocol):
     
     def __init__(self, iface, count, timeout, send_func, eth_src, eth_dst):
         
-        super().__init__(iface, count, timeout, send_func)
+        super().__init__(iface, send_func, count, timeout)
         
         if validate_eth(eth_src):
             self.eth_src = netaddr.EUI(eth_src)

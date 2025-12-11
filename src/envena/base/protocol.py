@@ -3,10 +3,12 @@ import logging
 from time import sleep
 from src.envena.config import ROOT_LOGGER_NAME
 
+from typing import Callable, Union
+
 class BaseProtocol:
     __slots__ = ('iface','count','timeout','send_func', '_word_sending', '_dot_timer', '_word_timer')
     
-    def __init__(self, iface, count, timeout, send_func):
+    def __init__(self, iface: str, send_func: Callable, count: int=1, timeout: Union[int, float]=0):
         self.send_func = None
         self._word_sending = 'sending'
         self._dot_timer = 0
@@ -22,12 +24,12 @@ class BaseProtocol:
         if isinstance(count, int) or count is math.inf:
             self.count = count
         else:
-            TypeError("count must be 'int' or 'math.inf'")
+            raise TypeError("count must be 'int' or 'math.inf'")
         
         if isinstance(timeout, float) or isinstance(timeout, int):
             self.timeout = timeout
         else:
-            raise TypeError("timeout must be 'float' or 'int'")
+            raise TypeError(f"timeout must be 'float' or 'int', not '{timeout}'")
         
         if not callable(send_func):
             # self.logger.info(f'{send_func} is not callable')
