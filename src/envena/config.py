@@ -27,7 +27,7 @@ ROOT_LOGGER = setup_root_logger()
 # Word that always print with exit
 BYE_WORD = 'Bye-bye! Quiting...'
 
-ENVENA_VERSION = '1.9.5'
+ENVENA_VERSION = '1.9.7'
 
 def main_exit()->None:
     print(BYE_WORD)
