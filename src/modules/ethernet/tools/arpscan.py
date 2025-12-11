@@ -140,9 +140,9 @@ if __name__ == "__main__":
     # '''
 
     parser = argparse.ArgumentParser(description='ARPscan is a scanner that use ARP protocol')
-    parser.add_argument("-ip", help="target IP or range", required=True)
+    parser.add_argument("-ip", help="target IP or range", required=True, type=str)
     parser.add_argument("-t", "--timeout", help="waiting time for responses in seconds", required=False, default=10, type=float)
-    parser.add_argument("-i", "--iface", help="interface to scanning from", required=False, default=str(conf.iface))
+    parser.add_argument("-i", "--iface", help="interface to scanning from", required=False, default=str(conf.iface), type=str)
     
     cli_args = parser.parse_args()
     # args = Arguments()

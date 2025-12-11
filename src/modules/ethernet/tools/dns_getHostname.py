@@ -15,7 +15,7 @@ if __name__ == "__main__":
         import argparse
 
         parser = argparse.ArgumentParser(description="Script witch get host domain name by IP-address", formatter_class=argparse.RawDescriptionHelpFormatter)
-        parser.add_argument("-ip", help="target IP.", required=True)  # , required=True)
+        parser.add_argument("-ip", help="target IP.", required=True, type=str)  # , required=True)
         # parser.add_argument( "-i", "--interface", help="Network interface.")
 
         arg = parser.parse_args()

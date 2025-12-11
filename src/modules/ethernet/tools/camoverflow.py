@@ -44,8 +44,8 @@ t_cam_overflow = Tool(tool_func=cam_overflow, VERSION=1.1)
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description=f"CAM-overflow attack module")
-    parser.add_argument("-i", "--iface", help="network iface send from", required=False, default=str(conf.iface))
-    parser.add_argument("-ed", "--eth_dst", help="destination MAC-address", required=False, default=rand_eth())
+    parser.add_argument("-i", "--iface", help="network iface send from", required=False, default=str(conf.iface), type=str)
+    parser.add_argument("-ed", "--eth_dst", help="destination MAC-address", required=False, default=rand_eth(), type=str)
     # parser.add_argument("-p", "--payload", help="payload content. The default is 'X' in 64 times", required=False, default='X'*64)
     parser.add_argument("-t", "--timeout", help="timeout between of sending packets. The default is 0.002 (~500 packets/sec)", 
                         required=False, type=float, 

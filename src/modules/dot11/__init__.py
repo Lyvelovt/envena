@@ -21,7 +21,7 @@ class Dot11Packet(BaseProtocol):
         send_func = self.send_func
 
         super().__init__(iface, count, timeout,
-            send_func, eth_src, eth_dst)
+            send_func, hw_src, hw_dst)
         
         if isinstance(payload, str):
             self.payload = payload
@@ -30,12 +30,12 @@ class Dot11Packet(BaseProtocol):
     
     def __setattr__(self, name, value):
         if name == 'packet_type':
-            if not isinstance(value, EtherPacketType):
+            if not isinstance(value, Dot11PacketType):
                 raise TypeError('invalid packet type got')
             
             send_func = self._get_send_func_by_type(value)
             object.__setattr__(self, 'send_func', send_func)
-        object.__setattr__(self, name, value)
+            object.__setattr__(self, name, value)
         
         elif name == 'hw_src' or name == 'hw_dst':
             if not validate_eth(value):

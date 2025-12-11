@@ -2,6 +2,8 @@ from src.envena.base.arguments import public_args
 from src.envena.base.tool import Tool
 from scapy.all import conf, get_if_hwaddr, conf, AsyncSniffer, Dot11, RadioTap, Dot11Deauth
 from scapy.all import sendp
+from src.envena.functions import validate_bpf
+from time import sleep
 
 sent_packets = 0
 
@@ -29,8 +31,11 @@ def jammer(param, logger)->None:
         global sent_packets
         iface = param.iface if param.iface else str(conf.iface)
         eth_src = get_if_hwaddr(iface)
-
-        data_filter = "wlan type data"
+        if not validate_bpf(param.input):
+            logger.fatal('Incorrect BPF. Check up your "--filter" option')
+            return
+        user_filter = f' and ({param.input})' if param.input != '' else ''
+        data_filter = "wlan type data" + user_filter
 
         sniffer = AsyncSniffer(iface=iface, prn=lambda pkt: process_pkt(pkt=pkt, logger=logger, iface=iface,
                                                                         eth_src=eth_src),
@@ -38,9 +43,11 @@ def jammer(param, logger)->None:
 
         sniffer.start()
 
-        while True:
-            # wait for ctrl+c
-            pass
+        logger.info("Waiting for target(s) data frames...")
+        logger.info("Press Enter or Ctrl+C to stop")
+
+        input()
+        raise KeyboardInterrupt
 
     except KeyboardInterrupt:
         if sniffer.running:
@@ -54,10 +61,14 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='Dot11 deauth jammer')
-    parser.add_argument("-i", "--iface", help="work interface", required=False, default=str(conf.iface))
+    parser.add_argument("-i", "--iface", help="work interface", required=False, default=str(conf.iface), type=str)
+    parser.add_argument("-f", "--filter", 
+                        help="Berkeley packet filter that will used to traffic. Can be used as whitelist. Example: 'wlan host <MAC_ADDRESS>' if you want to jam only one WLAN",
+                        required=False, default='', type=str)
 
     cli_args = parser.parse_args()
     public_args.iface = cli_args.iface
+    public_args.input = cli_args.filter.lower()
 
     t_jammer.start_tool()
 

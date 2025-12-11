@@ -10,6 +10,9 @@ import ipaddress
 import re
 from typing import List
 
+from scapy.arch.common import compile_filter
+from scapy.error import Scapy_Exception
+
 import ipaddress
 
 from scapy.all import Ether, ARP, srp, conf, get_if_addr, get_if_hwaddr, sendp
@@ -181,6 +184,14 @@ def validate_eth(eth: str = '', is_oui: bool = False) -> bool:
             eth = netaddr.EUI(eth)
         return True
     except (AddrFormatError, TypeError, ValueError):
+        return False
+
+# Validate BPF string
+def validate_bpf(filter: str, iface=None) -> bool:
+    try:
+        compile_filter(filter, iface)
+        return True
+    except Scapy_Exception:
         return False
 
 # Return random IP-address by mask or not
