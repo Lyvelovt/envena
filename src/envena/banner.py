@@ -17,8 +17,8 @@ envena_art = [
     f'           {w}?{n}@{g}c     {w}c{n}@5@@{w}?5{n}@@@@@5@@@5@@@{w}?.    {n}https://github.com/Lyvelovt/envena.git{r}',
     f'                   {g}c{n}@@@{w}.  {g}c{w}5{n}@@@%@@@5{w}5{n}@@{w}??',
     f'                   {w}.{n}%@{w}?     ?{n}@@@5@@@@@5{w}5?    {y}GET THE NET !{r}',
-    f'                   {w}?5       {w}.{n}@@@{w}c{g}c{w}?{n}@@@@@{w}?    #{Muted + x}Network packages manipulation{r}',
-    f'                   {g}c         {n}@@5    {w}?{n}5@%{w}.    {Muted + x}utility.{r}',
+    f'                   {w}?5       {w}.{n}@@@{w}c{g}c{w}?{n}@@@@@{w}?    #{Muted + x}Envena: Network Vulnerability Exposure {r}',
+    f'                   {g}c         {n}@@5    {w}?{n}5@%{w}.    {Muted + x} ..Node Analyzer{r}',
     f'                            {g}c{n}@@{w}c      ?5     #{Muted + x}Use \'?\' or \'help\' for help info.{r}',
     f'                             {w}5{g}c          ',
     f'                             {w}c{r}           '
