@@ -3,7 +3,7 @@ from scapy.all import PcapWriter, sniff, conf, get_if_addr, get_if_hwaddr
 from datetime import datetime
 
 from src.envena.functions import get_mac
-from src.envena.base.arguments import Arguments
+from src.envena.base.arguments import Arguments, public_args
 from src.envena.base.tool import Tool
 # from src.envena.base.address import IPaddrType
 import ipaddress
@@ -81,6 +81,8 @@ def ip_forwarding(param, logger):
     pcap_writer.write(forwarded_packets)
     logger.info(f'Traffic was written in "{filename}"')
 
+t_ip_forwarding = Tool(tool_func=ip_forwarding, VERSION=1.4)
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description=f"IP-forwarding module")
@@ -93,13 +95,12 @@ if __name__ == '__main__':
 
     cli_args = parser.parse_args()
     
-    args=Arguments()
+    # args=Arguments()
     
-    args.iface = cli_args.iface
-    args.eth_dst = cli_args.gateway
-    args.sub_mask = cli_args.submask
-    args.input = 'nottl' if cli_args.nottl else ''
+    public_args.iface = cli_args.iface
+    public_args.eth_dst = cli_args.gateway
+    public_args.sub_mask = cli_args.submask
+    public_args.input = 'nottl' if cli_args.nottl else ''
     
     
-    t_ip_forwarding = Tool(tool_func=ip_forwarding, VERSION=1.4, args=args)
     t_ip_forwarding.start_tool()

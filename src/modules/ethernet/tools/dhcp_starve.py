@@ -3,7 +3,7 @@ import time
 from src.envena.functions import rand_eth
 from random import uniform, randint
 from src.envena.base.tool import Tool
-from src.envena.base.arguments import Arguments
+from src.envena.base.arguments import Arguments, public_args
 from scapy.all import conf
 from src.modules.ethernet.ip.udp.dhcp import DHCPPacket, DHCPPacketType
 
@@ -66,15 +66,17 @@ def dhcp_starve(param, logger)->None:
     except KeyboardInterrupt:
         logger.info(f"{sent_packets} packet(s) sent")
 
+t_dhcp_starve = Tool(tool_func=dhcp_starve, VERSION=1.0)
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description=f"DHCP-starvation attack module")
     parser.add_argument("-i", "--iface", required=True, help="network interface", default=str(conf.iface))
     cli_args = parser.parse_args()
     
-    args=Arguments()
+    # args=Arguments()
     
-    args.iface = cli_args.iface
+    public_args.iface = cli_args.iface
     
-    t_dhcp_starve = Tool(tool_func=dhcp_starve, VERSION=1.0, args=args)
+    
     t_dhcp_starve.start_tool()

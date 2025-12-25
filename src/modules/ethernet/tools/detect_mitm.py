@@ -1,7 +1,7 @@
 from datetime import datetime
 from scapy.all import ARP, conf, get_if_hwaddr, IP, Ether
 from scapy.all import PcapWriter, sniff
-from src.envena.base.arguments import Arguments
+from src.envena.base.arguments import Arguments, public_args
 from src.envena.base.tool import Tool
 from src.envena.functions import validate_ip
 
@@ -119,6 +119,7 @@ def detect_mitm(param, logger)->None:
     pcap_writer.write(arpspoof_packets)
     logger.info(f'Traffic was writted in "{filename}"')
  
+t_detect_mitm = Tool(tool_func=detect_mitm, VERSION=1.1)
 
 if __name__ == '__main__':
     import argparse
@@ -127,12 +128,12 @@ if __name__ == '__main__':
     parser.add_argument("-g", "--gateway", help="gateway IP-address", required=True, type=str)
 
     cli_args = parser.parse_args()
-    args = Arguments()
+    # args = Arguments()
     
-    args.iface = cli_args.iface
-    args.input = cli_args.gateway
-    get_if_hwaddr(args.iface)
+    public_args.iface = cli_args.iface
+    public_args.input = cli_args.gateway
+    # get_if_hwaddr(public_args.iface)
     
-    t_detect_mitm = Tool(tool_func=detect_mitm, VERSION=1.1, args=args)
+    
     
     t_detect_mitm.start_tool()

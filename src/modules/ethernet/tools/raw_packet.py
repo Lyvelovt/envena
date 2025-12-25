@@ -1,6 +1,6 @@
 from src.envena.base.tool import Tool
 from scapy.all import sendp, hexdump, conf
-from src.envena.base.arguments import Arguments
+from src.envena.base.arguments import Arguments, public_args
 
 def send_raw_packet(param, printed: bool=True)->bool:
     with open(param.input, 'r') as pkt_file:
@@ -14,6 +14,8 @@ def send_raw_packet(param, printed: bool=True)->bool:
         param.logger.error(f"Packet was not sent: {e}")
         return False
 
+t_raw_packet = Tool(tool_func=send_raw_packet, VERSION=1.1)
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description="Raw packet send script")
@@ -25,9 +27,9 @@ if __name__ == '__main__':
     args = Arguments()
     
 
-    args.input = cli_args.file
-    args.iface = cli_args.iface
+    public_args.input = cli_args.file
+    public_args.iface = cli_args.iface
     
-    t_send_raw_packet = Tool(args=args, tool_func=send_raw_packet, VERSION=1.1)
+    
 
-    t_send_raw_packet.start_tool()
+    t_raw_packet.start_tool()

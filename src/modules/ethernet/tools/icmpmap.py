@@ -3,7 +3,7 @@ from scapy.all import sniff, conf, get_if_addr, get_if_hwaddr
 from time import monotonic
 
 from src.envena.functions import get_mac, parse_ip_ranges
-from src.envena.base.arguments import Arguments
+from src.envena.base.arguments import Arguments, public_args
 from src.envena.base.tool import Tool
 from src.modules.ethernet.ip.icmp import ICMPPacket, ICMPPacketType
 from random import randint
@@ -131,6 +131,8 @@ def icmpmap(param, logger):
                             # break   
     except KeyboardInterrupt:
         raise KeyboardInterrupt
+    
+t_icmpmap = Tool(tool_func=icmpmap, VERSION=1.4)
         
 if __name__ == '__main__':
     try:
@@ -145,14 +147,13 @@ if __name__ == '__main__':
 
         cli_args = parser.parse_args()
         
-        args=Arguments()
+        # args=Arguments()
         
-        args.iface = cli_args.iface
-        args.ip_dst = cli_args.ip_dst
-        args.input = cli_args.ip
+        public_args.iface = cli_args.iface
+        public_args.ip_dst = cli_args.ip_dst
+        public_args.input = cli_args.ip
         
-        
-        t_icmpmap = Tool(tool_func=icmpmap, VERSION=1.4, args=args)
         t_icmpmap.start_tool()
+        
     except KeyboardInterrupt:
         exit()

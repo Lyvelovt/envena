@@ -39,7 +39,7 @@ def cam_overflow(param, logger)->None:
     except KeyboardInterrupt:
         logger.info(f"{sent_packets} packet(s) sent")
 
-t_cam_overflow = Tool(tool_func=cam_overflow, VERSION=1.1)
+t_camoverflow = Tool(tool_func=cam_overflow, VERSION=1.1)
 
 if __name__ == '__main__':
     import argparse
@@ -59,4 +59,4 @@ if __name__ == '__main__':
     # args.input = cli_args.payload
     
     
-    t_cam_overflow.start_tool()
+    t_camoverflow.start_tool()
