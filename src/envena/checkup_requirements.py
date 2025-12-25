@@ -24,7 +24,7 @@ if __name__ == '__main__':
                 logger.error('Failed to install requirements using "requirements.txt", retrying without it...')
                 result = subprocess.run(
                     ['pip', 'install', 'scapy>=2.6.1', 'colorama', 'rich',
-                                         'netaddr', 'ipaddress', 'numpy'],
+                                         'netaddr', 'ipaddress', 'numpy', 'cmd2'],
                            capture_output=1,
                            text=1)
                 
@@ -80,6 +80,12 @@ if __name__ == '__main__':
     except Exception as e:
         logger.error(f'Ipaddress lib is not installed. Details: {e}')
         NOT_INSTALLED_LIBS.append('ipaddress')
+    
+    try:
+        import cmd2
+    except Exception as e:
+        logger.error(f'Cmd2 lib is not installed. Details: {e}')
+        NOT_INSTALLED_LIBS.append('cmd2')
     
     if NOT_INSTALLED_LIBS != []:
         logger.info(f'Try "pip install -r requirements" or "pip install {' '.join(NOT_INSTALLED_LIBS)}"')
