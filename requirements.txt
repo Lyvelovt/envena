@@ -3,3 +3,4 @@ colorama; platform_system == "Windows"
 rich
 numpy
 netaddr
+ipaddress

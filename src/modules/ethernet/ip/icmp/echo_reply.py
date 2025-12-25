@@ -26,7 +26,6 @@ def send_icmp_echo_reply(param, printed=True)->bool:
     if payload:
         packet / payload
 
-
     # Sends the packet
     try:
         sendp(packet, iface=iface, verbose=False)

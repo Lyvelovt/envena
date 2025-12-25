@@ -55,7 +55,7 @@ def detect_mitm_in_package(
         # 1.2. ARP Request (op=1: who-has)
         elif packet[ARP].op == 1:
             logger.debug(f"ARP request: Who has {packet[ARP].pdst}? Tell {packet[ARP].psrc}")
-
+    '''
     # --- 2. ПАССИВНЫЙ МОНИТОРИНГ (IP/ETHERNET) ---
     
     if packet.haslayer(Ether) and packet.haslayer(IP):
@@ -86,7 +86,7 @@ def detect_mitm_in_package(
                 if current_ttl < (KNOWN_GATEWAY_TTL - 1):
                     logger.warning("TTL Anomaly: Gateway traffic has an unexpected low TTL")
                     logger.warning(f"...Expected TTL: ≈{KNOWN_GATEWAY_TTL}, Received: {current_ttl}. Extra hop suspected")
-    
+    '''
 
 def detect_mitm(param, logger)->None:
     
