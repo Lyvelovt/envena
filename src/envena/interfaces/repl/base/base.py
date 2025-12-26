@@ -18,7 +18,7 @@ import src.modules.ethernet.tools as ethernet_tools
 import src.modules.dot11.tools as dot11_tools
 
 
-from src.envena.interfaces.repl.repl_config import WORKSPACES, WORKSPACES_PATH, CURRENT_WORKSPACE, update_workspaces
+# from src.envena.interfaces.repl.repl_config import WORKSPACES, WORKSPACES_PATH, CURRENT_WORKSPACE, update_workspaces
 from src.envena.interfaces.repl.base.workspace import Workspaces
 
 class EnvenaREPL(cmd2.Cmd):
@@ -29,7 +29,6 @@ class EnvenaREPL(cmd2.Cmd):
         self.tools = self._load_module_tools()
         self.console = Console()
         self.workspaces = Workspaces()
-        print(update_workspaces())
         
     
     intro = '\n'.join(envena_art)
@@ -184,7 +183,7 @@ class EnvenaREPL(cmd2.Cmd):
         elif args.action == 'set':
             self.workspaces.current = args.name
             # self.poutput(f'{str(WORKSPACES_PATH)}/{args.name}.db')
-            self.conn = sqlite3.connect(self.workspaces.get_full_path())
+            self.conn = sqlite3.connect(self.workspaces.get_full_path(self.workspaces.current))
             self.cursor = self.conn.cursor()
             self.poutput(f'set "{args.name}" workspace')
             
