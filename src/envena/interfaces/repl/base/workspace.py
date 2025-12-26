@@ -1,46 +1,46 @@
+import sqlite3
 from pathlib import Path
-import argparse
-from typing import List
 
-WORKSPACES_PATH = Path('database/workspaces')
-WORKSPACES_PATH.mkdir(exist_ok=True, parents=True)
-
-class Workspaces():
-    def update_workspaces(self):
-        self.list = []
-        for ws in list(WORKSPACES_PATH.iterdir()):
-            enum_ws = str(ws)
-            enum_ws = enum_ws.split('/')
-            enum_ws = enum_ws[len(enum_ws)-1]
-            self.list.append(enum_ws[:len(enum_ws)-3])
-
-    def _is_workspace(self, value)->bool:
-        if not value in self.list:
-            return False
-            # 
-        else:
-            return True
-    
-    def __init__(self):
-        self.update_workspaces()
-        self.list: List[str]
-        self.path: Path = WORKSPACES_PATH
+class Workspaces:
+    def __init__(self, base_path: str = 'database/workspaces'):
+        self.path = Path(base_path)
         self.path.mkdir(parents=True, exist_ok=True)
-        self.current: str = None
-    
+        self._current = None  # Внутренняя переменная для хранения текущего воркспейса
+
+    @property
+    def list(self):
+        """Возвращает список имен воркспейсов (без .db), сканируя папку."""
+        # .stem возвращает имя файла без расширения
+        return [f.stem for f in self.path.glob("*.db")]
+
+    @property
+    def current(self):
+        return self._current
+
+    @current.setter
+    def current(self, value):
+        if value not in self.list:
+            raise ValueError(f'"{value}" is not a workspace. Use "workspace create {value}" first.')
+        self._current = value
+
+    def is_workspace(self, name: str) -> bool:
+        """Проверяет существование воркспейса."""
+        return name in self.list
+
+    def get_full_path(self, name: str) -> Path:
+        """Возвращает полный путь к файлу .db."""
+        return self.path / f"{name}.db"
+
+    def create(self, name: str):
+        """Создает новый файл базы данных, если его нет."""
+        db_path = self.get_full_path(name)
+        if db_path.exists():
+            raise FileExistsError(f"Workspace '{name}' already exists.")
         
-    def __getattribute__(self, name):
-        if name == 'list':
-            self.update_workspaces()
-            return self.list
-    
-    def __setattr__(self, name, value):
-        if name == 'current':
-            if not self._is_workspace(value):
-                raise argparse.ArgumentTypeError(f'{value} is not workspace. Try: "workspace create {value}"')
-            else:
-                object.__setattr__(self, 'current', value)
-    
-    def get_name(self):
-        return str(self.name)
-    
+        # Создаем файл через sqlite3 (это сразу инициализирует БД)
+        with sqlite3.connect(str(db_path)) as conn:
+            pass 
+        return True
+
+    def __repr__(self):
+        return f"<Workspaces(current={self.current}, total={len(self.list)})>"

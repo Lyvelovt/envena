@@ -182,9 +182,9 @@ class EnvenaREPL(cmd2.Cmd):
                 self.poutput('interrupted')
         
         elif args.action == 'set':
-            self.poutput(f'{str(WORKSPACES_PATH)}/{args.name}.db')
-            self.conn = sqlite3.connect(f'{str(WORKSPACES_PATH)}/{args.name}.db')
-            CURRENT_WORKSPACE = args.name
+            self.workspaces.current = args.name
+            # self.poutput(f'{str(WORKSPACES_PATH)}/{args.name}.db')
+            self.conn = sqlite3.connect(self.workspaces.get_full_path())
             self.cursor = self.conn.cursor()
             self.poutput(f'set "{args.name}" workspace')
             
