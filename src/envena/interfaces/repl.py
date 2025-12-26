@@ -6,4 +6,4 @@ import sqlite3
 from pathlib import Path
 
 
-import src.envena.interfaces.repl.base
+import src.envena.interfaces.repl.base.base
