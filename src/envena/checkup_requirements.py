@@ -13,6 +13,7 @@ if __name__ == '__main__':
 
     if cli_args.i_am_too_stupid:
         try:
+            OK_INSTALLED = False
             import subprocess
             result = subprocess.run(['pip', 'install', '-r', 'requirementss.txt'],
                            capture_output=1,
@@ -24,7 +25,8 @@ if __name__ == '__main__':
                 logger.error('Failed to install requirements using "requirements.txt", retrying without it...')
                 result = subprocess.run(
                     ['pip', 'install', 'scapy>=2.6.1', 'colorama', 'rich',
-                                         'netaddr', 'ipaddress', 'numpy', 'cmd2'],
+                                         'netaddr', 'ipaddress', 'numpy', 'cmd2',
+                                         'python-nmap'],
                            capture_output=1,
                            text=1)
                 
@@ -87,6 +89,12 @@ if __name__ == '__main__':
         logger.error(f'Cmd2 lib is not installed. Details: {e}')
         NOT_INSTALLED_LIBS.append('cmd2')
     
+    try:
+        import nmap
+    except Exception as e:
+        logger.error(f'Nmap lib is not installed. Details: {e}')
+        NOT_INSTALLED_LIBS.append('nmap')
+        
     if NOT_INSTALLED_LIBS != []:
         logger.info(f'Try "pip install -r requirements" or "pip install {' '.join(NOT_INSTALLED_LIBS)}"')
         logger.info('Or try to start this module with "--i-am-too-stupid" flag')

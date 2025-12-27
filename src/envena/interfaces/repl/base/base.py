@@ -140,14 +140,14 @@ class EnvenaREPL(cmd2.Cmd):
             self.console.print(output_table)
         
         elif args.action == 'create':
-            db_file = self.workspaces.path / Path(f"{args.name}.db")
-            self.workspaces.create(str(db_file))
+            # db_file = self.workspaces.path / Path(args.name)
+            self.workspaces.create(args.name)
             self.poutput(f'created new workspace: {args.name}')
         
         elif args.action == 'delete':
             if input(f'are you absolutely sure that you want to permanently delete "{args.name}"? (y/N): ').lower() in \
                 ['y', 'yes', 'yeah', 'yep', 'yeap', 'yea']:
-                    Path(f'database/workspaces/{args.name}').unlink(missing_ok=1)
+                    self.workspaces.delete(args.name)
                     self.poutput(f'deleted: {args.name}')
             else:
                 self.poutput('interrupted')
@@ -155,8 +155,8 @@ class EnvenaREPL(cmd2.Cmd):
         elif args.action == 'set':
             self.workspaces.current = args.name
             # self.poutput(f'{str(WORKSPACES_PATH)}/{args.name}.db')
-            self.conn = sqlite3.connect(self.workspaces.get_full_path(self.workspaces.current))
-            self.cursor = self.conn.cursor()
+            # self.conn = sqlite3.connect(self.workspaces.get_full_path(self.workspaces.current))
+            # self.cursor = self.conn.cursor()
             self.poutput(f'set "{args.name}" workspace')
             
     # args ======================================================== #
@@ -247,7 +247,11 @@ class EnvenaREPL(cmd2.Cmd):
         self.console.print(output_table)
         # self.poutput(output_table)
     
+    def do_q(self, _:argparse.Namespace):
+        return True
+    
     def do_exit(self, _: argparse.Namespace):
+        return True
         if input("You sure you want to exit? (y/N): ").lower() in\
             ['y', 'yeap', 'yea', 'yes', 'yeah', 'fuck you stupid clanker let me out', ':q!']:
             return True

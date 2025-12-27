@@ -5,3 +5,4 @@ numpy
 netaddr
 ipaddress
 cmd2
+python-nmap
