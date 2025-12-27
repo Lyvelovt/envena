@@ -141,35 +141,7 @@ class EnvenaREPL(cmd2.Cmd):
         
         elif args.action == 'create':
             db_file = self.workspaces.path / Path(f"{args.name}.db")
-            conn = sqlite3.connect(str(db_file))
-            conn.executescript('''
-            CREATE TABLE IF NOT EXISTS workspaces (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT UNIQUE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE TABLE IF NOT EXISTS hosts (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                workspace_id INTEGER,
-                mac_address TEXT,
-                ip_address TEXT,
-                vendor TEXT,
-                connection_type TEXT,
-                last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
-            );
-            
-            CREATE TABLE IF NOT EXISTS wifi_networks (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                workspace_id INTEGER,
-                ssid TEXT,
-                bssid TEXT,
-                signal_strength INTEGER,
-                FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
-            );
-        ''')
-            conn.close()
+            self.workspaces.create(str(db_file))
             self.poutput(f'created new workspace: {args.name}')
         
         elif args.action == 'delete':

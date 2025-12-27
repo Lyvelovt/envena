@@ -39,7 +39,33 @@ class Workspaces:
         
         # Создаем файл через sqlite3 (это сразу инициализирует БД)
         with sqlite3.connect(str(db_path)) as conn:
-            pass 
+            conn.executescript('''
+            CREATE TABLE IF NOT EXISTS workspaces (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS hosts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                workspace_id INTEGER,
+                mac_address TEXT,
+                ip_address TEXT,
+                vendor TEXT,
+                connection_type TEXT,
+                last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
+            );
+            
+            CREATE TABLE IF NOT EXISTS wifi_networks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                workspace_id INTEGER,
+                ssid TEXT,
+                bssid TEXT,
+                signal_strength INTEGER,
+                FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
+            );
+        ''') 
         return True
 
     def __repr__(self):

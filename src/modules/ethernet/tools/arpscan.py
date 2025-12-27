@@ -143,7 +143,7 @@ if __name__ == "__main__":
     parser.add_argument("-ip", help="target IP or range", required=True, type=str)
     parser.add_argument("-t", "--timeout", help="waiting time for responses in seconds", required=False, type=float, default=10)
     parser.add_argument("-i", "--iface", help="interface to scanning from", required=False, default=str(conf.iface))
-    
+    # parser.add_argument("-i", "--iface", help="interface to scanning from", required=False, default=str(conf.)
     cli_args = parser.parse_args()
     # args = Arguments()
     public_args.iface = cli_args.iface
