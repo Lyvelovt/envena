@@ -5,13 +5,12 @@ class Workspaces:
     def __init__(self, base_path: str = 'database/workspaces'):
         self.path = Path(base_path)
         self.path.mkdir(parents=True, exist_ok=True)
-        self._current = None  # Внутренняя переменная для хранения текущего воркспейса
+        self._current = None
         self.conn = None
 
     @property
     def list(self):
         """Возвращает список имен воркспейсов (без .db), сканируя папку."""
-        # .stem возвращает имя файла без расширения
         return [f.stem for f in self.path.glob("*.db")]
 
     @property
@@ -25,7 +24,9 @@ class Workspaces:
         self._current = value
         if self.conn:
             self.conn.close()
-        self.conn = sqlite3.connect(self.get_full_path(self.current))
+        self.conn = sqlite3.connect(self.get_full_path(self.current), check_same_thread=False)
+        self.conn.execute("PRAGMA foreign_keys = ON;")
+        self.conn.execute("PRAGMA journal_mode = WAL;")
 
     def is_workspace(self, name: str) -> bool:
         """Проверяет существование воркспейса."""
@@ -36,42 +37,57 @@ class Workspaces:
         return self.path / f"{name}.db"
 
     def create(self, name: str):
-        """Создает новый файл базы данных, если его нет."""
+        """Создает новый файл базы данных с таблицами hosts, wifi и services."""
         db_path = self.get_full_path(name)
         if db_path.exists():
             raise FileExistsError(f'workspace "{name}" already exists')
-        # Создаем файл через sqlite3 (это сразу инициализирует БД)
+        
         with sqlite3.connect(str(db_path)) as conn:
             cursor = conn.cursor()
-            # Включаем поддержку Foreign Keys (обязательно для SQLite)
             cursor.execute("PRAGMA foreign_keys = ON;")
 
-            # Базовая таблица устройств
-            cursor.execute('''CREATE TABLE IF NOT EXISTS targets (
+            # Главная таблица хостов
+            cursor.execute('''CREATE TABLE IF NOT EXISTS hosts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 mac TEXT UNIQUE,
+                ip TEXT,
+                hostname TEXT,
                 vendor TEXT,
-                seen_count INTEGER DEFAULT 1
+                type TEXT DEFAULT 'Unknown',
+                last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )''')
 
-            # Данные сканирования Wi-Fi
-            cursor.execute('''CREATE TABLE IF NOT EXISTS wifi_data (
-                bssid TEXT PRIMARY KEY,
+            # Точки доступа
+            cursor.execute('''CREATE TABLE IF NOT EXISTS wifi_aps (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                host_id INTEGER,
                 ssid TEXT,
+                bssid TEXT UNIQUE,
                 channel INTEGER,
+                signal_dbm INTEGER,
                 encryption TEXT,
-                FOREIGN KEY (bssid) REFERENCES targets (mac)
+                FOREIGN KEY (host_id) REFERENCES hosts (id) ON DELETE CASCADE
             )''')
 
-            # Данные сканирования IP/Nmap
+            # Wi-Fi клиенты
+            cursor.execute('''CREATE TABLE IF NOT EXISTS wifi_clients (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                host_id INTEGER,
+                ap_id INTEGER,
+                signal_dbm INTEGER,
+                FOREIGN KEY (host_id) REFERENCES hosts (id) ON DELETE CASCADE,
+                FOREIGN KEY (ap_id) REFERENCES wifi_aps (id) ON DELETE SET NULL
+            )''')
+
+            # Сервисы (порты)
             cursor.execute('''CREATE TABLE IF NOT EXISTS services (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                target_mac TEXT,
-                ip TEXT,
+                host_id INTEGER,
                 port INTEGER,
-                product TEXT,
+                name TEXT,
                 version TEXT,
-                FOREIGN KEY (target_mac) REFERENCES targets (mac)
+                UNIQUE(host_id, port),
+                FOREIGN KEY (host_id) REFERENCES hosts (id) ON DELETE CASCADE
             )''')
 
             # Уязвимости
@@ -80,7 +96,7 @@ class Workspaces:
                 service_id INTEGER,
                 title TEXT,
                 url TEXT,
-                FOREIGN KEY (service_id) REFERENCES services (id)
+                FOREIGN KEY (service_id) REFERENCES services (id) ON DELETE CASCADE
             )''')
             conn.commit()
         return True
@@ -90,7 +106,6 @@ class Workspaces:
         db_path = self.get_full_path(name)
         if db_path.exists():
             db_path.unlink()
-            # Если удалили текущий воркспейс, сбрасываем _current
             if self._current == name:
                 self._current = None
                 if self.conn:
@@ -99,63 +114,58 @@ class Workspaces:
             return True
         else:
             raise FileExistsError(f'workspace "{name}" not exists')
-    
+
     def __repr__(self):
         return f"<Workspaces(current={self.current}, total={len(self.list)})>"
-    
-    def set_target(self, mac: str, vendor: str = None):
-        """Базовая запись устройства (L2)."""
-        sql = '''INSERT INTO targets (mac, vendor) VALUES (?, ?)
+
+    # --- API МЕТОДЫ ---
+
+    def set_host(self, mac: str, ip: str = None, hostname: str = None, vendor: str = None, htype: str = 'Unknown'):
+        if not self.conn:
+            return False
+        """Запись хоста. Обновляет данные, если MAC уже существует."""
+        sql = '''INSERT INTO hosts (mac, ip, hostname, vendor, type) 
+                 VALUES (?, ?, ?, ?, ?)
                  ON CONFLICT(mac) DO UPDATE SET 
-                 seen_count = seen_count + 1,
-                 vendor = COALESCE(excluded.vendor, vendor)'''
-        self.conn.execute(sql, (mac, vendor))
+                    ip = COALESCE(excluded.ip, ip),
+                    hostname = COALESCE(excluded.hostname, hostname),
+                    vendor = COALESCE(excluded.vendor, vendor),
+                    type = COALESCE(excluded.type, type),
+                    last_seen = CURRENT_TIMESTAMP'''
+        self.conn.execute(sql, (mac.lower(), ip, hostname, vendor, htype))
+        self.conn.commit()
+        return self.conn.execute("SELECT id FROM hosts WHERE mac=?", (mac.lower(),)).fetchone()[0]
+
+    def set_wifi_ap(self, bssid: str, ssid: str, ch: int, sig: int, enc: str):
+        """Запись AP."""
+        h_id = self.set_host(mac=bssid, hostname=ssid, htype='AP')
+        sql = '''INSERT INTO wifi_aps (host_id, bssid, ssid, channel, signal_dbm, encryption) 
+                 VALUES (?, ?, ?, ?, ?, ?)
+                 ON CONFLICT(bssid) DO UPDATE SET 
+                    ssid=excluded.ssid, channel=excluded.channel, 
+                    signal_dbm=excluded.signal_dbm, encryption=excluded.encryption'''
+        self.conn.execute(sql, (h_id, bssid.lower(), ssid, ch, sig, enc))
+        self.conn.commit()
+        return h_id
+
+    def set_wifi_client(self, mac: str, ap_bssid: str = None, sig: int = None):
+        """Запись клиента Wi-Fi."""
+        h_id = self.set_host(mac=mac, htype='Client')
+        ap_id = None
+        if ap_bssid:
+            res = self.conn.execute("SELECT id FROM wifi_aps WHERE bssid=?", (ap_bssid.lower(),)).fetchone()
+            if res: ap_id = res[0]
+        self.conn.execute("INSERT INTO wifi_clients (host_id, ap_id, signal_dbm) VALUES (?, ?, ?)", (h_id, ap_id, sig))
         self.conn.commit()
 
-    def set_wifi(self, bssid: str, ssid: str, channel: int, enc: str):
-        """Запись Wi-Fi сети. Сначала создает таргет, если его нет."""
-        self.save_target(bssid)
-        sql = '''INSERT OR REPLACE INTO wifi_data (bssid, ssid, channel, encryption)
-                 VALUES (?, ?, ?, ?)'''
-        self.conn.execute(sql, (bssid, ssid, channel, enc))
+    def set_service(self, host_id: int, port: int, name: str = None, ver: str = None):
+        """Запись сервиса."""
+        sql = '''INSERT INTO services (host_id, port, name, version) VALUES (?, ?, ?, ?)
+                 ON CONFLICT(host_id, port) DO UPDATE SET name=excluded.name, version=excluded.version'''
+        self.conn.execute(sql, (host_id, port, name, ver))
         self.conn.commit()
-
-    def set_service(self, mac: str, ip: str, port: int, prod: str = None, ver: str = None):
-        """Запись найденного порта/сервиса."""
-        self.save_target(mac)
-        sql = '''INSERT INTO services (target_mac, ip, port, product, version)
-                 VALUES (?, ?, ?, ?, ?)'''
-        self.conn.execute(sql, (mac, ip, port, prod, ver))
-        self.conn.commit()
-        # Возвращаем ID созданного сервиса, чтобы привязать к нему уязвимости
-        return self.conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+        return self.conn.execute("SELECT id FROM services WHERE host_id=? AND port=?", (host_id, port)).fetchone()[0]
 
     def set_vuln(self, service_id: int, title: str, url: str = None):
-        """Запись уязвимости для конкретного сервиса."""
-        sql = 'INSERT INTO vulns (service_id, title, url) VALUES (?, ?, ?)'
-        self.conn.execute(sql, (service_id, title, url))
+        self.conn.execute('INSERT INTO vulns (service_id, title, url) VALUES (?, ?, ?)', (service_id, title, url))
         self.conn.commit()
-    
-    def get_summary(self):
-        """Возвращает полную картину: IP, MAC, Вендор и кол-во портов."""
-        sql = '''
-            SELECT t.mac, s.ip, t.vendor, COUNT(s.port) as port_count
-            FROM targets t
-            LEFT JOIN services s ON t.mac = s.target_mac
-            GROUP BY t.mac
-        '''
-        return self.conn.execute(sql).fetchall()
-
-    def get_host_services(self, mac: str):
-        """Список всех портов для конкретного MAC."""
-        sql = 'SELECT port, product, version FROM services WHERE target_mac = ?'
-        return self.conn.execute(sql, (mac,)).fetchall()
-
-    def get_vuln(self):
-        """Список всех найденных уязвимостей с привязкой к IP и порту."""
-        sql = '''
-            SELECT s.ip, s.port, v.title, v.url
-            FROM vulns v
-            JOIN services s ON v.service_id = s.id
-        '''
-        return self.conn.execute(sql).fetchall()

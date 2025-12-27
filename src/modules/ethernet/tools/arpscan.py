@@ -7,6 +7,10 @@ from src.envena.base.arguments import public_args
 from src.envena.base.tool import Tool
 from scapy.all import conf, get_if_hwaddr, get_if_addr, conf, ARP, AsyncSniffer
 
+from src.envena.interfaces.repl.base.workspace import Workspaces
+from src.envena.base.arguments import NOT_SET
+
+
 arpscan_v = 2.1
 
 from rich.table import Table
@@ -100,12 +104,14 @@ def scan_network(logger, ip_range: str, ip_src: str=None, eth_src: str=None, ifa
     deduplicated_devices = [dict(t) for t in set(tuple(d.items()) for d in devices)]
     return deduplicated_devices
 
-def arpscan(param, logger)->None:
+def arpscan(param, logger, ws=None)->None:
     try:
         iface = param.iface if param.iface else str(conf.iface)
         eth_src = get_if_hwaddr(iface)
         ip_src = get_if_addr(iface)
         start_time = time.time()
+        if not param.input:
+            raise AttributeError(f'IP range input is required')
         
         try:
             ip_range = parse_ip_ranges(param.input)
@@ -120,6 +126,10 @@ def arpscan(param, logger)->None:
             logger.info(f'Scan finished in {round(time.time() - start_time, 3)} s.')
             logger.info('Detected device(s):')
             print_aligned_table(devices_info)
+            if ws:
+                for device in devices_info:
+                    ws.set_host(mac=device['eth'], ip=device['ip'], vendor=get_vendor(device['eth']), hostname=device['hostname'])
+                    
         else:
             logger.info("Failed to detect device(s) on the network")
         

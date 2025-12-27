@@ -100,7 +100,7 @@ class EnvenaREPL(cmd2.Cmd):
     #################
     
     # workspace ======================================================== #
-    workspace_parser = argparse.ArgumentParser()
+    workspace_parser = argparse.ArgumentParser(prog='args', description='manage workspaces')
     workspace_subparsers = workspace_parser.add_subparsers(dest='action', help='action to perform')
     workspace_subparsers.required = True
     
@@ -260,6 +260,12 @@ class EnvenaREPL(cmd2.Cmd):
     ################
     # MODULES PART #
     ################
+    
+    def do_arpscan(self, _: argparse.Namespace):
+        self.tools['arpscan'].ws = self.workspaces
+        self.tools['arpscan'].args = self.args_obj
+        self.tools['arpscan'].start_tool()
+    
     
     
 EnvenaREPL().cmdloop()
