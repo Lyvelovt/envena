@@ -281,7 +281,7 @@ class EnvenaREPL(cmd2.Cmd):
         self.tools['arpscan'].start_tool()
     
     def do_vulnscan(self, _:argparse.Namespace):
-        if not self.tools.get('vullnscan'):
+        if not self.tools.get('vulnscan'):
             self.poutput('VULNscan module is unavailable !')
             return False
         self.tools['vulnscan'].ws = self.workspaces
