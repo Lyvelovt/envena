@@ -175,7 +175,7 @@ class Workspaces:
         Возвращает host_id. 
         Поиск приоритетно по MAC, затем по IP.
         """
-        self._check_connection()
+        # self._check_connection()
         
         # 1. Сначала ищем по MAC
         if mac:

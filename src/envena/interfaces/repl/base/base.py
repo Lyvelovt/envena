@@ -11,6 +11,8 @@ from rich.console import Console
 from rich.box import Box
 from src.envena.base.arguments import Arguments, NOT_SET
 
+from src.envena.config import ENVENA_VERSION
+
 import pkgutil
 import importlib
 
@@ -30,10 +32,19 @@ class EnvenaREPL(cmd2.Cmd):
         self.console = Console()
         self.workspaces = Workspaces()
         
+        self.prompt = f"ENVENA{ENVENA_VERSION}-{self.args_obj.iface}-[{self.workspaces.current}]-> "
+    
+    def update_prompt(self):
+        iface = self.args_obj.iface
+        ws = self.workspaces.current
+        self.prompt = f"ENVENA{ENVENA_VERSION}-{iface}-[{ws}]-> "
+
+    def postcmd(self, stop, line):
+        self.update_prompt()
+        return stop
+    
     
     intro = '\n'.join(envena_art)
-    prompt = "ENVENA>>> "
-    
     
     ##############################
     # Import all available tools #
@@ -262,10 +273,20 @@ class EnvenaREPL(cmd2.Cmd):
     ################
     
     def do_arpscan(self, _: argparse.Namespace):
+        if not self.tools.get('arpscan'):
+            self.poutput('ARPscan module is unavailable !')
+            return False
         self.tools['arpscan'].ws = self.workspaces
         self.tools['arpscan'].args = self.args_obj
         self.tools['arpscan'].start_tool()
     
+    def do_vulnscan(self, _:argparse.Namespace):
+        if not self.tools.get('vullnscan'):
+            self.poutput('VULNscan module is unavailable !')
+            return False
+        self.tools['vulnscan'].ws = self.workspaces
+        self.tools['vulnscan'].args = self.args_obj
+        self.tools['vulnscan'].start_tool()
     
     
 EnvenaREPL().cmdloop()
