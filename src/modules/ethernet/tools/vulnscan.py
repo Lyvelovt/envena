@@ -55,11 +55,6 @@ def scan_vuln(logger, target_ips: str, iface: str=conf.iface, ws=None)->list:
     
     nm.scan(hosts=target_ips, arguments=args)
 
-    # Пока nmap работает в фоне, основной поток не заблокирован
-    while nm.still_scanning():
-        nm.wait(2) # Ждем 2 секунды и проверяем снова
-    
-    # nm.scan(hosts=target_ips, arguments=args)
     
     for host in nm.all_hosts():
         # Пытаемся достать Hostname если nmap его нашел
@@ -112,16 +107,36 @@ def scan_vuln(logger, target_ips: str, iface: str=conf.iface, ws=None)->list:
                     
                     # Метод find должен возвращать список объектов/словарей
                     vulnerabilities = Searchsploit.find(search_query)
+                    # vulnerabilities — это тот самый словарь из твоего лога
+                    vuln_results = vulnerabilities.get('RESULTS_EXPLOIT', [])
                     
-                    for v in vulnerabilities:
-                        # Предположим, find возвращает {'title': '...', 'url': '...'}
-                        logger.info(f'Found exploit for {host}:{port} - {product} ({version}) !')
-                        logger.info(f'Title: {v.get('Title')} | Path: {v.get('Path')} {'| ' + v.get['Codes'][0] if len(v.get['Codes']) != 0 else ''}')
+                    if not vuln_results:
+                        logger.info(f'No exploit found for {search_query}')
+                        continue
+                    
+                    for v in vuln_results:
+                        title = v.get('Title')
+                        path = v.get('Path')
+                        # Проверяем верификацию (в логе она '1' или '0')
+                        is_verified = "Yes" if v.get('Verified') == '1' else "No"
+                        
+                        # Работаем с кодами (CVE/OSVDB)
+                        # В выводе searchsploit это часто строка, а не список, проверим это
+                        codes = v.get('Codes', '')
+                        codes_str = f"Codes: {codes}" if codes else "no codes found"
+
+                        logger.info(f'Found exploit for {host}:{port}')
+                        logger.info(f'  ├── Title: {title}')
+                        logger.info(f'  ├── Verified: {is_verified}')
+                        logger.info(f'  ├── Codes: {codes}')
+                        logger.info(f'  └── Path: {path}')
+
                         if ws:
+                            # Пишем в базу (Path кладем в колонку url)
                             ws.set_vuln(
                                 service_id=sid,
-                                title=v.get('Title'),
-                                url=v.get('Path')
+                                title=title,
+                                url=path
                             )
     
     # Печатаем таблицу в конце
