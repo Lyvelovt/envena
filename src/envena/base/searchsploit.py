@@ -1,7 +1,7 @@
 import subprocess
 import json
 
-class Searchsplout():
+class Searchsploit():
     def __init__(self):
         pass
     def find(query):

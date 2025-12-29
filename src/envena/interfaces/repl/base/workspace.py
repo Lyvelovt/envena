@@ -169,3 +169,24 @@ class Workspaces:
     def set_vuln(self, service_id: int, title: str, url: str = None):
         self.conn.execute('INSERT INTO vulns (service_id, title, url) VALUES (?, ?, ?)', (service_id, title, url))
         self.conn.commit()
+    
+    def get_host_id(self, mac: str = None, ip: str = None):
+        """
+        Возвращает host_id. 
+        Поиск приоритетно по MAC, затем по IP.
+        """
+        self._check_connection()
+        
+        # 1. Сначала ищем по MAC
+        if mac:
+            res = self.conn.execute("SELECT id FROM hosts WHERE mac = ?", (mac.lower(),)).fetchone()
+            if res:
+                return res[0]
+        
+        # 2. Если по MAC не нашли или его не дали, ищем по IP
+        if ip:
+            res = self.conn.execute("SELECT id FROM hosts WHERE ip = ?", (ip,)).fetchone()
+            if res:
+                return res[0]
+        
+        return None
