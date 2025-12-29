@@ -15,7 +15,7 @@ if __name__ == '__main__':
         try:
             OK_INSTALLED = False
             import subprocess
-            result = subprocess.run(['pip', 'install', '-r', 'requirementss.txt'],
+            result = subprocess.run(['pip', 'install', '-r', 'requirements.txt'],
                            capture_output=1,
                            text=1)
             if not 'ERROR' in result.stderr.upper():
@@ -95,6 +95,12 @@ if __name__ == '__main__':
         logger.error(f'Nmap lib is not installed. Details: {e}')
         NOT_INSTALLED_LIBS.append('nmap')
         
+    try:
+        from src.envena.base.searchsploit import Searchsploit
+        Searchsploit.find('openssh')
+    except Exception as e:
+        logger.error(f'Searchsploit module is unavailable. Details: {e}')
+    
     if NOT_INSTALLED_LIBS != []:
         logger.info(f'Try "pip install -r requirements" or "pip install {' '.join(NOT_INSTALLED_LIBS)}"')
         logger.info('Or try to start this module with "--i-am-too-stupid" flag')
