@@ -50,7 +50,7 @@ def is_way_exists(param, logger, my_ip, my_eth, eth_dst, ip, icmp_id=randint(1,6
         return False
     return True
 
-def icmpmap(param, logger):
+def icmpmap(param, logger, ws=None):
     try:
         my_eth = get_if_hwaddr(param.iface)
         my_ip = get_if_addr(param.iface)

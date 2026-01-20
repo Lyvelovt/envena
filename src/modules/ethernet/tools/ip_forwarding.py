@@ -56,7 +56,7 @@ def addr_spoof(packet, my_ip, my_eth, gateway_mac, submask, logger, iface, nottl
         logger.info(f'{packet[IP].src} -> {packet[IP].dst}')
     
 
-def ip_forwarding(param, logger):
+def ip_forwarding(param, logger, ws=None):
     my_eth = get_if_hwaddr(param.iface)
     my_ip = get_if_addr(param.iface)
     gateway_mac = str(param.eth_dst).replace('-',':')

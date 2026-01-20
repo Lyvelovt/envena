@@ -88,7 +88,7 @@ def detect_mitm_in_package(
                     logger.warning(f"...Expected TTL: ≈{KNOWN_GATEWAY_TTL}, Received: {current_ttl}. Extra hop suspected")
     '''
 
-def detect_mitm(param, logger)->None:
+def detect_mitm(param, logger, ws=None)->None:
     
     if not validate_ip(param.input):
         logger.error('Invalid gateway IP-address got')

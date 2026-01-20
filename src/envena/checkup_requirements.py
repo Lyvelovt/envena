@@ -104,3 +104,6 @@ if __name__ == '__main__':
     if NOT_INSTALLED_LIBS != []:
         logger.info(f'Try "pip install -r requirements" or "pip install {' '.join(NOT_INSTALLED_LIBS)}"')
         logger.info('Or try to start this module with "--i-am-too-stupid" flag')
+    
+    else:
+        logger.info("Succesfully installed all requirements")

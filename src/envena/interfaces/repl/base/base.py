@@ -31,6 +31,8 @@ class EnvenaREPL(cmd2.Cmd):
         self.tools = self._load_module_tools()
         self.console = Console()
         self.workspaces = Workspaces()
+        self._int_args = ['count', 'xid']
+        self._float_args = ['timeout']
         
         self.prompt = f"ENVENA{ENVENA_VERSION}-{self.args_obj.iface}-[{self.workspaces.current}]-> "
     
@@ -174,10 +176,8 @@ class EnvenaREPL(cmd2.Cmd):
     args_parser = argparse.ArgumentParser(prog='args', description='manage arguments')
     args_subparsers = args_parser.add_subparsers(dest='action', help='action to perform')
 
-    # Подкоманда 'show'
     args_subparsers.add_parser('list', help='show all current arguments')
 
-    # Подкоманда 'default'
     args_subparsers.add_parser('default', help='reset all arguments to default values')
 
     set_p = args_subparsers.add_parser('set', help='set a value: args set key=value')
@@ -192,7 +192,6 @@ class EnvenaREPL(cmd2.Cmd):
             self.args_obj = Arguments()
             self.poutput("all arguments to default")
 
-        # Случай 3: ПРИСВОЕНИЕ (args set key value)
         elif ns.action == 'set':
             expr = ns.expression
             if len(expr) != 2:
@@ -200,17 +199,27 @@ class EnvenaREPL(cmd2.Cmd):
                 return
             
             key, val = (expr[0], expr[1])
-            setattr(self.args_obj, key.strip(), val.strip())
+            if key in self._int_args: #['count', 'xid']:
+                try:
+                    setattr(self.args_obj, key.strip(), int(val.strip()))
+                except ValueError:
+                    self.perror('error: excepted integer')
+            elif key in self._float_args: # ['timeout']:
+                try:
+                    setattr(self.args_obj, key.strip(), float(val.strip()))
+                except ValueError:
+                    self.perror('error: excepted integer or float')
+            else:
+                setattr(self.args_obj, key.strip(), val.strip())
+                    
 
     def _show_args(self):
-        # Исправляем table на Table
         output_table = Table(
             title="[bold cyan]Workspace Arguments[/bold cyan]",
-            # box=Box.Box,
             show_header=True,
             header_style="bold magenta",
             min_width=60,
-            expand=False # Таблица будет сжиматься под контент
+            expand=False
         )
 
         output_table.add_column("Parameter", style="cyan", no_wrap=True)
@@ -238,9 +247,7 @@ class EnvenaREPL(cmd2.Cmd):
                 if p in all_slotted:
                     val = getattr(self.args_obj, p)
                     
-                    # Логика подсветки
                     if val is NOT_SET:
-                        # Подсвечиваем критически важный iface красным, если он пуст
                         style = "[bold red]" if p == 'iface' else "[dim italic]"
                         display_val = f"{style}{val}[/]"
                     else:
@@ -249,7 +256,6 @@ class EnvenaREPL(cmd2.Cmd):
                     output_table.add_row(p, display_val, category)
                     all_slotted.remove(p)
 
-        # Остатки
         # for p in all_slotted:
         #     val = getattr(self.args_obj, p)
         #     display_val = f"[bold green]{val}[/bold green]" if val is not NOT_SET else "[dim]None[/dim]"
@@ -287,6 +293,53 @@ class EnvenaREPL(cmd2.Cmd):
         self.tools['vulnscan'].ws = self.workspaces
         self.tools['vulnscan'].args = self.args_obj
         self.tools['vulnscan'].start_tool()
+
+    def do_camoverflow(self, _: argparse.Namespace):
+        if not self.tools.get('camoverflow'):
+            self.poutput('CamOF module is unavailable !')
+            return False
+        self.tools['camoverflow'].ws = self.workspaces
+        self.tools['camoverflow'].args = self.args_obj
+        self.tools['camoverflow'].start_tool()
     
+    def do_detect_mitm(self, _: argparse.Namespace):
+        if not self.tools.get('detect_mitm'):
+            self.poutput('DetectMITM module is unavailable !')
+            return False
+        self.tools['detect_mitm'].ws = self.workspaces
+        self.tools['detect_mitm'].args = self.args_obj
+        self.tools['detect_mitm'].start_tool()
+        
+    def do_dhcp_starve(self, _: argparse.Namespace):
+        if not self.tools.get('dhcp_starve'):
+            self.poutput('DHCPstarve module is unavailable !')
+            return False
+        self.tools['dhcp_starve'].ws = self.workspaces
+        self.tools['dhcp_starve'].args = self.args_obj
+        self.tools['dhcp_starve'].start_tool()
     
+    def do_icmpmap(self, _: argparse.Namespace):
+        if not self.tools.get('icmpmap'):
+            self.poutput('ICMPmap module is unavailable !')
+            return False
+        self.tools['icmpmap'].ws = self.workspaces
+        self.tools['icmpmap'].args = self.args_obj
+        self.tools['icmpmap'].start_tool()
+    
+    def do_ip_forwarding(self, _: argparse.Namespace):
+        if not self.tools.get('ip_forwarding'):
+            self.poutput('IPforwarding module is unavailable !')
+            return False
+        self.tools['ip_forwarding'].ws = self.workspaces
+        self.tools['ip_forwarding'].args = self.args_obj
+        self.tools['ip_forwarding'].start_tool()
+    
+    def do_raw_packet(self, _: argparse.Namespace):
+        if not self.tools.get('raw_packet'):
+            self.poutput('RAWpacket module is unavailable !')
+            return False
+        self.tools['raw_packet'].ws = self.workspaces
+        self.tools['raw_packet'].args = self.args_obj
+        self.tools['raw_packet'].start_tool()
+     
 EnvenaREPL().cmdloop()

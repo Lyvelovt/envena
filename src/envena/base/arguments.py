@@ -33,8 +33,8 @@ class Arguments:
                   'hw_dst', 'hw_src', 'bssid', 'ssid')
     
     def __init__(self):
-        for name in self.__slots__:
-            object.__setattr__(self, name, NOT_SET)
+        # for name in self.__slots__:
+        #     # object.__setattr__(self, name, NOT_SET)
             
         logger_name = f"{ROOT_LOGGER_NAME}.{self.__class__.__name__}"
         # self.logger = logging.getLogger(logger_name)

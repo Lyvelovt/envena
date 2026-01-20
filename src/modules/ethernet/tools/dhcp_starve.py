@@ -7,7 +7,7 @@ from src.envena.base.arguments import Arguments, public_args
 from scapy.all import conf
 from src.modules.ethernet.ip.udp.dhcp import DHCPPacket, DHCPPacketType
 
-def dhcp_starve(param, logger)->None:
+def dhcp_starve(param, logger, ws=None)->None:
     
     if param.timeout == None:
         param.timeout = 0.5

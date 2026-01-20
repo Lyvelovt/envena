@@ -2,7 +2,7 @@ from src.envena.base.tool import Tool
 from scapy.all import sendp, hexdump, conf
 from src.envena.base.arguments import Arguments, public_args
 
-def send_raw_packet(param, printed: bool=True)->bool:
+def send_raw_packet(param, printed: bool=True, ws=None)->bool:
     with open(param.input, 'r') as pkt_file:
         dump = pkt_file.read()
         dump = bytes.fromhex(dump)
