@@ -27,8 +27,9 @@ class ICMPPacket(IPProtocol):
         
         send_func = self.send_func
 
-        super().__init__(iface, count, timeout, send_func, ip_src, \
-            ip_dst, eth_src, eth_dst, ttl=ttl)
+        super().__init__(iface=iface, count=count, timeout=timeout, 
+                         send_func=send_func, ip_src=ip_src, 
+                         ip_dst=ip_dst, eth_src=eth_src, eth_dst=eth_dst, ttl=ttl)
         
         if isinstance(seq, int) and 0 <= seq <= 65535:
             self.seq = seq

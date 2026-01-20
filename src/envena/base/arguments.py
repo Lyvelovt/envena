@@ -6,33 +6,37 @@ from math import inf
 from src.envena.config import ROOT_LOGGER_NAME
 from scapy.all import get_if_list, conf, get_if_addr, get_if_hwaddr
 
-class NotSet:
-    """Special type for not set args"""
-    def __repr__(self):
-        return "not set"
+# class NotSet:
+#     """Special type for not set args"""
+#     def __repr__(self):
+#         return "not set"
     
-    def __str__(self):
-        return "not set"
+#     def __str__(self):
+#         return "not set"
 
-    def __bool__(self):
-        return False
+#     def __bool__(self):
+#         return False
     
-    def __int__(self):
-        return 0
+#     def __int__(self):
+#         return 0
     
-    def __float__(self):
-        return 0.0
+#     def __float__(self):
+#         return 0.0
 
 
-NOT_SET = NotSet()
+# NOT_SET = NotSet()
 
 class Arguments:
-    __slots__ = ('ip_dst','ip_src','eth_dst','eth_src',
-                  'iface','count','timeout','port_dst','port_src',
-                  'sub_mask','sub_ip','xid','dns_server', 'input','logger',
-                  'hw_dst', 'hw_src', 'bssid', 'ssid')
+    __slots__ = (
+        'xid', 'dns_server',                # L7
+        'port_src', 'port_dst',             # L4
+        'sub_ip', 'sub_mask', 'ip_src', 'ip_dst', # L3
+        'eth_src', 'eth_dst', 'hw_src', 'hw_dst', 'bssid', 'ssid', 'iface', # L2
+        'count', 'timeout', 'input',        # App
+        'logger' # other
+    )
     
-    def __init__(self):
+    def __init__(self, **kwargs):
         # for name in self.__slots__:
         #     # object.__setattr__(self, name, NOT_SET)
             
@@ -42,17 +46,40 @@ class Arguments:
         object.__setattr__(self, 'logger', logger_instance)
         
         # Values as default
-        self.iface = str(conf.iface)
-        self.eth_src = get_if_hwaddr(self.iface)
-        self.ip_src = get_if_addr(self.iface)
-        self.dns_server = ipaddress.ip_address('8.8.8.8')
-        self.count = 1
-        self.hw_src = self.eth_src
+        self.default()
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        
         # self.sub_mask = parse_submask(sub_mask='24')
         # self.sub_ip = ipaddress.ip_address('.'.join(str(self.ip_src).split('.').pop().append('0')))
         
+    def default(self):
+        self.xid = 0
+        self.dns_server = ipaddress.ip_address('8.8.8.8')
         
+        self.port_src = 0
+        self.port_dst = 0
         
+        self.sub_ip = ipaddress.ip_address("0.0.0.0")
+        self.sub_mask = "255.255.255.0"
+        self.ip_dst = ipaddress.ip_address("0.0.0.0")
+        
+        self.eth_dst = netaddr.EUI("00-00-00-00-00-00")
+        self.bssid = netaddr.EUI("00-00-00-00-00-00")
+        self.hw_dst = netaddr.EUI("00-00-00-00-00-00")
+        self.ssid = ""
+        
+        self.timeout = 0
+        self.input = ""
+
+        self.iface = str(conf.iface)
+        self.eth_src = netaddr.EUI(get_if_hwaddr(self.iface).replace(':', '-'))
+        self.ip_src = ipaddress.ip_address(get_if_addr(self.iface))
+        self.hw_src = self.eth_src
+        self.count = 1
+
+    
     def __setattr__(self, name, value):
         if name == 'logger':
             # Разрешаем присвоение логгера (если кто-то вызывает его явно)
@@ -90,7 +117,7 @@ class Arguments:
                 return
             
         elif name == 'timeout':
-            if not (isinstance(value, float) or isinstance(value, int)):
+            if not (isinstance(value, float) or isinstance(value, int)) or value < 0:
                 raise TypeError(f'Invalid value "{value}" for "{name}"')
             else:
                 object.__setattr__(self, name, value)
@@ -121,7 +148,7 @@ class Arguments:
         elif name == 'ssid':
             if not isinstance(value, str):
                 raise TypeError(f'Invalid type "{type(value)}" for {name}')
-            elif len(value) < 32:
+            elif len(value) > 32:
                 raise ValueError(f'{name} cannot be longer than 32 letters')
             else:
                 object.__setattr__(self, name, value)

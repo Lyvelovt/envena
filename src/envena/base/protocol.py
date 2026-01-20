@@ -6,7 +6,7 @@ from src.envena.config import ROOT_LOGGER_NAME
 from typing import Callable, Union
 
 class BaseProtocol:
-    __slots__ = ('iface','count','timeout','send_func', '_word_sending', '_dot_timer', '_word_timer')
+    __slots__ = ('send_func', '_word_sending', '_dot_timer', '_word_timer', 'iface','count','timeout')
     
     def __init__(self, iface: str, send_func: Callable, count: int=1, timeout: Union[int, float]=0):
         self.send_func = None

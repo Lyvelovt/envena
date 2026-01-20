@@ -7,7 +7,6 @@ from src.envena.base.tool import Tool
 from src.envena.functions import parse_ip_ranges
 
 from src.envena.interfaces.repl.base.workspace import Workspaces
-from src.envena.base.arguments import NOT_SET
 
 from src.envena.base.searchsploit import Searchsploit
 

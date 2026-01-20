@@ -8,7 +8,6 @@ from src.envena.base.tool import Tool
 from scapy.all import conf, get_if_hwaddr, get_if_addr, conf, ARP, AsyncSniffer
 
 from src.envena.interfaces.repl.base.workspace import Workspaces
-from src.envena.base.arguments import NOT_SET
 
 
 arpscan_v = 2.1

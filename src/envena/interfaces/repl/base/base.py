@@ -9,7 +9,7 @@ import re
 from rich.table import Table
 from rich.console import Console
 from rich.box import Box
-from src.envena.base.arguments import Arguments, NOT_SET
+from src.envena.base.arguments import Arguments
 
 from src.envena.config import ENVENA_VERSION
 
@@ -113,7 +113,7 @@ class EnvenaREPL(cmd2.Cmd):
     #################
     
     # workspace ======================================================== #
-    workspace_parser = argparse.ArgumentParser(prog='args', description='manage workspaces')
+    workspace_parser = argparse.ArgumentParser(prog='workspace', description='manage workspaces')
     workspace_subparsers = workspace_parser.add_subparsers(dest='action', help='action to perform')
     workspace_subparsers.required = True
     
@@ -180,8 +180,13 @@ class EnvenaREPL(cmd2.Cmd):
 
     args_subparsers.add_parser('default', help='reset all arguments to default values')
 
-    set_p = args_subparsers.add_parser('set', help='set a value: args set key=value')
-    set_p.add_argument('expression', nargs=argparse.REMAINDER, help='key = value expression')
+    get_p = args_subparsers.add_parser('get', help='show value of argument')
+    get_p.add_argument('expression', nargs=argparse.REMAINDER, help='argument to show') 
+    
+    set_p = args_subparsers.add_parser('set', help='set a value: args set key value')
+    set_p.add_argument('expression', nargs=argparse.REMAINDER, help='key value expression')
+    
+    
 
     @cmd2.with_argparser(args_parser)
     def do_args(self, ns: argparse.Namespace):        
@@ -189,7 +194,7 @@ class EnvenaREPL(cmd2.Cmd):
             self._show_args()
 
         elif ns.action == 'default':
-            self.args_obj = Arguments()
+            self.args_obj.default()
             self.poutput("all arguments to default")
 
         elif ns.action == 'set':
@@ -201,16 +206,28 @@ class EnvenaREPL(cmd2.Cmd):
             key, val = (expr[0], expr[1])
             if key in self._int_args: #['count', 'xid']:
                 try:
-                    setattr(self.args_obj, key.strip(), int(val.strip()))
+                    setattr(self.args_obj, key, int(val))
                 except ValueError:
                     self.perror('error: excepted integer')
             elif key in self._float_args: # ['timeout']:
                 try:
-                    setattr(self.args_obj, key.strip(), float(val.strip()))
+                    setattr(self.args_obj, key, float(val))
                 except ValueError:
                     self.perror('error: excepted integer or float')
             else:
-                setattr(self.args_obj, key.strip(), val.strip())
+                setattr(self.args_obj, key, val)
+
+        elif ns.action == 'get':
+            if len(ns.expression) != 1:
+                self.perror('error: excepted argument to show')
+                return
+            key = ns.expression[0]
+            
+            if key in self.args_obj.__slots__ and key != 'logger':
+                val = getattr(self.args_obj, key)
+                self.poutput(f'{key} : {val}')
+            else:
+                self.perror(f'error: argument "{key}" is invalid')
                     
 
     def _show_args(self):
@@ -247,11 +264,7 @@ class EnvenaREPL(cmd2.Cmd):
                 if p in all_slotted:
                     val = getattr(self.args_obj, p)
                     
-                    if val is NOT_SET:
-                        style = "[bold red]" if p == 'iface' else "[dim italic]"
-                        display_val = f"{style}{val}[/]"
-                    else:
-                        display_val = f"[bold green]{val}[/bold green]"
+                    display_val = f"[bold green]{val}[/bold green]"
                     
                     output_table.add_row(p, display_val, category)
                     all_slotted.remove(p)

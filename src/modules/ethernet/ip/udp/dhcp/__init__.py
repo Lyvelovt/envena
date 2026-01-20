@@ -40,8 +40,9 @@ class DHCPPacket(UDPProtocol):
         
         send_func = self.send_func
 
-        super().__init__(iface, count, timeout, ip_src, \
-            ip_dst, eth_src, eth_dst, send_func, port_src, port_dst, ttl=ttl)
+        super().__init__(iface=iface, count=count, timeout=timeout, ip_src=ip_src,
+            ip_dst=ip_dst, eth_src=eth_src, eth_dst=eth_dst, send_func=send_func, 
+            port_src=port_src, port_dst=port_dst, ttl=ttl)
         
         if validate_ip(sub_mask):
             self.sub_mask = ipaddress.ip_address(sub_mask)
