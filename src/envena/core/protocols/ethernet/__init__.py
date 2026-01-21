@@ -1,15 +1,15 @@
-from src.envena.core.protocols.base import BaseProtocol
-from src.envena.utils.functions import validate_eth
 import netaddr
 
+from src.envena.core.protocols.base import BaseProtocol
+from src.envena.utils.functions import validate_eth
+
+
 class EthernetProtocol(BaseProtocol):
-    __slots__ = ('iface','count','timeout','send_func',
-                             'eth_src','eth_dst')
-    
+    __slots__ = ("iface", "count", "timeout", "send_func", "eth_src", "eth_dst")
+
     def __init__(self, iface, count, timeout, send_func, eth_src, eth_dst):
-        
         super().__init__(iface=iface, send_func=send_func, count=count, timeout=timeout)
-        
+
         if validate_eth(eth_src):
             self.eth_src = netaddr.EUI(eth_src)
         else:

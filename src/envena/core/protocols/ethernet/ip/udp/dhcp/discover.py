@@ -1,18 +1,19 @@
-from scapy.all import Ether, IP, UDP, BOOTP, DHCP, sendp, hexdump
+from scapy.all import BOOTP, DHCP, IP, UDP, Ether, hexdump, sendp
 
-def send_dhcp_discover(param, printed: bool=True)->bool:
+
+def send_dhcp_discover(param, verbose: bool = True) -> bool:
     # ip_dst=str(param.ip_dst)
     # ip_src=str(param.ip_src)
     # eth_dst=str(param.eth_dst)
-    xid=param.xid
+    xid = param.xid
     # lease_time=param.lease_time
     # sub_mask=str(param.sub_mask)
     # dns_server=str(param.dns_server)
-    iface=param.iface
-    eth_src=str(param.eth_src)
-    port_src=param.port_src
-    port_dst=param.port_dst
-    hostname=param.hostname
+    iface = param.iface
+    eth_src = str(param.eth_src)
+    port_src = param.port_src
+    port_dst = param.port_dst
+    hostname = param.hostname
     # param_req_list=param.param_req_list
 
     ether = Ether(dst="ff:ff:ff:ff:ff:ff", src=eth_src)
@@ -23,20 +24,22 @@ def send_dhcp_discover(param, printed: bool=True)->bool:
         ("message-type", 1),  # DHCP Discover
         ("client_id", b"\x01" + bytes.fromhex(eth_src.replace(":", ""))),
         ("hostname", hostname),
-        ("param_req_list", [1, 3, 15, 6]), 
-        ("end")
+        ("param_req_list", [1, 3, 15, 6]),
+        ("end"),
     ]
     dhcp = DHCP(options=dhcp_options)
 
     packet = ether / ip / udp / bootp / dhcp
     try:
         sendp(packet, iface=iface, verbose=False)
-        if printed:
-            param.logger.info(f"Sent discover: {eth_src} -> 255.255.255.255: Is there any DHCP server here? Tell {eth_src}")
+        if verbose:
+            param.logger.info(
+                f"Sent discover: {eth_src} -> 255.255.255.255: Is there any DHCP server here? Tell {eth_src}"
+            )
             hexdump(packet)
         return True
     except Exception as e:
         param.logger.error(f"Packet was not sent: {e}")
         return False
-    
-    # return xid 
+
+    # return xid

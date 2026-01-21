@@ -1,18 +1,19 @@
-from scapy.all import Ether, IP, UDP, BOOTP, DHCP, sendp, hexdump
+from scapy.all import BOOTP, DHCP, IP, UDP, Ether, hexdump, sendp
 
-def send_dhcp_ack(param, printed: bool=True)->bool:
-    ip_dst=str(param.ip_dst)
-    ip_src=str(param.ip_src)
-    eth_dst=str(param.eth_dst)
-    xid=param.xid
-    lease_time=param.lease_time
-    sub_mask=str(param.sub_mask)
-    dns_server=str(param.dns_server)
-    iface=param.iface
-    eth_src=str(param.eth_src)
-    port_src=param.port_src
+
+def send_dhcp_ack(param, verbose: bool = True) -> bool:
+    ip_dst = str(param.ip_dst)
+    ip_src = str(param.ip_src)
+    eth_dst = str(param.eth_dst)
+    xid = param.xid
+    lease_time = param.lease_time
+    sub_mask = str(param.sub_mask)
+    dns_server = str(param.dns_server)
+    iface = param.iface
+    eth_src = str(param.eth_src)
+    port_src = param.port_src
     # hostname=param.hostname
-    port_dst=param.port_dst
+    port_dst = param.port_dst
     # param_req_list=param.param_req_list
 
     ether = Ether(dst=eth_dst, src=eth_src)
@@ -26,7 +27,7 @@ def send_dhcp_ack(param, printed: bool=True)->bool:
         ("sub_mask", sub_mask),
         ("router", ip_src),
         ("dns", dns_server),
-        ("end")
+        ("end"),
     ]
     dhcp = DHCP(options=dhcp_options)
 
@@ -34,10 +35,12 @@ def send_dhcp_ack(param, printed: bool=True)->bool:
 
     try:
         sendp(packet, iface=iface, verbose=False)
-        if printed:
-            param.logger.info(f"Sent ack: {ip_src} -> {ip_dst}: Address issue acknowledgement")
+        if verbose:
+            param.logger.info(
+                f"Sent ack: {ip_src} -> {ip_dst}: Address issue acknowledgement"
+            )
             hexdump(packet)
         return True
     except Exception as e:
         param.logger.error(f"Packet was not sent: {e}")
-        return False 
+        return False

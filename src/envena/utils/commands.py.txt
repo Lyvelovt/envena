@@ -183,7 +183,7 @@ def send_packet(type: str, args: Dict)->bool:
     first = True # Flag that indicating the first run through the cycle
     while current:
         print(word_sending[:word_timer] + word_sending[word_timer].upper() + word_sending[word_timer+1:] + '.' * dot_timer, end='\r')
-        if handler(**filtered_args, printed=first): # Send package
+        if handler(**filtered_args, verbose=first): # Send package
             sent_packets += 1
         if not first:
             time.sleep(timeout)

@@ -1,13 +1,14 @@
 # from src.envena.config import scapy, Error_text, Fatal_Error, Clear
 # from src.envena.functions import validate_args
-from scapy.all import hexdump, Ether, sendp
+from scapy.all import Ether, hexdump, sendp
 
-def send_ether(param, printed=True)->bool:
-    eth_src=str(param.eth_src).replace('-', ':')
-    eth_dst=str(param.eth_dst).replace('-', ':')
-    iface=str(param.iface)
-    payload=param.payload
-    
+
+def send_ether(param, verbose=True) -> bool:
+    eth_src = str(param.eth_src).replace("-", ":")
+    eth_dst = str(param.eth_dst).replace("-", ":")
+    iface = str(param.iface)
+    payload = param.payload
+
     # Creates an Ethernet packet for the data link layer
     ether = Ether(src=eth_src, dst=eth_dst) / payload
 
@@ -16,11 +17,12 @@ def send_ether(param, printed=True)->bool:
     # Sends the packet
     try:
         sendp(packet, iface=iface, verbose=False)
-        if printed:
-            param.logger.info(f"Sent Ether: {eth_src} -> {eth_dst}{'' if payload == '' else f": {payload}"}")
+        if verbose:
+            param.logger.info(
+                f"Sent Ether: {eth_src} -> {eth_dst}{'' if payload == '' else f': {payload}'}"
+            )
             hexdump(packet)
         return True
     except Exception as e:
         param.logger.error(f"Packet was not sent: {e}")
         return False
-

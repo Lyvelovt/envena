@@ -1,19 +1,21 @@
-from datetime import datetime
 import os
 import platform
 import threading
 import time
+from datetime import datetime
 from statistics import mean
 
-from src.envena.core.config import Clear, Success, Error, Error_text, Purple
-from scapy.all import sniff, rdpcap, Dot11, Dot11Beacon, Dot11ProbeResp, RadioTap, conf
-from src.envena.utils.functions import validate_args, get_vendor
-
+from rich.align import Align
 from rich.console import Console
-from rich.table import Table
 from rich.live import Live
 from rich.panel import Panel
-from rich.align import Align
+from rich.table import Table
+from scapy.all import (Dot11, Dot11Beacon, Dot11ProbeResp, RadioTap, conf,
+                       rdpcap, sniff)
+
+from src.envena.core.config import Clear, Error, Error_text, Purple, Success
+from src.envena.modules.dot11.discovery import CATEGORY_DOC
+from src.envena.utils.functions import get_vendor, validate_args
 
 dot11scan_v = 2.0
 
@@ -23,11 +25,14 @@ _lock = threading.RLock()
 
 console = Console()
 
+
 def _now_ts():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+
 def _mac_norm(mac):
     return mac.upper() if mac else mac
+
 
 def _update_signal(store, mac, signal):
     if signal is None:
@@ -38,6 +43,7 @@ def _update_signal(store, mac, signal):
     if len(store[mac]["signals"]) > 100:
         store[mac]["signals"].pop(0)
 
+
 def _avg_signal(store, mac):
     s = store.get(mac, {}).get("signals", [])
     if not s:
@@ -46,6 +52,7 @@ def _avg_signal(store, mac):
         return round(mean(s), 1)
     except Exception:
         return None
+
 
 def _get_rssi_from_radiotap(pkt):
     try:
@@ -59,6 +66,7 @@ def _get_rssi_from_radiotap(pkt):
         pass
     return None
 
+
 def _detect_encryption(pkt):
     try:
         if pkt.haslayer(Dot11Beacon) or pkt.haslayer(Dot11ProbeResp):
@@ -69,7 +77,7 @@ def _detect_encryption(pkt):
                     return "WPA2/RSN"
                 if elt.ID == 221 and elt.info and len(elt.info) >= 4:
                     # vendor specific — maybe WPA1 (OUI 00:50:F2)
-                    if elt.info.startswith(b'\x00P\xf2'):
+                    if elt.info.startswith(b"\x00P\xf2"):
                         return "WPA"
                 seen.append((elt.ID, getattr(elt, "info", None)))
                 elt = elt.payload.getlayer("Dot11Elt")
@@ -92,7 +100,6 @@ def _detect_encryption(pkt):
     return "Open"
 
 
-
 def process_packet(pkt):
     if not pkt.haslayer(Dot11):
         return
@@ -108,14 +115,17 @@ def process_packet(pkt):
             bssid = _mac_norm(dot11.addr2 or dot11.addr3)
             if not bssid:
                 return
-            ap = aps.setdefault(bssid, {
-                "ssid": None,
-                "manufacturer": None,
-                "enc": None,
-                "clients": set(),
-                "signals": [],
-                "last_seen": None
-            })
+            ap = aps.setdefault(
+                bssid,
+                {
+                    "ssid": None,
+                    "manufacturer": None,
+                    "enc": None,
+                    "clients": set(),
+                    "signals": [],
+                    "last_seen": None,
+                },
+            )
             # SSID
             ssid = None
             try:
@@ -147,11 +157,20 @@ def process_packet(pkt):
             ap["last_seen"] = ts
 
             # register device info also in devices
-            dev = devices.setdefault(bssid, {"manufacturer": ap["manufacturer"], "signals": [], "last_seen": None, "seen_as": set()})
+            dev = devices.setdefault(
+                bssid,
+                {
+                    "manufacturer": ap["manufacturer"],
+                    "signals": [],
+                    "last_seen": None,
+                    "seen_as": set(),
+                },
+            )
             dev["seen_as"].add("ap")
             if rssi is not None:
-                dev["signals"].append(rssi); 
-                if len(dev["signals"])>100: dev["signals"].pop(0)
+                dev["signals"].append(rssi)
+                if len(dev["signals"]) > 100:
+                    dev["signals"].pop(0)
             dev["last_seen"] = ts
 
         # Data frames: client <-> ap
@@ -162,7 +181,15 @@ def process_packet(pkt):
 
             for mac in (src, dst, bssid):
                 if mac and mac not in devices:
-                    devices.setdefault(mac, {"manufacturer": None, "signals": [], "last_seen": None, "seen_as": set()})
+                    devices.setdefault(
+                        mac,
+                        {
+                            "manufacturer": None,
+                            "signals": [],
+                            "last_seen": None,
+                            "seen_as": set(),
+                        },
+                    )
             # determine probable AP vs client:
             # if bssid exists in known aps -> treat other addr as client
             if bssid and bssid in aps:
@@ -170,15 +197,20 @@ def process_packet(pkt):
                 if src and src != bssid:
                     aps[bssid]["clients"].add(src)
                     devices[src]["seen_as"].add("client")
-                    devices[src]["manufacturer"] = devices[src].get("manufacturer") or get_vendor(src)
+                    devices[src]["manufacturer"] = devices[src].get(
+                        "manufacturer"
+                    ) or get_vendor(src)
                 if dst and dst != bssid:
                     aps[bssid]["clients"].add(dst)
                     devices[dst]["seen_as"].add("client")
-                    devices[dst]["manufacturer"] = devices[dst].get("manufacturer") or get_vendor(dst)
+                    devices[dst]["manufacturer"] = devices[dst].get(
+                        "manufacturer"
+                    ) or get_vendor(dst)
                 # update ap last seen and signals
                 if rssi is not None:
                     aps[bssid]["signals"].append(rssi)
-                    if len(aps[bssid]["signals"])>100: aps[bssid]["signals"].pop(0)
+                    if len(aps[bssid]["signals"]) > 100:
+                        aps[bssid]["signals"].pop(0)
                 aps[bssid]["last_seen"] = ts
 
             # if bssid unknown but src or dst is known AP -> use that
@@ -198,26 +230,37 @@ def process_packet(pkt):
                     devices[src]["manufacturer"] = get_vendor(src)
                 if rssi is not None:
                     devices[src].setdefault("signals", []).append(rssi)
-                    if len(devices[src]["signals"])>100: devices[src]["signals"].pop(0)
+                    if len(devices[src]["signals"]) > 100:
+                        devices[src]["signals"].pop(0)
             if dst:
                 devices[dst]["last_seen"] = ts
                 if devices[dst].get("manufacturer") is None:
                     devices[dst]["manufacturer"] = get_vendor(dst)
                 if rssi is not None:
                     devices[dst].setdefault("signals", []).append(rssi)
-                    if len(devices[dst]["signals"])>100: devices[dst]["signals"].pop(0)
+                    if len(devices[dst]["signals"]) > 100:
+                        devices[dst]["signals"].pop(0)
 
         # Other management frames: probe request (subtype 4) — client probing for APs
         elif dot11.type == 0 and dot11.subtype == 4:
             # addr2 — client
             client = _mac_norm(dot11.addr2)
             if client:
-                devices.setdefault(client, {"manufacturer": None, "signals": [], "last_seen": None, "seen_as": set()})
+                devices.setdefault(
+                    client,
+                    {
+                        "manufacturer": None,
+                        "signals": [],
+                        "last_seen": None,
+                        "seen_as": set(),
+                    },
+                )
                 devices[client]["seen_as"].add("client")
                 devices[client]["last_seen"] = ts
                 if rssi is not None:
                     devices[client].setdefault("signals", []).append(rssi)
-                    if len(devices[client]["signals"])>100: devices[client]["signals"].pop(0)
+                    if len(devices[client]["signals"]) > 100:
+                        devices[client]["signals"].pop(0)
                 if devices[client].get("manufacturer") is None:
                     devices[client]["manufacturer"] = get_vendor(client)
         else:
@@ -226,19 +269,34 @@ def process_packet(pkt):
             dst = _mac_norm(dot11.addr1) if dot11.addr1 else None
             for mac in (src, dst):
                 if mac:
-                    devices.setdefault(mac, {"manufacturer": None, "signals": [], "last_seen": None, "seen_as": set()})
+                    devices.setdefault(
+                        mac,
+                        {
+                            "manufacturer": None,
+                            "signals": [],
+                            "last_seen": None,
+                            "seen_as": set(),
+                        },
+                    )
                     devices[mac]["seen_as"].add("other")
                     devices[mac]["last_seen"] = ts
                     if rssi is not None:
                         devices[mac].setdefault("signals", []).append(rssi)
-                        if len(devices[mac]["signals"])>100: devices[mac]["signals"].pop(0)
+                        if len(devices[mac]["signals"]) > 100:
+                            devices[mac]["signals"].pop(0)
                     if devices[mac].get("manufacturer") is None:
                         devices[mac]["manufacturer"] = get_vendor(mac)
 
 
 def _build_table(source_label="live"):
-   with _lock:
-        table = Table(title=f"Dot11 scan — {source_label} — { _now_ts() }", expand=True, show_lines=False, show_header=True, header_style="bold cyan")
+    with _lock:
+        table = Table(
+            title=f"Dot11 scan — {source_label} — {_now_ts()}",
+            expand=True,
+            show_lines=False,
+            show_header=True,
+            header_style="bold cyan",
+        )
         # AP BSSID, SSID, MANUFACTURER, TYPE, ENC, AVG_RSSI, LAST_SEEN, CLIENTS
         table.add_column("BSSID / Client", style="bold magenta")
         table.add_column("SSID / —", overflow="fold", style="yellow")
@@ -249,17 +307,33 @@ def _build_table(source_label="live"):
         table.add_column("Last seen")
 
         # sort APs by last_seen desc
-        ap_items = sorted(aps.items(), key=lambda kv: kv[1].get("last_seen", datetime.min), reverse=True)
+        ap_items = sorted(
+            aps.items(),
+            key=lambda kv: kv[1].get("last_seen", datetime.min),
+            reverse=True,
+        )
 
         if not ap_items:
             table.add_row("[no APs detected]", "-", "-", "-", "-", "-", "-")
             # also show any standalone devices
-            dev_items = sorted(devices.items(), key=lambda kv: kv[1].get("last_seen", datetime.min), reverse=True)
+            dev_items = sorted(
+                devices.items(),
+                key=lambda kv: kv[1].get("last_seen", datetime.min),
+                reverse=True,
+            )
             for mac, info in dev_items[:50]:
                 avg = _avg_signal(devices, mac)
                 last = info.get("last_seen")
                 last_s = last.strftime("%Y-%m-%d %H:%M:%S") if last else "-"
-                table.add_row(mac, "-", info.get("manufacturer","-"), ", ".join(sorted(info.get("seen_as",[])) or ["-"]), "-", str(avg) if avg is not None else "-", last_s)
+                table.add_row(
+                    mac,
+                    "-",
+                    info.get("manufacturer", "-"),
+                    ", ".join(sorted(info.get("seen_as", [])) or ["-"]),
+                    "-",
+                    str(avg) if avg is not None else "-",
+                    last_s,
+                )
             return table
 
         for bssid, info in ap_items:
@@ -267,7 +341,7 @@ def _build_table(source_label="live"):
             manuf = info.get("manufacturer") or get_vendor(bssid)
             dev_type = "AP"
             enc = info.get("enc") or "-"
-            avg = round(mean(info["signals"]),1) if info.get("signals") else None
+            avg = round(mean(info["signals"]), 1) if info.get("signals") else None
             avg_s = str(avg) if avg is not None else "-"
             last = info.get("last_seen")
             last_s = last.strftime("%Y-%m-%d %H:%M:%S") if last else "-"
@@ -290,17 +364,34 @@ def _build_table(source_label="live"):
                 pass
 
         # show any devices not attached to an AP
-        orphan_devs = [ (mac, info) for mac, info in devices.items() if all(mac not in aps[a]["clients"] for a in aps) and mac not in aps ]
+        orphan_devs = [
+            (mac, info)
+            for mac, info in devices.items()
+            if all(mac not in aps[a]["clients"] for a in aps) and mac not in aps
+        ]
         if orphan_devs:
             table.add_section()
             table.add_row("[unassociated devices]", "-", "-", "-", "-", "-", "-")
-            for mac, info in sorted(orphan_devs, key=lambda kv: kv[1].get("last_seen") or datetime.min, reverse=True)[:50]:
+            for mac, info in sorted(
+                orphan_devs,
+                key=lambda kv: kv[1].get("last_seen") or datetime.min,
+                reverse=True,
+            )[:50]:
                 avg = _avg_signal(devices, mac)
                 last = info.get("last_seen")
                 last_s = last.strftime("%Y-%m-%d %H:%M:%S") if last else "-"
-                table.add_row(mac, "-", info.get("manufacturer","-"), ", ".join(sorted(info.get("seen_as",[])) or ["-"]), "-", str(avg) if avg is not None else "-", last_s)
+                table.add_row(
+                    mac,
+                    "-",
+                    info.get("manufacturer", "-"),
+                    ", ".join(sorted(info.get("seen_as", [])) or ["-"]),
+                    "-",
+                    str(avg) if avg is not None else "-",
+                    last_s,
+                )
 
         return table
+
 
 def run_from_pcap(pcap_path):
     print(f"Reading pcap: {pcap_path}")
@@ -315,7 +406,8 @@ def run_from_pcap(pcap_path):
 
     # очистим старые
     with _lock:
-        aps.clear(); devices.clear()
+        aps.clear()
+        devices.clear()
 
     for pkt in pkts:
         try:
@@ -327,16 +419,23 @@ def run_from_pcap(pcap_path):
     console.print(table)
     print(f"\n{Success}Processed {len(pkts)} packets.{Clear}")
 
+
 def run_live(iface, timeout=None):
     print(f"{Success}Live sniffing on interface: {Purple}{iface}{Clear}")
     with _lock:
-        aps.clear(); devices.clear()
+        aps.clear()
+        devices.clear()
 
     stop_sniff = threading.Event()
 
     def _sniff_thread():
         try:
-            sniff(iface=iface, prn=process_packet, store=False, stop_filter=lambda x: stop_sniff.is_set())
+            sniff(
+                iface=iface,
+                prn=process_packet,
+                store=False,
+                stop_filter=lambda x: stop_sniff.is_set(),
+            )
         except Exception as e:
             print(f"{Error}Error: {Error_text}failed to sniff: {e}{Clear}")
             stop_sniff.set()
@@ -345,7 +444,11 @@ def run_live(iface, timeout=None):
     t.start()
 
     try:
-        with Live(_build_table(source_label=f"iface:{iface}"), refresh_per_second=4, console=console) as live:
+        with Live(
+            _build_table(source_label=f"iface:{iface}"),
+            refresh_per_second=4,
+            console=console,
+        ) as live:
             start = time.time()
             while True:
                 live.update(_build_table(source_label=f"iface:{iface}"))
@@ -359,13 +462,14 @@ def run_live(iface, timeout=None):
         t.join(timeout=2)
         print(f"\nAborted.")
 
+
 def dot11scan(args: dict) -> bool:
     if not validate_args(
-        input=args['input'], iface=args['iface'],
-        timeout=args['timeout']):
+        input=args["input"], iface=args["iface"], timeout=args["timeout"]
+    ):
         return False
-    
-    os.system('cls' if platform.system() == 'Windows' else 'clear')
+
+    os.system("cls" if platform.system() == "Windows" else "clear")
     print(f"Dot11scan, version: {dot11scan_v}")
 
     if args.get("input"):
@@ -387,17 +491,34 @@ def dot11scan(args: dict) -> bool:
     run_live(iface, timeout=args.get("timeout"))
     return True
 
+
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description=f"Dot11 scanner module. Version: {dot11scan_v}")
-    parser.add_argument("-i", "--iface", help="Network iface to sniff from (e.g. wlan0mon).", required=False)
-    parser.add_argument("-p", "--pcap", help="Path to .pcap file to read (static mode).", required=False)
-    parser.add_argument("-t", "--timeout", type=int, help="Timeout seconds for live sniff (optional).", required=False)
+
+    parser = argparse.ArgumentParser(
+        description=f"Dot11 scanner module. Version: {dot11scan_v}"
+    )
+    parser.add_argument(
+        "-i",
+        "--iface",
+        help="Network iface to sniff from (e.g. wlan0mon).",
+        required=False,
+    )
+    parser.add_argument(
+        "-p", "--pcap", help="Path to .pcap file to read (static mode).", required=False
+    )
+    parser.add_argument(
+        "-t",
+        "--timeout",
+        type=int,
+        help="Timeout seconds for live sniff (optional).",
+        required=False,
+    )
 
     arg = parser.parse_args()
     args = {}
-    args['iface'] = arg.iface if arg.iface is not None else conf.iface
-    args['input'] = arg.pcap
-    args['timeout'] = arg.timeout
+    args["iface"] = arg.iface if arg.iface is not None else conf.iface
+    args["input"] = arg.pcap
+    args["timeout"] = arg.timeout
 
     dot11scan(args)

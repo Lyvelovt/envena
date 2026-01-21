@@ -1,6 +1,8 @@
 import os
 
-ENVENA_VERSION = '1.9.7'
+ENVENA_VERSION = "1.9.7"
+
+BASE_WORKSPACES_PATH = "database/workspaces"
 
 # Colors
 if os.name == "posix":
@@ -15,7 +17,7 @@ if os.name == "posix":
     Muted = "\033[37m"
     Back_red = "\033[101m"
     Info = "\033[1;34m"
-    
+
     Blink = "\033[5m"
     Blue = "\033[38;5;117m"
     Orange = "\033[38;5;208m"
@@ -25,20 +27,21 @@ if os.name == "posix":
     Light_red = "\033[38;5;197m"
 
     # For ART:
-    x = '\033[1m'
-    y = '\033[1;31m'
-    w = '[90m'
-    r = '[0;0;0m'
-    g = '[30m'
-    b = '\033[96m'
-    n = '[37m'
+    x = "\033[1m"
+    y = "\033[1;31m"
+    w = "[90m"
+    r = "[0;0;0m"
+    g = "[30m"
+    b = "\033[96m"
+    n = "[37m"
     c = Clear
 else:
     # For Windows and others
     try:
         import colorama
+
         colorama.init()
-        
+
         Clear = colorama.Style.RESET_ALL
         Error = colorama.Fore.RED
         Fatal_Error = colorama.Fore.RED + colorama.Style.BRIGHT
@@ -68,8 +71,12 @@ else:
         n = colorama.Fore.WHITE
         c = Clear
     except ImportError:
-        print('Error: failed to import colorama library. Colored output will be disabled. To fix it try "pip3 install colorama".')
-        print('You also can run program with "--i-am-too-stupid" flag if you do not know how to install dependencies.')
+        print(
+            'Error: failed to import colorama library. Colored output will be disabled. To fix it try "pip3 install colorama".'
+        )
+        print(
+            'You also can run program with "--i-am-too-stupid" flag if you do not know how to install dependencies.'
+        )
         Clear = ""
         Error = ""
         Fatal_Error = ""
@@ -96,12 +103,6 @@ else:
         g = ""
         n = ""
         c = ""
-
-
-
-
-
-
 
 
 # # Exit if scapy is not installed

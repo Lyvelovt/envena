@@ -1,4 +1,5 @@
 from ..core.config import ENVENA_VERSION
+
 help_info = f"""
 Envena v{ENVENA_VERSION}.
 
@@ -162,5 +163,3 @@ ip_forward:
     eth_src     -       source MAC address (router).
     iface       -       network interface to use.
 """
-
-
