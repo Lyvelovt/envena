@@ -37,7 +37,6 @@ class t_raw_packet(BaseTool):
     """
 
     def __init__(self, tool_func=send_raw_packet, VERSION=1.1):
-        self.category = CATEGORY_DOC
         super().__init__(tool_func=tool_func, VERSION=VERSION)
 
 
@@ -64,4 +63,4 @@ if __name__ == "__main__":
     public_args.input = cli_args.file
     public_args.iface = cli_args.iface
 
-    t_raw_packet.start_tool()
+    t_raw_packet().start_tool()

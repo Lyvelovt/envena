@@ -89,7 +89,6 @@ class t_dhcp_starve(BaseTool):
     """
 
     def __init__(self, tool_func=dhcp_starve, VERSION=1.0):
-        self.category = CATEGORY_DOC
         super().__init__(tool_func=tool_func, VERSION=VERSION)
 
 
@@ -110,4 +109,4 @@ if __name__ == "__main__":
 
     public_args.iface = cli_args.iface
 
-    t_dhcp_starve.start_tool()
+    t_dhcp_starve().start_tool()

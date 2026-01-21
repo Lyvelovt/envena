@@ -174,7 +174,6 @@ class t_arpscan(BaseTool):
     """
 
     def __init__(self, tool_func=arpscan, VERSION=2.2):
-        self.category = CATEGORY_DOC
         super().__init__(tool_func=tool_func, VERSION=VERSION)
 
 
@@ -207,4 +206,4 @@ if __name__ == "__main__":
     public_args.input = cli_args.ip
     public_args.timeout = cli_args.timeout
 
-    t_arpscan.start_tool()
+    t_arpscan().start_tool()

@@ -22,7 +22,6 @@ class t_dns_getHostname(BaseTool):
     """
 
     def __init__(self, tool_func=dns_getHostname, VERSION=1.0):
-        self.category = CATEGORY_DOC
         super().__init__(tool_func=tool_func, VERSION=VERSION)
 
 

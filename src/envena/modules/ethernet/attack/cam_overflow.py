@@ -72,7 +72,6 @@ class t_cam_overflow(BaseTool):
     """
 
     def __init__(self, tool_func=cam_overflow, VERSION=1.1):
-        self.category = CATEGORY_DOC
         super().__init__(tool_func=tool_func, VERSION=VERSION)
 
 
@@ -113,4 +112,4 @@ if __name__ == "__main__":
     public_args.iface = cli_args.iface
     # args.input = cli_args.payload
 
-    t_camoverflow.start_tool()
+    t_cam_overflow().start_tool()

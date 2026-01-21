@@ -153,7 +153,6 @@ class t_vulnscan(BaseTool):
     """
 
     def __init__(self, tool_func=vulnscan, VERSION=1.0):
-        self.category = CATEGORY_DOC
         super().__init__(tool_func=tool_func, VERSION=VERSION)
 
 
@@ -177,4 +176,4 @@ if __name__ == "__main__":
     public_args.input = cli_args.ip
     # public_args.timeout = cli_args.timeout
 
-    t_vulnscan.start_tool()
+    t_vulnscan().start_tool()

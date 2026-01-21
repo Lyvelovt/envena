@@ -113,7 +113,6 @@ class t_ip_forwarding(BaseTool):
     """
 
     def __init__(self, tool_func=ip_forwarding, VERSION=1.4):
-        self.category = CATEGORY_DOC
         super().__init__(tool_func=tool_func, VERSION=VERSION)
 
 
@@ -158,4 +157,4 @@ if __name__ == "__main__":
     public_args.sub_mask = cli_args.submask
     public_args.input = "nottl" if cli_args.nottl else ""
 
-    t_ip_forwarding.start_tool()
+    t_ip_forwarding().start_tool()

@@ -103,4 +103,4 @@ if __name__ == "__main__":
     public_args.iface = cli_args.iface
     public_args.input = cli_args.filter.lower()
 
-    t_jammer.start_tool()
+    t_jammer().start_tool()

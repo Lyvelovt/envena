@@ -171,7 +171,6 @@ class t_icmpmap(BaseTool):
     """
 
     def __init__(self, tool_func=icmpmap, VERSION=1.4):
-        self.category = CATEGORY_DOC
         super().__init__(tool_func=tool_func, VERSION=VERSION)
 
 
@@ -210,7 +209,7 @@ if __name__ == "__main__":
         public_args.ip_dst = cli_args.ip_dst
         public_args.input = cli_args.ip
 
-        t_icmpmap.start_tool()
+        t_icmpmap().start_tool()
 
     except KeyboardInterrupt:
         exit()

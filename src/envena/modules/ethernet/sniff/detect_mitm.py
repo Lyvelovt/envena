@@ -140,7 +140,6 @@ class t_detect_mitm(BaseTool):
     """
 
     def __init__(self, tool_func=detect_mitm, VERSION=1.1):
-        self.category = CATEGORY_DOC
         super().__init__(tool_func=tool_func, VERSION=VERSION)
 
 
@@ -167,4 +166,4 @@ if __name__ == "__main__":
     public_args.input = cli_args.gateway
     # get_if_hwaddr(public_args.iface)
 
-    t_detect_mitm.start_tool()
+    t_detect_mitm().start_tool()
