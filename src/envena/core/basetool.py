@@ -31,7 +31,7 @@ class BaseTool:
 
     def start_tool(self):
         self.logger = logging.getLogger(
-            f"{ROOT_LOGGER_NAME}.{self.__class__.__name__}.{self.tool_func.__name__}@{self.args.iface if self.args != None else public_args.iface}"
+            f"{ROOT_LOGGER_NAME}.{self.tool_func.__name__}@{self.args.iface if self.args != None else public_args.iface}"
         )
         self.logger.info(f"# Script started, version: {self.VERSION}")
         try:

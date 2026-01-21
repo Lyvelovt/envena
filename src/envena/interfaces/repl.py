@@ -100,17 +100,19 @@ class EnvenaREPL(cmd2.Cmd):
         return loaded_objects
 
     def _create_command(self, name, instance):
-        """Automaticaly create command in REPL for tool"""
+        """Automatically create command in REPL for tool"""
 
-        def command_wrapper(arg):
-            instance.ws = self.workspaces
-            instance.args = self.args_obj
+        # Добавляем 'self' (т.к. это станет методом класса)
+        # и 'statement' (куда cmd2 запишет введенные аргументы)
+        def command_wrapper(repl_instance, statement):
+            instance.ws = repl_instance.workspaces
+            instance.args = repl_instance.args_obj
             instance.start_tool()
 
+        # Копируем документацию из класса инструмента для команды help
         command_wrapper.__doc__ = instance.__doc__
 
-        # command_wrapper.category = instance.category
-
+        # Регистрируем метод в классе REPL
         setattr(self.__class__, f"do_{name}", command_wrapper)
 
     #################
