@@ -2,8 +2,8 @@ import logging
 import sys
 
 ROOT_LOGGER_NAME = "envena"
-LOG_LEVEL = logging.INFO
-# LOG_LEVEL = logging.DEBUG
+# LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.DEBUG
 LOG_FORMAT = "[%(name)s] [%(levelname)s] %(message)s"
 
 

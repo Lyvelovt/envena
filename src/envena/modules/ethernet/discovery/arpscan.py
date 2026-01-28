@@ -142,7 +142,7 @@ def arpscan(param, logger, ws=None) -> None:
         logger.info(f"Scan finished in {round(time.time() - start_time, 3)} s.")
         logger.info(f"Detected {len(devices_info)}/{len(ip_range)} device(s)")
         print_aligned_table(devices_info)
-        if ws.current:
+        if ws and ws.current:
             for device in devices_info:
                 ws.set_host(
                     mac=device["eth"],

@@ -76,7 +76,7 @@ def scan_vuln(logger, target_ips: str, iface: str = conf.iface, ws=None) -> list
 
                 # logger.info(f"Found {host}:{port} - {name} ({full_version})")
 
-                if ws.current:
+                if ws and ws.current:
                     hid = ws.get_host_id(ip=host)
                     if not hid:
                         hid = ws.set_host(mac="Unknown", ip=host, hostname=hostname)
@@ -109,7 +109,7 @@ def scan_vuln(logger, target_ips: str, iface: str = conf.iface, ws=None) -> list
                         logger.info(f"  ├── Codes: {codes}")
                         logger.info(f"  └── Path: {path}")
 
-                        if ws.current:
+                        if ws and ws.current:
                             ws.set_vuln(service_id=sid, title=title, url=path)
 
     return all_found_services
@@ -132,7 +132,7 @@ def vulnscan(param, logger, ws=None) -> None:
     results = scan_vuln(logger=logger, target_ips=param.input, iface=param.iface, ws=ws)
 
     print_aligned_table(results)
-    if ws.current:
+    if ws and ws.current:
         pass
 
     # except KeyboardInterrupt:

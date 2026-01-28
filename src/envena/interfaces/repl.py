@@ -75,7 +75,6 @@ class EnvenaREPL(cmd2.Cmd):
 
                     parent_package_name = ".".join(module_name.split(".")[:-1])
                     parent_package = importlib.import_module(parent_package_name)
-
                     category = getattr(parent_package, "CATEGORY_DOC", "Misc")
 
                     short_name = module_name.split(".")[-1]
@@ -84,12 +83,11 @@ class EnvenaREPL(cmd2.Cmd):
                     if hasattr(module, target_obj_name):
                         obj_class = getattr(module, target_obj_name)
                         tool_instance = obj_class()
-
                         tool_instance.category = category
 
-                        loaded_objects[short_name] = obj_class
                         self._create_command(short_name, tool_instance)
 
+                        loaded_objects[short_name] = obj_class
                         self.logger.debug(
                             f'Imported "{target_obj_name}" (Category: {category})'
                         )
@@ -98,23 +96,25 @@ class EnvenaREPL(cmd2.Cmd):
                     self.logger.warning(f"Failed to load module {module_name}: {e}")
 
         return loaded_objects
-
+    
     def _create_command(self, name, instance):
         """Automatically create command in REPL for tool"""
 
-        # Добавляем 'self' (т.к. это станет методом класса)
-        # и 'statement' (куда cmd2 запишет введенные аргументы)
         def command_wrapper(repl_instance, statement):
             instance.ws = repl_instance.workspaces
             instance.args = repl_instance.args_obj
             instance.start_tool()
 
-        # Копируем документацию из класса инструмента для команды help
-        command_wrapper.__doc__ = instance.__doc__
+        command_wrapper.__doc__ = instance.__doc__ or f"Tool: {name}"
 
-        # Регистрируем метод в классе REPL
-        setattr(self.__class__, f"do_{name}", command_wrapper)
+        cmd_name = f"do_{name}"
 
+        setattr(self.__class__, cmd_name, command_wrapper)
+
+        if hasattr(instance, 'category'):
+            func = getattr(self, cmd_name)
+            func.__func__.category = instance.category
+                
     #################
     # COMMANDS PART #
     #################

@@ -6,7 +6,7 @@ from src.envena.core.workspace import Workspaces
 
 
 class BaseTool:
-    __slots__ = ("VERSION", "tool_func", "logger", "args", "ws")
+    __slots__ = ("VERSION", "tool_func", "logger", "args", "ws", "category")
 
     def __init__(
         self, tool_func, VERSION: float, args: Arguments = None, ws: Workspaces = None

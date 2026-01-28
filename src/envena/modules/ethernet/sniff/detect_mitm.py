@@ -42,7 +42,7 @@ def detect_mitm_in_package(
                         f"...Known MAC..: {ARP_TABLE[source_ip]} (Legitimate)"
                     )
                     ARP_TABLE[source_ip] = source_mac
-                elif ws.current:
+                elif ws and ws.current:
                     if source_mac != "ff:ff:ff:ff:ff:ff":
                         ws.set_host(
                             mac=source_mac,

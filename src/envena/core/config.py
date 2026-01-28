@@ -1,4 +1,8 @@
 import os
+import logging
+from src.envena.core.logger import ROOT_LOGGER_NAME
+
+logger = logging.getLogger(ROOT_LOGGER_NAME)
 
 ENVENA_VERSION = "1.9.7"
 
@@ -66,16 +70,13 @@ else:
         y = colorama.Style.BRIGHT + colorama.Fore.RED
         w = colorama.Fore.LIGHTBLACK_EX
         r = colorama.Style.RESET_ALL
-        b = Style.BRIGHT + Fore.CYAN
+        b = colorama.Style.BRIGHT + colorama.Fore.CYAN
         g = colorama.Fore.BLACK
         n = colorama.Fore.WHITE
         c = Clear
     except ImportError:
-        print(
+        logger.warning(
             'Error: failed to import colorama library. Colored output will be disabled. To fix it try "pip3 install colorama".'
-        )
-        print(
-            'You also can run program with "--i-am-too-stupid" flag if you do not know how to install dependencies.'
         )
         Clear = ""
         Error = ""
