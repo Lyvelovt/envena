@@ -2,12 +2,13 @@
 
 # Envena: Network Vulnerability Exposure Node Analyzer 
 ### Description
-<b>Envena</b> - is a program for network analysis and testing that includes:
+<b>Envena</b> - is a framework for network analysis and testing that includes:
 ```
 1. Scripts for diagnostics and analysis, which are in demand in everyday situations
 2. Flexible generation of packets with arbitrary headers
 3. Support for key protocols: ARP (L2/3), DHCP (L7), ICMP (L3), IEEE 802.11 (L1/2)
 4. Cross-platform
+5. The ability to create your own scripts and add your own data transfer standards (e.g. 433MHz, BLE)
 ```
 
 ### Requirements
@@ -64,20 +65,28 @@ pip install -r requirements.txt
 ### Using
 Example for Unix-like systems:
 ```sh
+# To run envena in REPL
+sudo python3 -m main
+```
+
+```sh
+# You also can use every module as CLI programm
 # To scan all subnet for hosts using ARPscan module
-sudo python3 -m src.ethernet.tools.arpscan -ip 192.168.1.0/24
+sudo python3 -m src.envena.modules.ethernet.discovery.arpscan -ip 192.168.1.0/24
 ```
 
 To run any other module use:
 ```sh
 sudo python3 -m <path to module in python import standart> <args>
 ```
+
 Example for Windows:
 
 Start your terminal with <b>superuser</b> rights!
 ```
+# You also can use every module as CLI programm
 # To scan all subnet for hosts using ARPscan module
-python3 -m src.ethernet.tools.arpscan -ip 192.168.1.0/24
+python3 -m src.envena.modules.ethernet.discovery.arpscan -ip 192.168.1.0/24
 ```
 
 To run any other module use:
