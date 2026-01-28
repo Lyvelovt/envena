@@ -1,5 +1,6 @@
-import os
 import logging
+import os
+
 from src.envena.core.logger import ROOT_LOGGER_NAME
 
 logger = logging.getLogger(ROOT_LOGGER_NAME)

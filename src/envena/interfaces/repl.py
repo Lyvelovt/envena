@@ -96,17 +96,17 @@ class EnvenaREPL(cmd2.Cmd):
                     self.logger.warning(f"Failed to load module {module_name}: {e}")
 
         return loaded_objects
-    
+
     def _create_command(self, name, instance):
         @cmd2.with_category(instance.category)
-        def command_wrapper(arg):
-            instance.ws = self.workspaces
-            instance.args = self.args_obj
+        def command_wrapper(repl_self, arg):
+            instance.ws = repl_self.workspaces
+            instance.args = repl_self.args_obj
             instance.start_tool()
 
         command_wrapper.__doc__ = instance.__doc__
         setattr(self.__class__, f"do_{name}", command_wrapper)
-        
+
     #################
     # COMMANDS PART #
     #################
