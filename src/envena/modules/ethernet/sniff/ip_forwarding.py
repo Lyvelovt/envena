@@ -102,9 +102,9 @@ class t_ip_forwarding(BaseTool):
     Transparent IP forwarding between victims and gateway.
 
     Arguments:
-        gateway (Required): MAC address of the gateway (e.g. aa:bb:cc...).
-        submask (Optional): Network mask (default: /24).
-        nottl (Optional): If set, doesn't decrement IP TTL (prevents loops).
+        eth_dst (Required): MAC address of the gateway (e.g. aa:bb:cc...).
+        sub_mask (Optional): Network mask (default: /24).
+        input (Optional): If set "nottl", doesn't decrement IP TTL (prevents loops).
         iface (Optional): Interface to forward on.
 
     Example:

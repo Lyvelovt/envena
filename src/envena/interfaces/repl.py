@@ -98,23 +98,15 @@ class EnvenaREPL(cmd2.Cmd):
         return loaded_objects
     
     def _create_command(self, name, instance):
-        """Automatically create command in REPL for tool"""
-
-        def command_wrapper(repl_instance, statement):
-            instance.ws = repl_instance.workspaces
-            instance.args = repl_instance.args_obj
+        @cmd2.with_category(instance.category)
+        def command_wrapper(arg):
+            instance.ws = self.workspaces
+            instance.args = self.args_obj
             instance.start_tool()
 
-        command_wrapper.__doc__ = instance.__doc__ or f"Tool: {name}"
-
-        cmd_name = f"do_{name}"
-
-        setattr(self.__class__, cmd_name, command_wrapper)
-
-        if hasattr(instance, 'category'):
-            func = getattr(self, cmd_name)
-            func.__func__.category = instance.category
-                
+        command_wrapper.__doc__ = instance.__doc__
+        setattr(self.__class__, f"do_{name}", command_wrapper)
+        
     #################
     # COMMANDS PART #
     #################
@@ -143,6 +135,7 @@ class EnvenaREPL(cmd2.Cmd):
     delete_p.add_argument("name", type=str)
 
     @cmd2.with_argparser(workspace_parser)
+    @cmd2.with_category("Management")
     def do_workspace(self, args):
         if args.action == "list":
             output_table = Table(
@@ -211,6 +204,7 @@ class EnvenaREPL(cmd2.Cmd):
     )
 
     @cmd2.with_argparser(args_parser)
+    @cmd2.with_category("Management")
     def do_args(self, ns: argparse.Namespace):
         if ns.action == "list":
             self._show_args()
