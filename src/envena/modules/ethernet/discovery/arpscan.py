@@ -6,8 +6,6 @@ from scapy.all import ARP, AsyncSniffer, conf, get_if_addr, get_if_hwaddr
 from src.envena.core.arguments import public_args
 from src.envena.core.basetool import BaseTool
 from src.envena.core.protocols.ethernet.ip.arp import ARPPacket, ARPPacketType
-from src.envena.core.workspace import Workspaces
-from src.envena.modules.ethernet.discovery import CATEGORY_DOC
 from src.envena.utils.generators import get_vendor
 from src.envena.utils.network import get_hostname
 from src.envena.utils.parsers import parse_ip_ranges
@@ -44,6 +42,7 @@ def print_aligned_table(devices: list) -> None:
 def scan_network(
     logger,
     ip_range: str,
+    dns_server,
     ip_src: str = None,
     eth_src: str = None,
     iface: str = conf.iface,
@@ -104,7 +103,7 @@ def scan_network(
     for pkt in answered:
         ip = pkt[ARP].psrc
         eth = pkt[ARP].hwsrc
-        hostname = get_hostname(ip)
+        hostname = get_hostname(ip-ip, iface=iface, dns_server=dns_server)
         devices.append({"ip": ip, "eth": eth, "hostname": hostname})
 
     logger.info(f"Scanned ({len(target_ips)}/{len(target_ips)})")
@@ -133,6 +132,7 @@ def arpscan(param, logger, ws=None) -> None:
     devices_info = scan_network(
         logger=logger,
         ip_range=ip_range,
+        dns_server=param.dns_server,
         eth_src=eth_src,
         ip_src=ip_src,
         iface=iface,
@@ -168,6 +168,7 @@ class t_arpscan(BaseTool):
         input (Required): Target subnet or IP (e.g. 192.168.1.0/24).
         timeout (Optional): Waiting time for responses (default: 10).
         iface (Optional): Interface to scan from.
+        dns_server (Optional): DNS server to send DNS request.
 
     Example:
         args set input 192.168.1.0/24

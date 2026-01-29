@@ -11,13 +11,10 @@ from scapy.all import (
     conf,
     get_if_addr,
     get_if_hwaddr,
-    srp1,
     srp,
+    srp1,
 )
 
-
-from scapy.all import DNS, DNSQR, IP, UDP, Ether, srp1, conf, RandShort
-import ipaddress
 
 def get_hostname(ip: str, iface: str = None, dns_server: str = "8.8.8.8") -> str:
     """Get DNS by IP address using DNS protocol through specific interface.
@@ -34,10 +31,10 @@ def get_hostname(ip: str, iface: str = None, dns_server: str = "8.8.8.8") -> str
     ptr_name = ipaddress.ip_address(ip).reverse_pointer
 
     dns_pkt = (
-        Ether() / 
-        IP(dst=dns_server) / 
-        UDP(sport=RandShort(), dport=53) / 
-        DNS(rd=1, qd=DNSQR(qname=ptr_name, qtype="PTR"))
+        Ether()
+        / IP(dst=dns_server)
+        / UDP(sport=RandShort(), dport=53)
+        / DNS(rd=1, qd=DNSQR(qname=ptr_name, qtype="PTR"))
     )
 
     answer = srp1(dns_pkt, iface=iface, timeout=2, verbose=0)
@@ -47,7 +44,7 @@ def get_hostname(ip: str, iface: str = None, dns_server: str = "8.8.8.8") -> str
         if isinstance(res, bytes):
             return res.decode().strip(".")
         return str(res).strip(".")
-        
+
     return ip
 
 

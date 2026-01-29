@@ -1,17 +1,18 @@
 from src.envena.core.basetool import BaseTool
-from src.envena.modules.ethernet.utils import CATEGORY_DOC
 from src.envena.utils.network import get_hostname
+from src.envena.core.arguments import public_args
+from scapy.all import conf
 
-# TODO: complete this module
+# TODO: add store to workspace
 
 dns_getHostname_v = 1.0
 
 
-def dns_getHostname(param, logger, ws) -> None:
+def get_dns(param, logger, ws) -> None:
     logger.info(f'DNS response: {param.input} is "{get_hostname(ip=param.input, iface=param.iface, dns_server=str(param.dns_server))}"')
 
 
-class t_dns_getHostname(BaseTool):
+class t_get_dns(BaseTool):
     """
     Reverse DNS lookup to find hostname by IP.
 
@@ -23,7 +24,7 @@ class t_dns_getHostname(BaseTool):
         dns_getHostname
     """
 
-    def __init__(self, tool_func=dns_getHostname, VERSION=1.0):
+    def __init__(self, tool_func=get_dns, VERSION=1.1):
         super().__init__(tool_func=tool_func, VERSION=VERSION)
 
 
@@ -40,14 +41,17 @@ if __name__ == "__main__":
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "-ip", help="target IP.", required=True, type=str
-    )  # , required=True)
-    # parser.add_argument( "-i", "--interface", help="Network interface.")
+        "-ip", help="target IP address", required=True, type=str)
+    parser.add_argument( "-i", "--iface", help="network interface to send request from", default=str(conf.iface))
+    parser.add_argument(
+        "-ds", "--dns_server", help="DNS server to send request", required=False, type=str, default="8.8.8.8") 
 
-    arg = parser.parse_args()
-    args = {}
-    args["input"] = arg.ip
-    dns_getHostname(args)
+    cli_args = parser.parse_args()
+    public_args.input = cli_args.ip
+    public_args.dns_server = cli_args.dns_server
+    public_args.iface = cli_args.iface
+    # get_dns(args)
+    t_get_dns().start_tool()
 
 # except KeyboardInterrupt:
 # print("Aborted.")

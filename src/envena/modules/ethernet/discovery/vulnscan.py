@@ -1,16 +1,14 @@
 import time
-from random import shuffle, uniform
 
 import nmap
 from rich.console import Console
 from rich.table import Table
-from scapy.all import conf, get_if_addr, get_if_list
+from scapy.all import conf, get_if_list
 
 from src.envena.core.arguments import public_args
 from src.envena.core.basetool import BaseTool
 from src.envena.core.searchsploit import Searchsploit
 from src.envena.core.workspace import Workspaces
-from src.envena.modules.ethernet.discovery import CATEGORY_DOC
 from src.envena.utils.parsers import parse_ip_ranges
 
 
