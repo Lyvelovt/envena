@@ -2,9 +2,12 @@ import logging
 import sys
 
 ROOT_LOGGER_NAME = "envena"
-# LOG_LEVEL = logging.INFO
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.INFO
+# LOG_LEVEL = logging.DEBUG
 LOG_FORMAT = "[%(name)s] [%(levelname)s] %(message)s"
+
+# Log format for debug
+# LOG_FORMAT = "[%(asctime)s] %(levelname)-7s in %(module)s.%(funcName)s:%(lineno)d : %(message)s"
 
 
 def setup_root_logger():
@@ -24,3 +27,5 @@ def setup_root_logger():
 
 
 ROOT_LOGGER = setup_root_logger()
+
+

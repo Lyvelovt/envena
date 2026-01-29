@@ -1,6 +1,6 @@
 import netaddr
 
-from src.envena.core.protocols.base import BaseProtocol
+from src.envena.core.protocols.baseprotocol import BaseProtocol
 from src.envena.utils.functions import validate_eth
 
 

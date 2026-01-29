@@ -44,6 +44,7 @@ if __name__ == "__main__":
                         "numpy",
                         "cmd2",
                         "python-nmap",
+                        "pydantic"
                     ],
                     capture_output=1,
                     text=1,
@@ -114,6 +115,12 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error(f"Nmap lib is not installed. Details: {e}")
         NOT_INSTALLED_LIBS.append("nmap")
+    
+    try:
+        import pydantic
+    except Exception as e:
+        logger.error(f"Pydantic lib is not installed. Details: {e}")
+        NOT_INSTALLED_LIBS.append("pydantic")
 
     try:
         from src.envena.core.searchsploit import Searchsploit

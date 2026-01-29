@@ -9,10 +9,9 @@ from random import randint
 from typing import List
 
 import netaddr
-from netaddr.core import AddrFormatError, NotRegisteredError
+
 from scapy.all import ARP, Ether, conf, get_if_addr, get_if_hwaddr, sendp, srp
-from scapy.arch.common import compile_filter
-from scapy.error import Scapy_Exception
+
 
 from src.envena.ui.banner import envena_art
 
@@ -73,16 +72,6 @@ def get_vendor(eth: str = "") -> str | None:
         return eth.oui.registration().org
     except NotRegisteredError:
         return None
-
-
-# Check all args are not None
-def validate_args(**kwargs) -> None:
-    noneIsFount = True
-    for arg_name, arg_value in kwargs.items():
-        if arg_value is None:
-            print(f'{Error}Error: {Error_text}arg "{arg_name}" is required!{Clear}')
-            noneIsFount = False
-    return noneIsFount
 
 
 def parse_ip_ranges(ip_range: str) -> List[str]:
@@ -182,34 +171,10 @@ def parse_submask(sub_mask: str) -> Optional[int]:
         return None
 
 
-# Validate IP-address
-def validate_ip(ip: str = "") -> bool:
-    try:
-        ip = ipaddress.ip_address(ip)
-        return True
-    except ValueError:
-        return False
 
 
-# Validate eth-address
-def validate_eth(eth: str = "", is_oui: bool = False) -> bool:
-    try:
-        if is_oui:
-            eth = netaddr.OUI(eth)
-        else:
-            eth = netaddr.EUI(eth)
-        return True
-    except (AddrFormatError, TypeError, ValueError):
-        return False
 
 
-# Validate BPF string
-def validate_bpf(filter: str, iface=None) -> bool:
-    try:
-        compile_filter(filter, iface)
-        return True
-    except Scapy_Exception:
-        return False
 
 
 # Return random IP-address by mask or not
