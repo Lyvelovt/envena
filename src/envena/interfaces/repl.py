@@ -271,7 +271,7 @@ class EnvenaREPL(cmd2.Cmd):
             "Other...(App)": ["input"],
         }
 
-        all_slotted = list(self.args_obj.__slots__)
+        all_slotted = list(self.args_obj.model_fields.keys())
         if "logger" in all_slotted:
             all_slotted.remove("logger")
 
