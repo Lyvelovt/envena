@@ -107,8 +107,8 @@ def rand_eth(mask: str = "x:x:x:x:x:x") -> str:
         ValueError: Incorrect format of mask.
     """
     try:
+        mask = mask.replace('-', ':')
         mask = mask.split(":")
-        mask = mask.split("-")
     except ValueError:
         raise ValueError("Incorrect format of MAC generator mask")
 

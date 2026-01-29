@@ -232,7 +232,10 @@ class EnvenaREPL(cmd2.Cmd):
                 except ValueError:
                     self.perror("error: excepted integer or float")
             else:
-                setattr(self.args_obj, key, val)
+                try:
+                    setattr(self.args_obj, key, val)
+                except Exception as e:
+                    self.perror(e)
 
         elif ns.action == "get":
             if len(ns.expression) != 1:

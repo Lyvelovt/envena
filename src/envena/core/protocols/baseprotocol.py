@@ -1,77 +1,50 @@
 import logging
 import math
 from time import sleep
-from typing import Callable, Union
+from typing import Callable, Union, Any, Optional
 
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from src.envena.core.logger import ROOT_LOGGER_NAME
 
+class BaseProtocol(BaseModel):
+    model_config = ConfigDict(extra='ignore', arbitrary_types_allowed=True)
 
-class BaseProtocol:
-    __slots__ = (
-        "send_func",
-        "_word_sending",
-        "_dot_timer",
-        "_word_timer",
-        "iface",
-        "count",
-        "timeout",
-    )
+    iface: str
+    # send_func: Callable
+    send_func: Optional[Callable] = lambda: ...
+    count: Union[int, float] = 1
+    timeout: float = 0.0
+    
+    _word_sending: str = "sending"
+    _dot_timer: int = 0
+    _word_timer: int = 0
+    logger: Any = None
 
-    def __init__(
-        self,
-        iface: str,
-        send_func: Callable,
-        count: int = 1,
-        timeout: Union[int, float] = 0,
-    ):
-        self.send_func = None
-        self._word_sending = "sending"
-        self._dot_timer = 0
-        self._word_timer = 0
-
-        if isinstance(iface, str):
-            self.iface = iface
-        else:
-            raise TypeError("iface must be 'str'")
-
+    def __init__(self, **data):
+        super().__init__(**data)
         self.logger = logging.getLogger(
-            f"{ROOT_LOGGER_NAME}.{__class__.__name__}/{self.iface}"
+            f"{ROOT_LOGGER_NAME}.{self.__class__.__name__}/{self.iface}"
         )
 
-        if isinstance(count, int) or count is math.inf:
-            self.count = count
-        else:
-            raise TypeError("count must be 'int' or 'math.inf'")
-
-        if isinstance(timeout, float) or isinstance(timeout, int):
-            self.timeout = timeout
-        else:
-            raise TypeError(f"timeout must be 'float' or 'int', not '{timeout}'")
-
-        if not callable(send_func):
-            # self.logger.info(f'{send_func} is not callable')
-            raise TypeError("send function must be callable")
-        else:
-            self.send_func = send_func
+    @field_validator('count')
+    @classmethod
+    def check_count(cls, v):
+        if not (isinstance(v, int) or v == math.inf):
+            raise ValueError("count must be 'int' or 'math.inf'")
+        return v
 
     def _print_animated_sending(self, word: str, dot_timer: int, word_timer: int):
         word = "sending"
-        # Логика анимации, перенесенная из оригинальной функции
         animated_word = (
             word[:word_timer] + word[word_timer].upper() + word[word_timer + 1 :]
         )
-
-        # Печатаем текущее состояние анимации
         print(f"{animated_word}{'.' * dot_timer}", end="\r")
-
-        # Обновляем таймеры
-        self._dot_timer = (dot_timer + 1) % 4  # Цикл 0-3
-        self._word_timer = (word_timer + 1) % len(word)  # Цикл по длине слова
+        self._dot_timer = (dot_timer + 1) % 4
+        self._word_timer = (word_timer + 1) % len(word)
 
     def send_packet(self, verbose=True):
         sent_packets = 0
         first_send = True
-        # try:
         while sent_packets < self.count:
             if self.send_func(param=self, verbose=first_send and verbose):
                 sent_packets += 1
@@ -85,8 +58,3 @@ class BaseProtocol:
         if verbose:
             print()
             self.logger.info(f"Successfully sent {sent_packets} packet(s)")
-        # except KeyboardInterrupt:
-        #     if verbose:
-        #         self.logger.info(f'Successfully sent {sent_packets} packet(s)')
-        # return None
-        #     exit()

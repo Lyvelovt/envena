@@ -103,7 +103,7 @@ def scan_network(
     for pkt in answered:
         ip = pkt[ARP].psrc
         eth = pkt[ARP].hwsrc
-        hostname = get_hostname(ip - ip, iface=iface, dns_server=dns_server)
+        hostname = get_hostname(ip=ip, iface=iface, dns_server=str(dns_server))
         devices.append({"ip": ip, "eth": eth, "hostname": hostname})
 
     logger.info(f"Scanned ({len(target_ips)}/{len(target_ips)})")

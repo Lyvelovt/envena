@@ -1,20 +1,23 @@
 import netaddr
+from pydantic import field_validator, BeforeValidator
+from typing import Annotated, Any
 
 from src.envena.core.protocols.baseprotocol import BaseProtocol
-from src.envena.utils.validators import validate_eth
+from src.envena.utils.validators import get_validated_eth
 
+
+MacAddress = Annotated[netaddr.EUI, BeforeValidator(get_validated_eth)]
 
 class EthernetProtocol(BaseProtocol):
-    __slots__ = ("iface", "count", "timeout", "send_func", "eth_src", "eth_dst")
+    eth_src: MacAddress
+    eth_dst: MacAddress
 
-    def __init__(self, iface, count, timeout, send_func, eth_src, eth_dst):
-        super().__init__(iface=iface, send_func=send_func, count=count, timeout=timeout)
-
-        if validate_eth(eth_src):
-            self.eth_src = netaddr.EUI(eth_src)
-        else:
-            raise ValueError(f'invalid eth_src "{eth_src}" MAC-address got')
-        if validate_eth(eth_dst):
-            self.eth_dst = netaddr.EUI(eth_dst)
-        else:
-            raise ValueError(f'invalid eth_dst "{eth_dst}" MAC-address got')
+    # def __init__(self, iface, count, timeout, send_func, eth_src, eth_dst):
+    #     super().__init__(
+    #         iface=iface, 
+    #         count=count, 
+    #         timeout=timeout, 
+    #         send_func=send_func, 
+    #         eth_src=eth_src, 
+    #         eth_dst=eth_dst
+    #     )
