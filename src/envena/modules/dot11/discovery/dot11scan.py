@@ -13,9 +13,11 @@ from rich.table import Table
 from scapy.all import (Dot11, Dot11Beacon, Dot11ProbeResp, RadioTap, conf,
                        rdpcap, sniff)
 
+# TODO: complete this module
+
 from src.envena.core.config import Clear, Error, Error_text, Purple, Success
 from src.envena.modules.dot11.discovery import CATEGORY_DOC
-from src.envena.utils.functions import get_vendor, validate_args
+from src.envena.utils.validators import get_vendor, validate_args
 
 dot11scan_v = 2.0
 

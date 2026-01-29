@@ -5,7 +5,7 @@ from scapy.arch.common import compile_filter
 from scapy.error import Scapy_Exception
 
 
-def get_validated_mac(v: any) -> netaddr.EUI:
+def get_validated_eth(v: any) -> netaddr.EUI:
     '''
     Return validated EUI type MAC address.
     

@@ -1,7 +1,7 @@
 import ipaddress
 
 from src.envena.core.protocols.ethernet import EthernetProtocol
-from src.envena.utils.functions import validate_ip
+from src.envena.utils.validators import validate_ip
 
 
 class IPProtocol(EthernetProtocol):

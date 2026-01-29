@@ -8,7 +8,7 @@ from src.envena.core.basetool import BaseTool
 from src.envena.core.protocols.ethernet.ip.udp.dhcp import (DHCPPacket,
                                                             DHCPPacketType)
 from src.envena.modules.ethernet.attack import CATEGORY_DOC
-from src.envena.utils.functions import rand_eth
+from src.envena.utils.generators import rand_eth
 
 
 def dhcp_starve(param, logger, ws=None) -> None:

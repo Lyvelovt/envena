@@ -3,7 +3,7 @@ import ipaddress
 from random import randint
 
 from src.envena.core.protocols.ethernet.ip import IPProtocol
-from src.envena.utils.functions import validate_ip
+from src.envena.utils.validators import validate_ip
 
 from .echo_reply import send_icmp_echo_reply
 from .echo_request import send_icmp_echo_request

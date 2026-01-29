@@ -8,14 +8,15 @@ from pydantic import BaseModel, Field, field_validator, ConfigDict, BeforeValida
 from scapy.all import conf, get_if_addr, get_if_hwaddr, get_if_list
 
 from src.envena.core.logger import ROOT_LOGGER_NAME
-from src.envena.utils.functions import parse_submask, validate_eth, validate_ip
+from src.envena.utils.parsers import parse_submask
+from src.envena.utils.validators import get_validated_eth, get_validated_ip
 
 
 
 
 
-MacAddress = Annotated[netaddr.EUI, BeforeValidator(validate_mac_custom)]
-IpAddress = Annotated[Union[ipaddress.IPv4Address, ipaddress.IPv6Address], BeforeValidator(validate_ip_custom)]
+MacAddress = Annotated[netaddr.EUI, BeforeValidator(get_validated_eth)]
+IpAddress = Annotated[Union[ipaddress.IPv4Address, ipaddress.IPv6Address], BeforeValidator(get_validated_ip)]
 
 class Arguments(BaseModel):
     model_config = ConfigDict(

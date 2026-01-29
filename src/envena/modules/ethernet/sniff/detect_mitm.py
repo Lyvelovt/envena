@@ -6,7 +6,9 @@ from src.envena.core.arguments import Arguments, public_args
 from src.envena.core.basetool import BaseTool
 from src.envena.core.workspace import Workspaces
 from src.envena.modules.ethernet.sniff import CATEGORY_DOC
-from src.envena.utils.functions import get_hostname, get_vendor, validate_ip
+from src.envena.utils.network import get_hostname
+from src.envena.utils.generators import get_vendor
+from src.envena.utils.validators import validate_ip
 
 ARP_TABLE = {}
 KNOWN_GATEWAY_TTL = {}

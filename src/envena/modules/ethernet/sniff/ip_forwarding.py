@@ -8,7 +8,7 @@ from scapy.all import (IP, Ether, PcapWriter, conf, get_if_addr, get_if_hwaddr,
 from src.envena.core.arguments import Arguments, public_args
 from src.envena.core.basetool import BaseTool
 from src.envena.modules.ethernet.sniff import CATEGORY_DOC
-from src.envena.utils.functions import get_mac
+from src.envena.utils.network import get_mac
 
 ARP_TABLE = {}
 

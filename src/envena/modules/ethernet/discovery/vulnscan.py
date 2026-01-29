@@ -11,7 +11,7 @@ from src.envena.core.basetool import BaseTool
 from src.envena.core.searchsploit import Searchsploit
 from src.envena.core.workspace import Workspaces
 from src.envena.modules.ethernet.discovery import CATEGORY_DOC
-from src.envena.utils.functions import parse_ip_ranges
+from src.envena.utils.parsers import parse_ip_ranges
 
 
 def print_aligned_table(services_data: list) -> None:

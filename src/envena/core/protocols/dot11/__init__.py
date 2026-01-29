@@ -1,7 +1,7 @@
 import enum
 
 from src.envena.core.protocols.baseprotocol import BaseProtocol
-from src.envena.utils.functions import validate_eth
+from src.envena.utils.validators import validate_eth
 
 from .deauth import send_deauth
 

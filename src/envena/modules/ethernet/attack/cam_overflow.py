@@ -9,7 +9,7 @@ from src.envena.core.basetool import BaseTool
 from src.envena.core.protocols.ethernet.ether import (EtherPacket,
                                                       EtherPacketType)
 from src.envena.modules.ethernet.attack import CATEGORY_DOC
-from src.envena.utils.functions import rand_eth
+from src.envena.utils.generators import rand_eth
 
 
 def cam_overflow(param, logger, ws=None) -> None:

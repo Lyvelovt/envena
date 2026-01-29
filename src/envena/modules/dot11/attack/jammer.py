@@ -5,7 +5,7 @@ from src.envena.core.arguments import public_args
 from src.envena.core.basetool import BaseTool
 from src.envena.core.protocols.dot11 import Dot11Packet, Dot11PacketType
 from src.envena.modules.dot11.attack import CATEGORY_DOC
-from src.envena.utils.functions import validate_bpf
+from src.envena.utils.validators import validate_bpf
 
 sent_packets = 0
 

@@ -1,12 +1,14 @@
 from src.envena.core.basetool import BaseTool
 from src.envena.modules.ethernet.utils import CATEGORY_DOC
-from src.envena.utils.functions import get_hostname
+from src.envena.utils.network import get_hostname
+
+# TODO: complete this module
 
 dns_getHostname_v = 1.0
 
 
-def dns_getHostname(param) -> None:
-    print(f'DNS response: {args["input"]} is "{get_hostname(ip=args["input"])}".')
+def dns_getHostname(param, logger, ws) -> None:
+    logger.info(f'DNS response: {args["input"]} is "{get_hostname(ip=args["input"])}"')
 
 
 class t_dns_getHostname(BaseTool):

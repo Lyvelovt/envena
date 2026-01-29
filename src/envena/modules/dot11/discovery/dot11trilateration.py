@@ -15,7 +15,9 @@ from scapy.all import Dot11, RadioTap, rdpcap, sniff
 from src.envena.core.config import (Clear, Error, Error_text, Light_blue,
                                     Purple, Success)
 from src.envena.modules.dot11.discovery import CATEGORY_DOC
-from src.envena.utils.functions import validate_args
+from src.envena.utils.validators import validate_args
+
+# TODO: complete this module
 
 console = Console()
 dot11trilateration_v = 2.1

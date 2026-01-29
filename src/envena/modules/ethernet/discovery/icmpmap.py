@@ -8,7 +8,8 @@ from src.envena.core.basetool import BaseTool
 from src.envena.core.protocols.ethernet.ip.icmp import (ICMPPacket,
                                                         ICMPPacketType)
 from src.envena.modules.ethernet.discovery import CATEGORY_DOC
-from src.envena.utils.functions import get_mac, parse_ip_ranges
+from src.envena.utils.network import get_mac
+from src.envena.utils.parsers import parse_ip_ranges
 
 # from src.envena.core.address import IPaddrType
 

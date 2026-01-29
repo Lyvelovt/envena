@@ -3,7 +3,7 @@ import ipaddress
 from random import randint
 
 from src.envena.core.protocols.ethernet.ip.udp import UDPProtocol
-from src.envena.utils.functions import validate_ip
+from src.envena.utils.validators import validate_ip
 
 from .ack import send_dhcp_ack
 from .discover import send_dhcp_discover
