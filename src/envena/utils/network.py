@@ -1,95 +1,56 @@
-import netaddr
-import ipaddress
-from netaddr.core import AddrFormatError, NotRegisteredError
-from scapy.arch.common import compile_filter
-from scapy.error import Scapy_Exception
+import socket
+from scapy.all import ARP, Ether, conf, get_if_addr, get_if_hwaddr, sendp, srp
 
-
-###################
-# Validators part #
-###################
-def get_validated_mac(v: any) -> netaddr.EUI:
-    '''
-    Return validated EUI type MAC address.
+def get_hostname(ip: str) -> str:
+    """
+    Get DNS by IP address using DNS protocol.
     
     Args:
-        v (str | netaddr.EUI): Input MAC address
+        ip (str): IP address of looking DNS.
     
     Returns:
-        netaddr.EUI: EUI address object (validated MAC address)
-    
-    Raises:
-        ValueError: If input address format total incorrect and cannot be returned into MAC address
-    '''
-    if isinstance(v, netaddr.EUI):
-        return v
-    str_v = str(v)
-    if not validate_eth(str_v):
-        raise ValueError(f"Invalid ETH/MAC address: {v}")
-    return netaddr.EUI(str_v)
-
-def get_validated_ip(v: any) -> ipaddress.IPv4Address:
-    '''
-    Return validated IPv4Address type MAC address.
-    
-    Args:
-        v (str | ipaddress.IPv4Address): Input MAC address
-    
-    Returns:
-        ipaddress.IPv4Address: EUI address object (validated MAC address)
-    
-    Raises:
-        ValueError: If input address format total incorrect and cannot be returned into IP address
-    '''
-    if isinstance(v, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
-        return v
-    str_v = str(v)
-    if not validate_ip(str_v):
-        raise ValueError(f"Invalid IP address: {v}")
-    return ipaddress.ip_address(str_v)
-
-
-### TODO: Replace this to classic netaddr and ipaddress validations
-# Validate IP-address
-def validate_ip(ip: str = "") -> bool:
-    """
-    Will been replaced soon !
+        hostname (str): Got DNS or input IP address if it failed to got DNS.
     """
     try:
-        ip = ipaddress.ip_address(ip)
-        return True
-    except ValueError:
-        return False
-
-### This too
-# Validate eth-address
-def validate_eth(eth: str = "", is_oui: bool = False) -> bool:
-    """
-    Will be replaced soon !
-    """
-    try:
-        if is_oui:
-            eth = netaddr.OUI(eth)
+        hostname = socket.gethostbyaddr(ip)[0]
+        if not hostname or hostname == "":
+            return ip
         else:
-            eth = netaddr.EUI(eth)
-        return True
-    except (AddrFormatError, TypeError, ValueError):
-        return False
-
-# Validate BPF string
-def validate_bpf(filter: str, iface=None) -> bool:
+            return hostname
+    except socket.herror:
+        return ip
+    
+def get_mac(
+    target_ip: str, iface: str = conf.iface, timeout: float = 1.0
+) -> str | None:
     """
-    Validate BPF using scapy (libpcap). Check whether, if string is correct BPF.
+    Synchronously get MAC address by IP address using ARP protocol (scapy based).
     
     Args:
-        filter (str): Input BPF string
-        iface (str | optional): 
-        
+        target_ip (str): IP address of looking MAC address.
+        iface (str | optional): Iface to send ARP request and get ARP respone from. Default: scapy.conf.iface.
+        timeout (float | optional): Timeout to waiting ARP response.
+    
     Returns:
-        answer (bool)
+        mac_address (str | none): MAC address of target IP address or None if failed to get ARP response.
     """
-    try:
-        compile_filter(filter, iface)
-        return True
-    except Scapy_Exception:
-        return False
+    eth_src = get_if_hwaddr(iface)
+    ip_src = get_if_addr(iface)
+    ether_layer = Ether(dst="ff:ff:ff:ff:ff:ff", src=eth_src)
+    arp_request = ARP(
+        pdst=target_ip, psrc=ip_src
+    )  # , hwdst='ff:ff:ff:ff:ff:ff', hwsrc=eth_src, op='who-has')
+    # sendp(arp_request, iface='en0')
+    answered, unanswered = srp(
+        ether_layer / arp_request,
+        timeout=timeout,
+        iface=iface,
+        verbose=0,
+        retry=0,
+    )
+
+    if answered:
+        mac_address = answered[0][1].hwsrc
+        return mac_address.lower()
+
+    return None
