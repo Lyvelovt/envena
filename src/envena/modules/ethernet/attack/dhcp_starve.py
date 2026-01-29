@@ -5,8 +5,7 @@ from scapy.all import BOOTP, DHCP, IP, UDP, Ether, conf, hexdump, sendp
 
 from src.envena.core.arguments import Arguments, public_args
 from src.envena.core.basetool import BaseTool
-from src.envena.core.protocols.ethernet.ip.udp.dhcp import (DHCPPacket,
-                                                            DHCPPacketType)
+from src.envena.core.protocols.ethernet.ip.udp.dhcp import DHCPPacket, DHCPPacketType
 from src.envena.modules.ethernet.attack import CATEGORY_DOC
 from src.envena.utils.generators import rand_eth
 

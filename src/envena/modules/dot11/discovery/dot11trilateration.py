@@ -12,8 +12,7 @@ from rich.console import Console
 from rich.table import Table
 from scapy.all import Dot11, RadioTap, rdpcap, sniff
 
-from src.envena.core.config import (Clear, Error, Error_text, Light_blue,
-                                    Purple, Success)
+from src.envena.core.config import Clear, Error, Error_text, Light_blue, Purple, Success
 from src.envena.modules.dot11.discovery import CATEGORY_DOC
 from src.envena.utils.validators import validate_args
 

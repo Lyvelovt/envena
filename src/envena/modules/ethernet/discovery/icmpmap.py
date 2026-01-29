@@ -5,8 +5,7 @@ from scapy.all import ICMP, IP, conf, get_if_addr, get_if_hwaddr, sniff
 
 from src.envena.core.arguments import Arguments, public_args
 from src.envena.core.basetool import BaseTool
-from src.envena.core.protocols.ethernet.ip.icmp import (ICMPPacket,
-                                                        ICMPPacketType)
+from src.envena.core.protocols.ethernet.ip.icmp import ICMPPacket, ICMPPacketType
 from src.envena.modules.ethernet.discovery import CATEGORY_DOC
 from src.envena.utils.network import get_mac
 from src.envena.utils.parsers import parse_ip_ranges

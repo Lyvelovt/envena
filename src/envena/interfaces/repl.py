@@ -16,6 +16,7 @@ import src.envena.modules.ethernet as ethernet_tools
 from src.envena.core.arguments import Arguments
 from src.envena.core.config import ENVENA_VERSION
 from src.envena.core.logger import ROOT_LOGGER_NAME
+
 # from src.envena.interfaces.repl.repl_config import WORKSPACES, WORKSPACES_PATH, CURRENT_WORKSPACE, update_workspaces
 from src.envena.core.workspace import Workspaces
 from src.envena.ui.banner import envena_art

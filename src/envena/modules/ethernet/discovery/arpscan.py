@@ -8,8 +8,8 @@ from src.envena.core.basetool import BaseTool
 from src.envena.core.protocols.ethernet.ip.arp import ARPPacket, ARPPacketType
 from src.envena.core.workspace import Workspaces
 from src.envena.modules.ethernet.discovery import CATEGORY_DOC
-from src.envena.utils.network import get_hostname 
 from src.envena.utils.generators import get_vendor
+from src.envena.utils.network import get_hostname
 from src.envena.utils.parsers import parse_ip_ranges
 
 arpscan_v = 2.1

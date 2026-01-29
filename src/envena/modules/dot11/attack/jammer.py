@@ -1,5 +1,12 @@
-from scapy.all import (AsyncSniffer, Dot11, Dot11Deauth, RadioTap, conf,
-                       get_if_hwaddr, sendp)
+from scapy.all import (
+    AsyncSniffer,
+    Dot11,
+    Dot11Deauth,
+    RadioTap,
+    conf,
+    get_if_hwaddr,
+    sendp,
+)
 
 from src.envena.core.arguments import public_args
 from src.envena.core.basetool import BaseTool

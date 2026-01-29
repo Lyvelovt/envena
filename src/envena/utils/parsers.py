@@ -1,18 +1,18 @@
 import ipaddress
-from typing import List
 import re
+from typing import List
 
 
 def parse_ip_ranges(ip_range: str) -> List[str]:
     """
     Parsing Nmap-style IP ranges (Example: 1.1.1.0/24, 1.1.1.1-5, 1.2.3.1,1.2.3.2, e.g.)
-    
+
     Args:
         ip_range (str): Input IP range in Nmap-style.
-    
+
     Returns:
         parsed_ips (List[str]): List of parsed IP addresses.
-    
+
     Raises:
         ValueError: Invalid range to any octet or unsupported IP format.
     """
@@ -62,15 +62,18 @@ def parse_ip_ranges(ip_range: str) -> List[str]:
 
     return parsed_ips
 
-def parse_submask(sub_mask: str) -> ipaddress.IPv4Network | ipaddress.IPv6Network: # Optional[int]:
+
+def parse_submask(
+    sub_mask: str,
+) -> ipaddress.IPv4Network | ipaddress.IPv6Network:  # Optional[int]:
     """
     Parse subnet mask by input submask.
-    
+
     Args:
         sub_mask (str): Input submask to parse.
-    
+
     Returns:
-        network (ipaddress.IPv4Network | ipaddress.IPv6Network | None): Parsed submask or None if unsupported submask format.    
+        network (ipaddress.IPv4Network | ipaddress.IPv6Network | None): Parsed submask or None if unsupported submask format.
     """
     sub_mask = sub_mask.strip()
 
@@ -89,4 +92,3 @@ def parse_submask(sub_mask: str) -> ipaddress.IPv4Network | ipaddress.IPv6Networ
         return network_obj.prefixlen
     except ValueError:
         return None
-

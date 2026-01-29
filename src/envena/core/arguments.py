@@ -1,28 +1,26 @@
 import ipaddress
 import logging
 from math import inf
-from typing import Union, Annotated
+from typing import Annotated, Union
 
 import netaddr
-from pydantic import BaseModel, Field, field_validator, ConfigDict, BeforeValidator
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, field_validator
 from scapy.all import conf, get_if_addr, get_if_hwaddr, get_if_list
 
 from src.envena.core.logger import ROOT_LOGGER_NAME
 from src.envena.utils.parsers import parse_submask
 from src.envena.utils.validators import get_validated_eth, get_validated_ip
 
-
-
-
-
 MacAddress = Annotated[netaddr.EUI, BeforeValidator(get_validated_eth)]
-IpAddress = Annotated[Union[ipaddress.IPv4Address, ipaddress.IPv6Address], BeforeValidator(get_validated_ip)]
+IpAddress = Annotated[
+    Union[ipaddress.IPv4Address, ipaddress.IPv6Address],
+    BeforeValidator(get_validated_ip),
+]
+
 
 class Arguments(BaseModel):
     model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        validate_assignment=True,
-        extra='forbid'
+        arbitrary_types_allowed=True, validate_assignment=True, extra="forbid"
     )
 
     ######
@@ -43,7 +41,7 @@ class Arguments(BaseModel):
     sub_ip: IpAddress = Field(default=ipaddress.ip_address("0.0.0.0"))
     sub_mask: str = "255.255.255.0"
     ip_dst: IpAddress = Field(default=ipaddress.ip_address("0.0.0.0"))
-    
+
     ip_src: IpAddress = Field(
         default_factory=lambda: ipaddress.ip_address(get_if_addr(conf.iface))
     )
@@ -52,7 +50,7 @@ class Arguments(BaseModel):
     # L2 #
     ######
     iface: str = Field(default_factory=lambda: str(conf.iface))
-    
+
     eth_src: MacAddress = Field(
         default_factory=lambda: netaddr.EUI(get_if_hwaddr(conf.iface).replace(":", "-"))
     )
@@ -70,23 +68,23 @@ class Arguments(BaseModel):
     count: Union[int, float] = 1
     timeout: float = Field(default=0.0, ge=0)
     input: str = ""
-    
+
     logger: logging.Logger = Field(
         default_factory=lambda: logging.getLogger(f"{ROOT_LOGGER_NAME}.Arguments"),
-        exclude=True
+        exclude=True,
     )
-    
+
     ##############
     # Validators #
     ##############
-    @field_validator('iface')
+    @field_validator("iface")
     @classmethod
     def check_iface_exists(cls, v: str) -> str:
         if v not in get_if_list():
             raise ValueError(f"Interface '{v}' not found in system")
         return v
 
-    @field_validator('sub_mask')
+    @field_validator("sub_mask")
     @classmethod
     def validate_mask(cls, v: str) -> str:
         mask = parse_submask(v)
@@ -94,11 +92,12 @@ class Arguments(BaseModel):
             raise ValueError(f"Invalid sub_mask: {v}")
         return str(mask)
 
-    @field_validator('count')
+    @field_validator("count")
     @classmethod
     def check_count(cls, v):
         if not (isinstance(v, int) or v == inf):
             raise TypeError("Count must be an integer or math.inf")
         return v
+
 
 public_args = Arguments()

@@ -6,8 +6,7 @@ from scapy.all import Ether, conf, hexdump
 
 from src.envena.core.arguments import public_args
 from src.envena.core.basetool import BaseTool
-from src.envena.core.protocols.ethernet.ether import (EtherPacket,
-                                                      EtherPacketType)
+from src.envena.core.protocols.ethernet.ether import EtherPacket, EtherPacketType
 from src.envena.modules.ethernet.attack import CATEGORY_DOC
 from src.envena.utils.generators import rand_eth
 

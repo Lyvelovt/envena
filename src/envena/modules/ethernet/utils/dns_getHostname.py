@@ -8,7 +8,7 @@ dns_getHostname_v = 1.0
 
 
 def dns_getHostname(param, logger, ws) -> None:
-    logger.info(f'DNS response: {args["input"]} is "{get_hostname(ip=args["input"])}"')
+    logger.info(f'DNS response: {param.input} is "{get_hostname(ip=param.input, iface=param.iface, dns_server=str(param.dns_server))}"')
 
 
 class t_dns_getHostname(BaseTool):

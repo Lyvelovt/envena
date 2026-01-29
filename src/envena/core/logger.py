@@ -27,5 +27,3 @@ def setup_root_logger():
 
 
 ROOT_LOGGER = setup_root_logger()
-
-

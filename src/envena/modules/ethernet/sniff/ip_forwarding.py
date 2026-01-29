@@ -2,8 +2,16 @@
 import ipaddress
 from datetime import datetime
 
-from scapy.all import (IP, Ether, PcapWriter, conf, get_if_addr, get_if_hwaddr,
-                       sendp, sniff)
+from scapy.all import (
+    IP,
+    Ether,
+    PcapWriter,
+    conf,
+    get_if_addr,
+    get_if_hwaddr,
+    sendp,
+    sniff,
+)
 
 from src.envena.core.arguments import Arguments, public_args
 from src.envena.core.basetool import BaseTool

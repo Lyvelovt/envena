@@ -2,6 +2,7 @@ import ipaddress
 import random
 import string
 from random import randint
+
 import netaddr
 from netaddr import NotRegisteredError
 
@@ -17,11 +18,11 @@ def ex_search_xid(from_begin: bool = True) -> any:
 def get_sub_ip(host_ip: str = "0.0.0.0", mask: str = "255.255.255.0") -> str:
     """
     Get subnet IP address from host IP and subnet mask.
-    
+
     Args:
         host_ip (str): IP address of any host from current subnet.
         mask (str): subnet mask of current subnet.
-    
+
     Returns:
         network (str): IP address of subnet.
     """
@@ -36,11 +37,11 @@ def get_sub_ip(host_ip: str = "0.0.0.0", mask: str = "255.255.255.0") -> str:
 def get_ip_broadcast(host_ip: str = "0.0.0.0", mask: str = "255.255.255.0") -> str:
     """
     Get broadcast IP of subnet.
-    
+
     Args:
         host_ip (str): IP address of any host from current subnet.
         mask (str): subnet mask of current subnet.
-    
+
     Returns:
         network (str): Broadcast IP address of subnet.
     """
@@ -56,10 +57,10 @@ def get_ip_broadcast(host_ip: str = "0.0.0.0", mask: str = "255.255.255.0") -> s
 def get_vendor(eth: str = "") -> str | None:
     """
     Get network interface vendor by OUI (first 6 bytes of MAC address).
-    
+
     Args:
         eth (str): Target MAC address.
-    
+
     Returns:
         vendor (str | None): Vendor name if it exists in OUI database, else None.
     """
@@ -70,24 +71,17 @@ def get_vendor(eth: str = "") -> str | None:
         return None
 
 
-
-
-
-
-
-
-
 # Return random IP-address by mask or not
 def rand_ip(mask: str = "x.x.x.x") -> str:
     """
     Generate random IP address by mask or not. Replase all 'x' to random bytes.
-    
+
     Args:
         mask (str | "x.x.x.x"): Input mask. 'x' will be replased to random bytes. Example "192.168.1.x"
-    
+
     Returns:
         ip (str): randomized IP address by mask.
-    
+
     Raises:
         ValueError: Incorrect format of mask.
     """
@@ -102,13 +96,13 @@ def rand_ip(mask: str = "x.x.x.x") -> str:
 def rand_eth(mask: str = "x:x:x:x:x:x") -> str:
     """
     Generate random MAC address by mask or not. Replase all 'x' to random bytes.
-    
+
     Args:
         mask (str | "x.x.x.x"): Input mask. 'x' will be replased to random bytes. Example "x:01:00:02:ff:x".
-    
+
     Returns:
         mac (str): randomized MAC address by mask.
-    
+
     Raises:
         ValueError: Incorrect format of mask.
     """
@@ -128,11 +122,10 @@ def rand_eth(mask: str = "x:x:x:x:x:x") -> str:
 def rand_ssid() -> str:
     """
     Generate random SSID.
-    
+
     Returns:
         ssid (str): Random generated SSID from 5 to 8 chars.
     """
     length = random.randint(5, 8)
     characters = string.ascii_letters + string.digits
     return "".join(random.choices(characters, k=length))
-
