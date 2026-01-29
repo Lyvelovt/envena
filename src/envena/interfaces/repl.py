@@ -7,6 +7,7 @@ import sqlite3
 from pathlib import Path
 
 import cmd2
+from pydantic import ValidationError
 from rich.box import Box
 from rich.console import Console
 from rich.table import Table
@@ -234,8 +235,9 @@ class EnvenaREPL(cmd2.Cmd):
             else:
                 try:
                     setattr(self.args_obj, key, val)
-                except Exception as e:
-                    self.perror(e)
+                except ValidationError as e:
+                    for error in e.errors():
+                        self.perror(error["msg"])
 
         elif ns.action == "get":
             if len(ns.expression) != 1:

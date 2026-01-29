@@ -1,20 +1,22 @@
 import logging
 import math
 from time import sleep
-from typing import Callable, Union, Any, Optional
+from typing import Any, Callable, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
 from src.envena.core.logger import ROOT_LOGGER_NAME
 
+
 class BaseProtocol(BaseModel):
-    model_config = ConfigDict(extra='ignore', arbitrary_types_allowed=True)
+    model_config = ConfigDict(extra="ignore", arbitrary_types_allowed=True)
 
     iface: str
     # send_func: Callable
     send_func: Optional[Callable] = lambda: ...
     count: Union[int, float] = 1
     timeout: float = 0.0
-    
+
     _word_sending: str = "sending"
     _dot_timer: int = 0
     _word_timer: int = 0
@@ -26,7 +28,7 @@ class BaseProtocol(BaseModel):
             f"{ROOT_LOGGER_NAME}.{self.__class__.__name__}/{self.iface}"
         )
 
-    @field_validator('count')
+    @field_validator("count")
     @classmethod
     def check_count(cls, v):
         if not (isinstance(v, int) or v == math.inf):

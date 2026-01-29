@@ -1,11 +1,16 @@
 import ipaddress
 from typing import Annotated, Any, Union
 
-from pydantic import Field, BeforeValidator
+from pydantic import BeforeValidator, Field
+
 from src.envena.core.protocols.ethernet import EthernetProtocol
 from src.envena.utils.validators import get_validated_ip
 
-IpAddress = Annotated[Union[ipaddress.IPv4Address, ipaddress.IPv6Address], BeforeValidator(get_validated_ip)]
+IpAddress = Annotated[
+    Union[ipaddress.IPv4Address, ipaddress.IPv6Address],
+    BeforeValidator(get_validated_ip),
+]
+
 
 class IPProtocol(EthernetProtocol):
     ip_src: IpAddress
@@ -13,15 +18,15 @@ class IPProtocol(EthernetProtocol):
     ttl: int = Field(default=64, ge=1, le=255)
 
     # def __init__(
-    #     self, 
-    #     iface: str, 
-    #     count: Union[int, float], 
-    #     timeout: float, 
-    #     send_func: Any, 
-    #     ip_src: Any, 
-    #     ip_dst: Any, 
-    #     eth_src: Any, 
-    #     eth_dst: Any, 
+    #     self,
+    #     iface: str,
+    #     count: Union[int, float],
+    #     timeout: float,
+    #     send_func: Any,
+    #     ip_src: Any,
+    #     ip_dst: Any,
+    #     eth_src: Any,
+    #     eth_dst: Any,
     #     ttl: int
     # ):
     #     super().__init__(
