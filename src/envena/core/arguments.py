@@ -65,7 +65,7 @@ class Arguments(BaseModel):
     ###############
     # App / Other #
     ###############
-    count: Union[int, float] = 1
+    count: Annotated[Union[int, float], Field(ge=0)] = 1
     timeout: float = Field(default=0.0, ge=0)
     input: str = ""
 
@@ -96,7 +96,7 @@ class Arguments(BaseModel):
     @classmethod
     def check_count(cls, v):
         if not (isinstance(v, int) or v == inf):
-            raise TypeError("Count must be an integer or math.inf")
+            raise TypeError("Count must be a not-negative integer or math.inf")
         return v
 
 
