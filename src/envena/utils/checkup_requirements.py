@@ -123,7 +123,7 @@ if __name__ == "__main__":
         NOT_INSTALLED_LIBS.append("pydantic")
 
     try:
-        from src.envena.core.searchsploit import Searchsploit
+        from envena.utils.searchsploit import Searchsploit
 
         Searchsploit.find("openssh")
     except Exception as e:

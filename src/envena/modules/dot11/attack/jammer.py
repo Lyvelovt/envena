@@ -44,7 +44,7 @@ def process_pkt(pkt, logger, hw_src, iface) -> None:
                 )
 
 
-def jammer(param, logger) -> None:
+def jammer(param, logger, ws) -> None:
     try:
         global sent_packets
         iface = param.iface if param.iface else str(conf.iface)
