@@ -37,6 +37,7 @@ class EnvenaREPL(cmd2.Cmd):
         self.aliases["quit"] = "exit"
         # self.update_promt()
         self.prompt = f"[{self.args_obj.iface}] [{self.workspaces.current}] >> "
+        self.intro = "\n".join(envena_art)
 
     def update_prompt(self):
         iface = self.args_obj.iface
@@ -46,8 +47,6 @@ class EnvenaREPL(cmd2.Cmd):
     def postcmd(self, stop, line):
         self.update_prompt()
         return stop
-
-    intro = "\n".join(envena_art)
 
     ##############################
     # Import all available tools #
@@ -212,7 +211,7 @@ class EnvenaREPL(cmd2.Cmd):
             self._show_args()
 
         elif ns.action == "default":
-            self.args_obj.default()
+            self.args_obj = Arguments()
             self.poutput("all arguments to default")
 
         elif ns.action == "set":

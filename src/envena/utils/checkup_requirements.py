@@ -77,7 +77,7 @@ if __name__ == "__main__":
     try:
         import colorama
     except Exception as e:
-        logger.error(f"Colorama lib is not installed. Details: {e}")
+        logger.warning(f"Colorama lib is not installed. Details: {e}")
         NOT_INSTALLED_LIBS.append("colorama")
 
     try:
@@ -123,7 +123,7 @@ if __name__ == "__main__":
         NOT_INSTALLED_LIBS.append("pydantic")
 
     try:
-        from envena.utils.searchsploit import Searchsploit
+        from src.envena.utils.searchsploit import Searchsploit
 
         Searchsploit.find("openssh")
     except Exception as e:
