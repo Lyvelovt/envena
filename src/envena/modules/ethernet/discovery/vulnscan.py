@@ -5,7 +5,7 @@ from rich.console import Console
 from rich.table import Table
 from scapy.all import conf, get_if_list
 
-from envena.utils.searchsploit import Searchsploit
+from src.envena.utils.searchsploit import Searchsploit
 from src.envena.core.arguments import public_args
 from src.envena.core.basetool import BaseTool
 from src.envena.core.workspace import Workspaces
